@@ -1,10 +1,31 @@
 //
 //  maxdomeII.cpp
-//  MaxDome II
+//  MaxDome II X2 plugin
 //
 //  Created by Rodolphe Pineau on 4/9/2016.
 //
-//
+// most of the code comes from the INDI driver.
+// The following is the original header.
+/*
+ Max Dome II Driver
+ Copyright (C) 2009 Ferran Casarramona (ferran.casarramona@gmail.com)
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+ */
+
 
 #include "maxdomeII.h"
 #include <stdlib.h>
@@ -37,6 +58,7 @@ bool CMaxDome::Connect(const char *szPort)
         return false;
 
     // bIsConnected = GetFirmware(szFirmware);
+    pSerx->purgeTxRx();
 
     if(!bIsConnected)
         pSerx->close();
@@ -87,43 +109,45 @@ signed char CMaxDome::checksum_MaxDomeII(char *cMessage, int nLen)
  */
 int CMaxDome::ReadResponse_MaxDomeII(int fd, char *cMessage)
 {
-    /*
-    int nBytesRead;
+    unsigned long nBytesRead;
     int nLen = MAX_BUFFER;
-    int nErrorType = TTY_OK;
+    // int nErrorType = SB_OK;
     char nChecksum;
-
+    int nErrorType = SB_OK;
     *cMessage = 0x00;
     cMessage[13] = 0x00;
+
     // Look for a 0x01 starting character, until time out occurs or MAX_BUFFER characters was read
-    while (*cMessage != 0x01 && nErrorType == TTY_OK)
+    while (*cMessage != 0x01 && nErrorType == SB_OK)
     {
-        nErrorType = tty_read(fd, cMessage, 1, MAXDOME_TIMEOUT, &nBytesRead);
+        // nErrorType = tty_read(fd, cMessage, 1, MAXDOME_TIMEOUT, &nBytesRead);
+        nErrorType = pSerx->readFile(cMessage, 1, nBytesRead, MAXDOME_TIMEOUT);
         //fprintf(stderr,"\nIn 1: %ld %02x\n", nBytesRead, (int)cMessage[0]);
     }
 
-    if (nErrorType != TTY_OK || *cMessage != 0x01)
+    if (nErrorType != SB_OK || *cMessage != 0x01)
         return -1;
 
     // Read message length
-    nErrorType = tty_read(fd, cMessage + 1, 1, MAXDOME_TIMEOUT, &nBytesRead);
+    // nErrorType = tty_read(fd, cMessage + 1, 1, MAXDOME_TIMEOUT, &nBytesRead);
+    nErrorType = pSerx->readFile(cMessage + 1, 1, nBytesRead, MAXDOME_TIMEOUT);
 
     //fprintf(stderr,"\nInLen: %d\n",(int) cMessage[1]);
-    if (nErrorType != TTY_OK || cMessage[1] < 0x02 || cMessage[1] > 0x0E)
+    if (nErrorType != SB_OK || cMessage[1] < 0x02 || cMessage[1] > 0x0E)
         return -2;
 
     nLen = cMessage[1];
     // Read the rest of the message
-    nErrorType = tty_read(fd, cMessage + 2, nLen, MAXDOME_TIMEOUT, &nBytesRead);
+    //nErrorType = tty_read(fd, cMessage + 2, nLen, MAXDOME_TIMEOUT, &nBytesRead);
+    nErrorType = pSerx->readFile(cMessage + 2, nLen, nBytesRead, MAXDOME_TIMEOUT);
 
     //fprintf(stderr,"\nIn: %s\n", cMessage);
-    if (nErrorType != TTY_OK || nBytesRead != nLen)
+    if (nErrorType != SB_OK || nBytesRead != nLen)
         return -3;
 
     nChecksum = checksum_MaxDomeII(cMessage, nLen + 2);
     if (nChecksum != 0x00)
         return -4;
-     */
     return 0;
 }
 
@@ -136,17 +160,24 @@ int CMaxDome::ReadResponse_MaxDomeII(int fd, char *cMessage)
 int CMaxDome::Abort_Azimuth_MaxDomeII(int fd)
 {
     char cMessage[MAX_BUFFER];
-    int nErrorType;
-    int nBytesWrite;
+    // int nErrorType;
+    unsigned long  nBytesWrite;
     int nReturn;
-    /*
+    int nErrorType = SB_OK;
+
     cMessage[0] = 0x01;
     cMessage[1] = 0x02;		// Will follow 2 bytes more
     cMessage[2] = ABORT_CMD;
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
-    nErrorType = tty_write(fd, cMessage, 4, &nBytesWrite);
+    // nErrorType = tty_write(fd, cMessage, 4, &nBytesWrite);
 
-    if (nErrorType != TTY_OK)
+    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
+
+    if (nErrorType != SB_OK)
+        return -5;
+    
+
+    if (nBytesWrite != 4)
         return -5;
 
     nReturn = ReadResponse_MaxDomeII(fd, cMessage);
@@ -155,7 +186,7 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(int fd)
 
     if (cMessage[2] == (char)(ABORT_CMD | TO_COMPUTER))
         return 0;
-     */
+
     return -6;	// Response don't match command
 }
 
@@ -169,16 +200,17 @@ int CMaxDome::Home_Azimuth_MaxDomeII(int fd)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
-    int nBytesWrite;
+    unsigned long  nBytesWrite;;
     int nReturn;
-    /*
+
     cMessage[0] = 0x01;
     cMessage[1] = 0x02;		// Will follow 2 bytes more
     cMessage[2] = HOME_CMD;
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
-    nErrorType = tty_write(fd, cMessage, 4, &nBytesWrite);
+    //nErrorType = tty_write(fd, cMessage, 4, &nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
 
-    if (nErrorType != TTY_OK)
+    if (nErrorType != SB_OK)
         return -5;
 
     nReturn = ReadResponse_MaxDomeII(fd, cMessage);
@@ -187,7 +219,7 @@ int CMaxDome::Home_Azimuth_MaxDomeII(int fd)
 
     if (cMessage[2] == (char)(HOME_CMD | TO_COMPUTER))
         return 0;
-     */
+
     return -6;	// Response don't match command
 }
 
@@ -203,9 +235,9 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int fd, int nDir, int nTicks)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType=0;
-    int nBytesWrite;
+    unsigned long  nBytesWrite;;
     int nReturn;
-    /*
+
     cMessage[0] = 0x01;
     cMessage[1] = 0x05;		// Will follow 5 bytes more
     cMessage[2] = GOTO_CMD;
@@ -214,10 +246,11 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int fd, int nDir, int nTicks)
     cMessage[4] = (char)(nTicks / 256);
     cMessage[5] = (char)(nTicks % 256);
     cMessage[6] = checksum_MaxDomeII(cMessage, 6);
-    nErrorType = tty_write(fd, cMessage, 7, &nBytesWrite);
+    // nErrorType = tty_write(fd, cMessage, 7, &nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, 7, nBytesWrite);
 
     //fprintf(stderr,"\nOut: %ld %02x %02x %02x %02x %02x %02x %02x\n", nBytesWrite, (int)cMessage[0], (int)cMessage[1], (int)cMessage[2], (int)cMessage[3], (int)cMessage[4], (int)cMessage[5], (int)cMessage[6]);
-    //if (nErrorType != TTY_OK)
+    //if (nErrorType != SB_OK)
     if (nBytesWrite != 7)
         return -5;
 
@@ -227,7 +260,6 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int fd, int nDir, int nTicks)
 
     if (cMessage[2] == (char)(GOTO_CMD | TO_COMPUTER))
         return 0;
-     */
     return -6;	// Response don't match command
 }
 
@@ -243,18 +275,19 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int fd, int nDir, int nTicks)
  */
 int CMaxDome::Status_MaxDomeII(int fd, enum SH_Status *nShutterStatus, enum AZ_Status *nAzimuthStatus, unsigned *nAzimuthPosition, unsigned *nHomePosition)
 {
-    unsigned char cMessage[MAX_BUFFER];
+    char cMessage[MAX_BUFFER];
     int nErrorType;
-    int nBytesWrite;
+    unsigned long  nBytesWrite;;
     int nReturn;
-    /*
+
     cMessage[0] = 0x01;
     cMessage[1] = 0x02;		// Will follow 2 bytes more
     cMessage[2] = STATUS_CMD;
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
-    nErrorType = tty_write(fd, cMessage, 4, &nBytesWrite);
+    // nErrorType = tty_write(fd, cMessage, 4, &nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
 
-    if (nErrorType != TTY_OK)
+    if (nErrorType != SB_OK)
         return -5;
 
     nReturn = ReadResponse_MaxDomeII(fd, cMessage);
@@ -263,14 +296,13 @@ int CMaxDome::Status_MaxDomeII(int fd, enum SH_Status *nShutterStatus, enum AZ_S
 
     if (cMessage[2] == (unsigned char)(STATUS_CMD | TO_COMPUTER))
     {
-        *nShutterStatus = (int)cMessage[3];
-        *nAzimuthStatus = (int)cMessage[4];
+        *nShutterStatus = (enum SH_Status)cMessage[3];
+        *nAzimuthStatus = (enum AZ_Status)cMessage[4];
         *nAzimuthPosition = (unsigned)(((unsigned)cMessage[5]) * 256 + ((unsigned)cMessage[6]));
         *nHomePosition = ((unsigned)cMessage[7]) * 256 + ((unsigned)cMessage[8]);
 
         return 0;
     }
-     */
 
     return -6;	// Response don't match command
 }
@@ -284,20 +316,22 @@ int CMaxDome::Status_MaxDomeII(int fd, enum SH_Status *nShutterStatus, enum AZ_S
 int CMaxDome::Ack_MaxDomeII(int fd)
 {
     char cMessage[MAX_BUFFER];
-    // int nErrorType = TTY_OK;
-    int nBytesWrite;
+    int nErrorType = SB_OK;
+    unsigned long  nBytesWrite;;
     int nReturn;
-    /*
+
     cMessage[0] = 0x01;
     cMessage[1] = 0x02;		// Will follow 2 bytes more
     cMessage[2] = ACK_CMD;
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
-    nErrorType = tty_write(fd, cMessage, 4, &nBytesWrite);
+    // nErrorType = tty_write(fd, cMessage, 4, &nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
+
     //nBytesWrite = write(fd, cMessage, 4);
     //if (nBytesWrite != 4)
     //	nErrorType = TTY_WRITE_ERROR;
     //fprintf(stderr,"\nOut: %ld %02x %02x %02x %02x\n", nBytesWrite, (int)cMessage[0], (int)cMessage[1], (int)cMessage[2], (int)cMessage[3]);
-    if (nErrorType != TTY_OK)
+    if (nErrorType != SB_OK)
         return -5;
 
     nReturn = ReadResponse_MaxDomeII(fd, cMessage);
@@ -307,7 +341,7 @@ int CMaxDome::Ack_MaxDomeII(int fd)
 
     if (cMessage[2] == (char)(ACK_CMD | TO_COMPUTER))
         return 0;
-     */
+
     //fprintf(stderr,"\nIn: %02x %02x", (unsigned char)(ACK_CMD | TO_COMPUTER), cMessage[2]);
     return -6;	// Response don't match command
 }
@@ -324,9 +358,9 @@ int CMaxDome::SetPark_MaxDomeII(int fd, int nParkOnShutter, int nTicks)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
-    int nBytesWrite;
+    unsigned long  nBytesWrite;;
     int nReturn;
-    /*
+
     cMessage[0] = 0x01;
     cMessage[1] = 0x05;		// Will follow 5 bytes more
     cMessage[2] = SETPARK_CMD;
@@ -335,9 +369,10 @@ int CMaxDome::SetPark_MaxDomeII(int fd, int nParkOnShutter, int nTicks)
     cMessage[4] = (char)(nTicks / 256);
     cMessage[5] = (char)(nTicks % 256);
     cMessage[6] = checksum_MaxDomeII(cMessage, 6);
-    nErrorType = tty_write(fd, cMessage, 7, &nBytesWrite);
+    //nErrorType = tty_write(fd, cMessage, 7, &nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, 7, nBytesWrite);
 
-    if (nErrorType != TTY_OK)
+    if (nErrorType != SB_OK)
         return -5;
 
     nReturn = ReadResponse_MaxDomeII(fd, cMessage);
@@ -346,7 +381,6 @@ int CMaxDome::SetPark_MaxDomeII(int fd, int nParkOnShutter, int nTicks)
 
     if (cMessage[2] == (char)(SETPARK_CMD | TO_COMPUTER))
         return 0;
-     */
 
     return -6;	// Response don't match command
 }
@@ -362,9 +396,9 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int fd, int nTicks)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
-    int nBytesWrite;
+    unsigned long  nBytesWrite;;
     int nReturn;
-    /*
+
     cMessage[0] = 0x01;
     cMessage[1] = 0x04;		// Will follow 4 bytes more
     cMessage[2] = TICKS_CMD;
@@ -372,9 +406,9 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int fd, int nTicks)
     cMessage[3] = (char)(nTicks / 256);
     cMessage[4] = (char)(nTicks % 256);
     cMessage[5] = checksum_MaxDomeII(cMessage, 5);
-    nErrorType = tty_write(fd, cMessage, 6, &nBytesWrite);
-
-    if (nErrorType != TTY_OK)
+    // nErrorType = tty_write(fd, cMessage, 6, &nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, 6, nBytesWrite);
+    if (nErrorType != SB_OK)
         return -5;
 
     nReturn = ReadResponse_MaxDomeII(fd, cMessage);
@@ -383,7 +417,7 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int fd, int nTicks)
 
     if (cMessage[2] == (char)(TICKS_CMD | TO_COMPUTER))
         return 0;
-     */
+
     return -6;	// Response don't match command
 }
 
@@ -403,18 +437,18 @@ int CMaxDome::Open_Shutter_MaxDomeII(int fd)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
-    int nBytesWrite;
+    unsigned long  nBytesWrite;;
     int nReturn;
 
-    /*
     cMessage[0] = 0x01;
     cMessage[1] = 0x03;		// Will follow 3 bytes more
     cMessage[2] = SHUTTER_CMD;
     cMessage[3] = OPEN_SHUTTER;
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
-    nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+    // nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
-    if (nErrorType != TTY_OK)
+    if (nErrorType != SB_OK)
         return -5;
 
     nReturn = ReadResponse_MaxDomeII(fd, cMessage);
@@ -423,7 +457,7 @@ int CMaxDome::Open_Shutter_MaxDomeII(int fd)
 
     if (cMessage[2] == (char)(SHUTTER_CMD | TO_COMPUTER))
         return 0;
-     */
+
     return -6;	// Response don't match command
 }
 
@@ -437,18 +471,18 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII(int fd)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
-    int nBytesWrite;
+    unsigned long  nBytesWrite;;
     int nReturn;
 
-    /*
     cMessage[0] = 0x01;
     cMessage[1] = 0x03;		// Will follow 3 bytes more
     cMessage[2] = SHUTTER_CMD;
     cMessage[3] = OPEN_UPPER_ONLY_SHUTTER;
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
-    nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+    // nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
-    if (nErrorType != TTY_OK)
+    if (nErrorType != SB_OK)
         return -5;
 
     nReturn = ReadResponse_MaxDomeII(fd, cMessage);
@@ -457,7 +491,7 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII(int fd)
 
     if (cMessage[2] == (char)(SHUTTER_CMD | TO_COMPUTER))
         return 0;
-     */
+
     return -6;	// Response don't match command
 }
 
@@ -471,17 +505,18 @@ int CMaxDome::Close_Shutter_MaxDomeII(int fd)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
-    int nBytesWrite;
+    unsigned long  nBytesWrite;;
     int nReturn;
-    /*
+
     cMessage[0] = 0x01;
     cMessage[1] = 0x03;		// Will follow 3 bytes more
     cMessage[2] = SHUTTER_CMD;
     cMessage[3] = CLOSE_SHUTTER;
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
-    nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+    // nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
-    if (nErrorType != TTY_OK)
+    if (nErrorType != SB_OK)
         return -5;
 
     nReturn = ReadResponse_MaxDomeII(fd, cMessage);
@@ -490,7 +525,7 @@ int CMaxDome::Close_Shutter_MaxDomeII(int fd)
 
     if (cMessage[2] == (char)(SHUTTER_CMD | TO_COMPUTER))
         return 0;
-     */
+
     return -6;	// Response don't match command
 }
 
@@ -504,18 +539,18 @@ int CMaxDome::Abort_Shutter_MaxDomeII(int fd)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
-    int nBytesWrite;
+    unsigned long  nBytesWrite;;
     int nReturn;
 
-    /*
     cMessage[0] = 0x01;
     cMessage[1] = 0x03;		// Will follow 3 bytes more
     cMessage[2] = SHUTTER_CMD;
     cMessage[3] = ABORT_SHUTTER;
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
-    nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+    // nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
-    if (nErrorType != TTY_OK)
+    if (nErrorType != SB_OK)
         return -5;
 
     nReturn = ReadResponse_MaxDomeII(fd, cMessage);
@@ -524,7 +559,7 @@ int CMaxDome::Abort_Shutter_MaxDomeII(int fd)
     
     if (cMessage[2] == (char)(SHUTTER_CMD | TO_COMPUTER))
         return 0;
-    */
+
     return -6;	// Response don't match command
 }
 
@@ -538,17 +573,18 @@ int CMaxDome::Exit_Shutter_MaxDomeII(int fd)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
-    int nBytesWrite;
+    unsigned long  nBytesWrite;;
     int nReturn;
-    /*
+
     cMessage[0] = 0x01;
     cMessage[1] = 0x03;		// Will follow 3 bytes more
     cMessage[2] = SHUTTER_CMD;
     cMessage[3] = EXIT_SHUTTER;
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
-    nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
-    
-    if (nErrorType != TTY_OK)
+    // nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
+
+    if (nErrorType != SB_OK)
         return -5;
     
     nReturn = ReadResponse_MaxDomeII(fd, cMessage);
@@ -557,7 +593,6 @@ int CMaxDome::Exit_Shutter_MaxDomeII(int fd)
     
     if (cMessage[2] == (char)(SHUTTER_CMD | TO_COMPUTER))
         return 0;
-    */
 
     return -6;	// Response don't match command
 }

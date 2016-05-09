@@ -3,13 +3,36 @@
 //  MaxDome II
 //
 //  Created by Rodolphe Pineau on 4/9/2016.
+//  MaxDome II X2 plugin
 //
+//  Created by Rodolphe Pineau on 4/9/2016.
 //
+// most of the code comes from the INDI driver.
+// The following is the original header.
+/*
+ Max Dome II Driver
+ Copyright (C) 2009 Ferran Casarramona (ferran.casarramona@gmail.com)
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+ */
 
 #ifndef __MAXDOMEII__
 #define __MAXDOMEII__
 
-//#include "MySerx/SerxInterface.h"
+#include "../../licensedinterfaces/sberrorx.h"
 #include "../../licensedinterfaces/serxinterface.h"
 
 #define MAXDOME_TIMEOUT	5		/* FD timeout in seconds */
