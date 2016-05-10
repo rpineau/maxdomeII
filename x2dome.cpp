@@ -247,7 +247,7 @@ int X2Dome::execModalSettingsDialog()
         printf("ui is NULL :(\n");
         return ERR_POINTER;
     }
-    if ((nErr = ui->loadUserInterface("RoRoDome.ui", deviceType(), m_nPrivateISIndex)))
+    if ((nErr = ui->loadUserInterface("maxdomeII.ui", deviceType(), m_nPrivateISIndex)))
         return nErr;
 
     if (NULL == (dx = uiutil.X2DX()))
