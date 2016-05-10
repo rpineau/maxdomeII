@@ -37,7 +37,9 @@
 
 CMaxDome::CMaxDome()
 {
-
+    pSerx = NULL;
+    bIsConnected = false;
+    
 }
 
 CMaxDome::~CMaxDome()
@@ -45,10 +47,11 @@ CMaxDome::~CMaxDome()
 
 }
 
+
 bool CMaxDome::Connect(const char *szPort)
 {
-    // 19200, 8, 0, 1
-    if(pSerx->open(szPort) == 0)
+    // 19200 8N1
+    if(pSerx->open(szPort,19200) == 0)
         bIsConnected = true;
     else
         bIsConnected = false;
@@ -71,7 +74,7 @@ void CMaxDome::Disconnect(void)
 {
     if(bIsConnected)
     {
-        Exit_Shutter_MaxDomeII(fd);
+        Exit_Shutter_MaxDomeII();
         pSerx->close();
     }
     bIsConnected = false;
@@ -107,7 +110,7 @@ signed char CMaxDome::checksum_MaxDomeII(char *cMessage, int nLen)
 	@param cMessage Pointer to a buffer to receive the message
 	@return 0 if message is Ok. -1 if no response or no start caracter found. -2 invalid declared message length. -3 message too short. -4 checksum error
  */
-int CMaxDome::ReadResponse_MaxDomeII(int fd, char *cMessage)
+int CMaxDome::ReadResponse_MaxDomeII(char *cMessage)
 {
     unsigned long nBytesRead;
     int nLen = MAX_BUFFER;
@@ -157,7 +160,7 @@ int CMaxDome::ReadResponse_MaxDomeII(int fd, char *cMessage)
 	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Abort_Azimuth_MaxDomeII(int fd)
+int CMaxDome::Abort_Azimuth_MaxDomeII()
 {
     char cMessage[MAX_BUFFER];
     // int nErrorType;
@@ -180,7 +183,7 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(int fd)
     if (nBytesWrite != 4)
         return -5;
 
-    nReturn = ReadResponse_MaxDomeII(fd, cMessage);
+    nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
         return nReturn;
 
@@ -196,7 +199,7 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(int fd)
 	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Home_Azimuth_MaxDomeII(int fd)
+int CMaxDome::Home_Azimuth_MaxDomeII()
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
@@ -213,7 +216,7 @@ int CMaxDome::Home_Azimuth_MaxDomeII(int fd)
     if (nErrorType != SB_OK)
         return -5;
 
-    nReturn = ReadResponse_MaxDomeII(fd, cMessage);
+    nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
         return nReturn;
 
@@ -231,7 +234,7 @@ int CMaxDome::Home_Azimuth_MaxDomeII(int fd)
 	@param nTicks Ticks from home position in E to W direction.
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Goto_Azimuth_MaxDomeII(int fd, int nDir, int nTicks)
+int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType=0;
@@ -254,7 +257,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int fd, int nDir, int nTicks)
     if (nBytesWrite != 7)
         return -5;
 
-    nReturn = ReadResponse_MaxDomeII(fd, cMessage);
+    nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
         return nReturn;
 
@@ -273,9 +276,9 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int fd, int nDir, int nTicks)
 	@param nHomePosition Returns last position where home was detected
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Status_MaxDomeII(int fd, enum SH_Status *nShutterStatus, enum AZ_Status *nAzimuthStatus, unsigned *nAzimuthPosition, unsigned *nHomePosition)
+int CMaxDome::Status_MaxDomeII(enum SH_Status *nShutterStatus, enum AZ_Status *nAzimuthStatus, unsigned *nAzimuthPosition, unsigned *nHomePosition)
 {
-    char cMessage[MAX_BUFFER];
+    unsigned char cMessage[MAX_BUFFER];
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -283,14 +286,14 @@ int CMaxDome::Status_MaxDomeII(int fd, enum SH_Status *nShutterStatus, enum AZ_S
     cMessage[0] = 0x01;
     cMessage[1] = 0x02;		// Will follow 2 bytes more
     cMessage[2] = STATUS_CMD;
-    cMessage[3] = checksum_MaxDomeII(cMessage, 3);
+    cMessage[3] = checksum_MaxDomeII((char*)cMessage, 3);
     // nErrorType = tty_write(fd, cMessage, 4, &nBytesWrite);
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
 
     if (nErrorType != SB_OK)
         return -5;
 
-    nReturn = ReadResponse_MaxDomeII(fd, cMessage);
+    nReturn = ReadResponse_MaxDomeII((char*)cMessage);
     if (nReturn != 0)
         return nReturn;
 
@@ -300,7 +303,8 @@ int CMaxDome::Status_MaxDomeII(int fd, enum SH_Status *nShutterStatus, enum AZ_S
         *nAzimuthStatus = (enum AZ_Status)cMessage[4];
         *nAzimuthPosition = (unsigned)(((unsigned)cMessage[5]) * 256 + ((unsigned)cMessage[6]));
         *nHomePosition = ((unsigned)cMessage[7]) * 256 + ((unsigned)cMessage[8]);
-
+        mAzimuthPosition = *nAzimuthPosition;
+        mHomePosition = *nHomePosition;
         return 0;
     }
 
@@ -313,7 +317,7 @@ int CMaxDome::Status_MaxDomeII(int fd, enum SH_Status *nShutterStatus, enum AZ_S
 	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Ack_MaxDomeII(int fd)
+int CMaxDome::Ack_MaxDomeII()
 {
     char cMessage[MAX_BUFFER];
     int nErrorType = SB_OK;
@@ -334,7 +338,7 @@ int CMaxDome::Ack_MaxDomeII(int fd)
     if (nErrorType != SB_OK)
         return -5;
 
-    nReturn = ReadResponse_MaxDomeII(fd, cMessage);
+    nReturn = ReadResponse_MaxDomeII(cMessage);
     //fprintf(stderr,"\nIn: %02x %02x %02x %02x %02x\n", cMessage[0], cMessage[1], cMessage[2], cMessage[3], cMessage[4]);
     if (nReturn != 0)
         return nReturn;
@@ -354,7 +358,7 @@ int CMaxDome::Ack_MaxDomeII(int fd)
 	@param nTicks Ticks from home position in E to W direction.
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::SetPark_MaxDomeII(int fd, int nParkOnShutter, int nTicks)
+int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
@@ -375,7 +379,7 @@ int CMaxDome::SetPark_MaxDomeII(int fd, int nParkOnShutter, int nTicks)
     if (nErrorType != SB_OK)
         return -5;
 
-    nReturn = ReadResponse_MaxDomeII(fd, cMessage);
+    nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
         return nReturn;
 
@@ -392,7 +396,7 @@ int CMaxDome::SetPark_MaxDomeII(int fd, int nParkOnShutter, int nTicks)
  @param nTicks Ticks from home position in E to W direction.
  @return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::SetTicksPerCount_MaxDomeII(int fd, int nTicks)
+int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
@@ -402,7 +406,7 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int fd, int nTicks)
     cMessage[0] = 0x01;
     cMessage[1] = 0x04;		// Will follow 4 bytes more
     cMessage[2] = TICKS_CMD;
-    // Note: we not use nTicks >> 8 in order to remain compatible with both little-endian and big-endian procesors
+    // Note: we do not use nTicks >> 8 in order to remain compatible with both little-endian and big-endian procesors
     cMessage[3] = (char)(nTicks / 256);
     cMessage[4] = (char)(nTicks % 256);
     cMessage[5] = checksum_MaxDomeII(cMessage, 5);
@@ -411,13 +415,15 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int fd, int nTicks)
     if (nErrorType != SB_OK)
         return -5;
 
-    nReturn = ReadResponse_MaxDomeII(fd, cMessage);
+    nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
         return nReturn;
 
     if (cMessage[2] == (char)(TICKS_CMD | TO_COMPUTER))
+    {
+        mNbTicksPerRev = nTicks;
         return 0;
-
+    }
     return -6;	// Response don't match command
 }
 
@@ -433,7 +439,7 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int fd, int nTicks)
 	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Open_Shutter_MaxDomeII(int fd)
+int CMaxDome::Open_Shutter_MaxDomeII()
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
@@ -451,7 +457,7 @@ int CMaxDome::Open_Shutter_MaxDomeII(int fd)
     if (nErrorType != SB_OK)
         return -5;
 
-    nReturn = ReadResponse_MaxDomeII(fd, cMessage);
+    nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
         return nReturn;
 
@@ -467,7 +473,7 @@ int CMaxDome::Open_Shutter_MaxDomeII(int fd)
 	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII(int fd)
+int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
@@ -485,7 +491,7 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII(int fd)
     if (nErrorType != SB_OK)
         return -5;
 
-    nReturn = ReadResponse_MaxDomeII(fd, cMessage);
+    nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
         return nReturn;
 
@@ -501,7 +507,7 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII(int fd)
 	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Close_Shutter_MaxDomeII(int fd)
+int CMaxDome::Close_Shutter_MaxDomeII()
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
@@ -519,7 +525,7 @@ int CMaxDome::Close_Shutter_MaxDomeII(int fd)
     if (nErrorType != SB_OK)
         return -5;
 
-    nReturn = ReadResponse_MaxDomeII(fd, cMessage);
+    nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
         return nReturn;
 
@@ -535,7 +541,7 @@ int CMaxDome::Close_Shutter_MaxDomeII(int fd)
 	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Abort_Shutter_MaxDomeII(int fd)
+int CMaxDome::Abort_Shutter_MaxDomeII()
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
@@ -553,7 +559,7 @@ int CMaxDome::Abort_Shutter_MaxDomeII(int fd)
     if (nErrorType != SB_OK)
         return -5;
 
-    nReturn = ReadResponse_MaxDomeII(fd, cMessage);
+    nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
         return nReturn;
     
@@ -569,7 +575,7 @@ int CMaxDome::Abort_Shutter_MaxDomeII(int fd)
 	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Exit_Shutter_MaxDomeII(int fd)
+int CMaxDome::Exit_Shutter_MaxDomeII()
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
@@ -587,7 +593,7 @@ int CMaxDome::Exit_Shutter_MaxDomeII(int fd)
     if (nErrorType != SB_OK)
         return -5;
     
-    nReturn = ReadResponse_MaxDomeII(fd, cMessage);
+    nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
         return nReturn;
     
@@ -595,5 +601,28 @@ int CMaxDome::Exit_Shutter_MaxDomeII(int fd)
         return 0;
 
     return -6;	// Response don't match command
+}
+
+/*
+	Convert Az to number of ticks to move and direction.
+
+	@param fd File descriptor
+	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
+ */
+
+void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
+{
+    double nbDeg;
+    nbDeg = (mAzimuthPosition - pdAz);
+    // 0 E to W. 1 W to E
+    if (nbDeg<0)
+    {
+        nbDeg = -nbDeg;
+        dir = 0;
+    }
+    else{
+        dir =1;
+    }
+    ticks = (int) (((double)mNbTicksPerRev/360.0f) * nbDeg);
 }
 

@@ -82,31 +82,37 @@ public:
     void        Disconnect(void);
     bool        IsConnected(void) { return bIsConnected; }
 
+    void        SetSerxPointer(SerXInterface *p) { pSerx = p; }
+
     // Dome commands
-    int Abort_Azimuth_MaxDomeII(int fd);
-    int Home_Azimuth_MaxDomeII(int fd);
-    int Goto_Azimuth_MaxDomeII(int fd, int nDir, int nTicks);
-    int Status_MaxDomeII(int fd, enum SH_Status *nShutterStatus, enum AZ_Status *nAzimuthStatus, unsigned *nAzimuthPosition, unsigned *nHomePosition);
-    int Ack_MaxDomeII(int fd);
-    int SetPark_MaxDomeII(int fd, int nParkOnShutter, int nTicks);
-    int SetTicksPerCount_MaxDomeII(int fd, int nTicks);
-    int Park_MaxDomeII(int fd);
+    int Abort_Azimuth_MaxDomeII();
+    int Home_Azimuth_MaxDomeII();
+    int Goto_Azimuth_MaxDomeII(int nDir, int nTicks);
+    int Status_MaxDomeII(enum SH_Status *nShutterStatus, enum AZ_Status *nAzimuthStatus, unsigned *nAzimuthPosition, unsigned *nHomePosition);
+    int Ack_MaxDomeII();
+    int SetPark_MaxDomeII(int nParkOnShutter, int nTicks);
+    int SetTicksPerCount_MaxDomeII(int nTicks);
+    int Park_MaxDomeII();
 
     //  Shutter commands
-    int Open_Shutter_MaxDomeII(int fd);
-    int Open_Upper_Shutter_Only_MaxDomeII(int fd);
-    int Close_Shutter_MaxDomeII(int fd);
-    int Abort_Shutter_MaxDomeII(int fd);
-    int Exit_Shutter_MaxDomeII(int fd);
+    int Open_Shutter_MaxDomeII();
+    int Open_Upper_Shutter_Only_MaxDomeII();
+    int Close_Shutter_MaxDomeII();
+    int Abort_Shutter_MaxDomeII();
+    int Exit_Shutter_MaxDomeII();
+
+    // convertion functions
+    void AzToTicks(double pdAz, int &dir, int &ticks);
 
 protected:
 
-    signed char checksum_MaxDomeII(char *cMessage, int nLen);
-    int         ReadResponse_MaxDomeII(int fd, char *cMessage);
-    bool        bIsConnected;
-
-    SerXInterface        *pSerx;
-    int fd;
+    signed char     checksum_MaxDomeII(char *cMessage, int nLen);
+    int             ReadResponse_MaxDomeII(char *cMessage);
+    bool            bIsConnected;
+    int             mNbTicksPerRev;
+    unsigned        mAzimuthPosition;
+    unsigned        mHomePosition;
+    SerXInterface   *pSerx;
 };
 
 #endif

@@ -11,6 +11,7 @@
 #include "../../licensedinterfaces/basiciniutilinterface.h"
 #include "../../licensedinterfaces/mutexinterface.h"
 #include "../../licensedinterfaces/tickcountinterface.h"
+#include "../../licensedinterfaces/serialportparams2interface.h"
 
 
 X2Dome::X2Dome(const char* pszSelection, 
@@ -33,6 +34,8 @@ X2Dome::X2Dome(const char* pszSelection,
 	m_pTickCount					= pTickCount;
 
 	m_bLinked = false;
+    maxDome.SetSerxPointer(pSerX);
+
 }
 
 
@@ -58,122 +61,154 @@ X2Dome::~X2Dome()
 
 int X2Dome::establishLink(void)					
 {
-	if (GetLogger())
-		GetLogger()->out("X2Dome::establishLink");
-
+    X2MutexLocker ml(GetMutex());
 	m_bLinked = true;
 	return SB_OK;
 }
+
 int X2Dome::terminateLink(void)					
 {
-	if (GetLogger())
-		GetLogger()->out("X2Dome::terminateLink");
-
+    X2MutexLocker ml(GetMutex());
 	m_bLinked = false;
 	return SB_OK;
 }
+
  bool X2Dome::isLinked(void) const				
 {
 	return m_bLinked;
 }
 
-#define ADD_STR "X2Dome";
 //HardwareInfoInterface
 void X2Dome::deviceInfoNameShort(BasicStringInterface& str) const					
 {
-	str = ADD_STR
+	str = "MaxDome II Dome Control System";
 }
 void X2Dome::deviceInfoNameLong(BasicStringInterface& str) const					
 {
-	str = ADD_STR
+    str = "MaxDome II Dome Control System";
 }
 void X2Dome::deviceInfoDetailedDescription(BasicStringInterface& str) const		
 {
-	str = ADD_STR;
+    str = "MaxDome II Dome Control System";
 }
  void X2Dome::deviceInfoFirmwareVersion(BasicStringInterface& str)					
 {
-	str = ADD_STR
+    str = "Not available.";
 }
-void X2Dome::deviceInfoModel(BasicStringInterface& str)							
+void X2Dome::deviceInfoModel(BasicStringInterface& str)
 {
-	str = ADD_STR
+    str = "MaxDome II Dome Control System";
 }
 
 //DriverInfoInterface
  void	X2Dome::driverInfoDetailedInfo(BasicStringInterface& str) const	
 {
+    str = "MaxDome II Dome Control System";
 }
-double	X2Dome::driverInfoVersion(void) const							
+
+double	X2Dome::driverInfoVersion(void) const
 {
-	return 1.0;
+	return DRIVER_VERSION;
 }
 
 //DomeDriverInterface
 int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
 {
-	if (GetLogger())
-		GetLogger()->out("X2Dome::dapiGetAzEl");
+    int err;
+    unsigned tmpAz;
+    unsigned tmpHomePosition;
+    enum SH_Status tmpShutterStatus;
+    enum AZ_Status tmpAzimuthStatus;
 
-	return SB_OK;
+    X2MutexLocker ml(GetMutex());
+    *pdEl=0.0f;
+    err = maxDome.Status_MaxDomeII(&tmpShutterStatus, &tmpAzimuthStatus, &tmpAz, &tmpHomePosition);
+    if(err)
+        return ERR_CMDFAILED;
+    *pdAz = tmpAz;
+    return SB_OK;
 }
 
 int X2Dome::dapiGotoAzEl(double dAz, double dEl)
 {
-	return SB_OK;
+    int err;
+    int dir;
+    int ticks;
+    X2MutexLocker ml(GetMutex());
+
+    maxDome.AzToTicks(dAz, dir, ticks);
+    err = maxDome.Goto_Azimuth_MaxDomeII(dir, ticks);
+
+    if(err)
+        return ERR_CMDFAILED;
+    else
+        return SB_OK;
 }
 int X2Dome::dapiAbort(void)
 {
+    X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
 int X2Dome::dapiOpen(void)
 {
+    X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
 int X2Dome::dapiClose(void)
 {
+    X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
 int X2Dome::dapiPark(void)
 {
+    X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
 
 int X2Dome::dapiUnpark(void)
 {
+    X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
 int X2Dome::dapiFindHome(void)
 {
+    X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
 int X2Dome::dapiIsGotoComplete(bool* pbComplete)
 {
+    X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
 
 int X2Dome::dapiIsOpenComplete(bool* pbComplete)
 {
+    X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
 int	X2Dome::dapiIsCloseComplete(bool* pbComplete)
 {
+    X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
 int X2Dome::dapiIsParkComplete(bool* pbComplete)
 {
+    X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
 int X2Dome::dapiIsUnparkComplete(bool* pbComplete)
 {
+    X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
 int X2Dome::dapiIsFindHomeComplete(bool* pbComplete)
 {
+    X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
 int X2Dome::dapiSync(double dAz, double dEl)
 {
+    X2MutexLocker ml(GetMutex());
 	return SB_OK;
 
 }
@@ -183,20 +218,13 @@ int X2Dome::queryAbstraction(const char* pszName, void** ppVal)
 	*ppVal = NULL;
 
     if (!strcmp(pszName, LoggerInterface_Name))
-    {
 		*ppVal = GetLogger();
-        printf("LoggerInterface_Name\n");
-    }
     else if (!strcmp(pszName, ModalSettingsDialogInterface_Name))
-    {
         *ppVal = dynamic_cast<ModalSettingsDialogInterface*>(this);
-        printf("ModalSettingsDialogInterface_Name\n");
-    }
     else if (!strcmp(pszName, X2GUIEventInterface_Name))
-    {
         *ppVal = dynamic_cast<X2GUIEventInterface*>(this);
-        printf("X2GUIEventInterface_Name\n");
-    }
+    else if (!strcmp(pszName, SerialPortParams2Interface_Name))
+        *ppVal = dynamic_cast<SerialPortParams2Interface*>(this);
     else
     {
         printf("pszName = %s\n",pszName);

@@ -13,6 +13,7 @@ class MutexInterface;
 class BasicIniUtilInterface;
 class TickCountInterface;
 
+#define DRIVER_VERSION      1.0
 
 /*!
 \brief The X2Dome example.
