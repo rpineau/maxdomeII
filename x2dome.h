@@ -14,6 +14,7 @@ class BasicIniUtilInterface;
 class TickCountInterface;
 
 #define DRIVER_VERSION      1.0
+enum lastCommand {AzGoto = 0, ShutterOpen, ShutterClose};
 
 /*!
 \brief The X2Dome example.
@@ -111,10 +112,10 @@ private:
 	MutexInterface									*	m_pIOMutex;
 	TickCountInterface								*	m_pTickCount;
 
-	int m_nPrivateISIndex;
+	int         m_nPrivateISIndex;
 
-	int m_bLinked;
+	int         m_bLinked;
 	
     CMaxDome    maxDome;
-    
+    int         mlastCommand;
 };

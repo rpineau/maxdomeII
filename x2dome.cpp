@@ -142,23 +142,42 @@ int X2Dome::dapiGotoAzEl(double dAz, double dEl)
     if(err)
         return ERR_CMDFAILED;
     else
+    {
+        mlastCommand = AzGoto;
         return SB_OK;
+    }
 }
+
 int X2Dome::dapiAbort(void)
 {
-    X2MutexLocker ml(GetMutex());
+    switch(mlastCommand)
+    {
+        case AzGoto:
+            maxDome.Abort_Azimuth_MaxDomeII();
+            break;
+        
+        case ShutterOpen:
+        case ShutterClose:
+            maxDome.Abort_Shutter_MaxDomeII();
+            break;
+    }
 	return SB_OK;
 }
+
 int X2Dome::dapiOpen(void)
 {
     X2MutexLocker ml(GetMutex());
+    mlastCommand = ShutterOpen;
 	return SB_OK;
 }
+
 int X2Dome::dapiClose(void)
 {
     X2MutexLocker ml(GetMutex());
+    mlastCommand = ShutterClose;
 	return SB_OK;
 }
+
 int X2Dome::dapiPark(void)
 {
     X2MutexLocker ml(GetMutex());
@@ -170,11 +189,13 @@ int X2Dome::dapiUnpark(void)
     X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
+
 int X2Dome::dapiFindHome(void)
 {
     X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
+
 int X2Dome::dapiIsGotoComplete(bool* pbComplete)
 {
     X2MutexLocker ml(GetMutex());
@@ -186,31 +207,35 @@ int X2Dome::dapiIsOpenComplete(bool* pbComplete)
     X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
+
 int	X2Dome::dapiIsCloseComplete(bool* pbComplete)
 {
     X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
+
 int X2Dome::dapiIsParkComplete(bool* pbComplete)
 {
     X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
+
 int X2Dome::dapiIsUnparkComplete(bool* pbComplete)
 {
     X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
+
 int X2Dome::dapiIsFindHomeComplete(bool* pbComplete)
 {
     X2MutexLocker ml(GetMutex());
 	return SB_OK;
 }
+
 int X2Dome::dapiSync(double dAz, double dEl)
 {
     X2MutexLocker ml(GetMutex());
 	return SB_OK;
-
 }
 
 int X2Dome::queryAbstraction(const char* pszName, void** ppVal)
@@ -267,6 +292,7 @@ int X2Dome::execModalSettingsDialog()
         return nErr;
 
 }
+
 void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 {
 
