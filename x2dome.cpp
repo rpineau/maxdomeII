@@ -121,6 +121,10 @@ int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
     enum AZ_Status tmpAzimuthStatus;
 
     X2MutexLocker ml(GetMutex());
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+
     *pdEl=0.0f;
     err = maxDome.Status_MaxDomeII(&tmpShutterStatus, &tmpAzimuthStatus, &tmpAz, &tmpHomePosition);
     if(err)
@@ -136,6 +140,9 @@ int X2Dome::dapiGotoAzEl(double dAz, double dEl)
     int ticks;
     X2MutexLocker ml(GetMutex());
 
+    if(!m_bLinked)
+        return ERR_NOLINK;
+
     maxDome.AzToTicks(dAz, dir, ticks);
     err = maxDome.Goto_Azimuth_MaxDomeII(dir, ticks);
 
@@ -150,6 +157,10 @@ int X2Dome::dapiGotoAzEl(double dAz, double dEl)
 
 int X2Dome::dapiAbort(void)
 {
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+
     switch(mlastCommand)
     {
         case AzGoto:
@@ -167,6 +178,10 @@ int X2Dome::dapiAbort(void)
 int X2Dome::dapiOpen(void)
 {
     X2MutexLocker ml(GetMutex());
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+
     mlastCommand = ShutterOpen;
 	return SB_OK;
 }
@@ -174,6 +189,10 @@ int X2Dome::dapiOpen(void)
 int X2Dome::dapiClose(void)
 {
     X2MutexLocker ml(GetMutex());
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+
     mlastCommand = ShutterClose;
 	return SB_OK;
 }
@@ -181,60 +200,100 @@ int X2Dome::dapiClose(void)
 int X2Dome::dapiPark(void)
 {
     X2MutexLocker ml(GetMutex());
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+    
 	return SB_OK;
 }
 
 int X2Dome::dapiUnpark(void)
 {
     X2MutexLocker ml(GetMutex());
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+    
 	return SB_OK;
 }
 
 int X2Dome::dapiFindHome(void)
 {
     X2MutexLocker ml(GetMutex());
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+    
 	return SB_OK;
 }
 
 int X2Dome::dapiIsGotoComplete(bool* pbComplete)
 {
     X2MutexLocker ml(GetMutex());
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+    
 	return SB_OK;
 }
 
 int X2Dome::dapiIsOpenComplete(bool* pbComplete)
 {
     X2MutexLocker ml(GetMutex());
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+    
 	return SB_OK;
 }
 
 int	X2Dome::dapiIsCloseComplete(bool* pbComplete)
 {
     X2MutexLocker ml(GetMutex());
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+    
 	return SB_OK;
 }
 
 int X2Dome::dapiIsParkComplete(bool* pbComplete)
 {
     X2MutexLocker ml(GetMutex());
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+    
 	return SB_OK;
 }
 
 int X2Dome::dapiIsUnparkComplete(bool* pbComplete)
 {
     X2MutexLocker ml(GetMutex());
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+    
 	return SB_OK;
 }
 
 int X2Dome::dapiIsFindHomeComplete(bool* pbComplete)
 {
     X2MutexLocker ml(GetMutex());
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+    
 	return SB_OK;
 }
 
 int X2Dome::dapiSync(double dAz, double dEl)
 {
     X2MutexLocker ml(GetMutex());
+
+    if(!m_bLinked)
+        return ERR_NOLINK;
+    
 	return SB_OK;
 }
 

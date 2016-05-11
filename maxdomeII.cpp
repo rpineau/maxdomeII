@@ -613,15 +613,15 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
 void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
 {
     double nbDeg;
-    nbDeg = (mAzimuthPosition - pdAz);
+    nbDeg = (pdAz - mAzimuthPosition );
     // 0 E to W. 1 W to E
     if (nbDeg<0)
     {
         nbDeg = -nbDeg;
-        dir = 0;
+        dir = 1;
     }
     else{
-        dir =1;
+        dir =0;
     }
     ticks = (int) (((double)mNbTicksPerRev/360.0f) * nbDeg);
 }
