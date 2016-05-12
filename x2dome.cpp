@@ -61,15 +61,10 @@ X2Dome::~X2Dome()
 
 int X2Dome::establishLink(void)					
 {
-    int err;
-    unsigned tmpAz;
-    unsigned tmpHomePosition;
-    enum SH_Status tmpShutterStatus;
-    enum AZ_Status tmpAzimuthStatus;
-
+    bool err;
     X2MutexLocker ml(GetMutex());
-    // get the device status to make sure we're properly connected.
-    err = maxDome.Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
+    // need to figure out how to get the serial port device name
+    err = maxDome.Connect("");
     if(err)
         return ERR_COMMNOLINK;
 

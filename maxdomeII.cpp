@@ -50,6 +50,12 @@ CMaxDome::~CMaxDome()
 
 bool CMaxDome::Connect(const char *szPort)
 {
+    int err;
+    unsigned tmpAz;
+    unsigned tmpHomePosition;
+    enum SH_Status tmpShutterStatus;
+    enum AZ_Status tmpAzimuthStatus;
+
     // 19200 8N1
     if(pSerx->open(szPort,19200) == 0)
         bIsConnected = true;
@@ -63,9 +69,16 @@ bool CMaxDome::Connect(const char *szPort)
     // bIsConnected = GetFirmware(szFirmware);
     pSerx->purgeTxRx();
 
-    if(!bIsConnected)
-        pSerx->close();
+    
+    // get the device status to make sure we're properly connected.
+    err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
 
+    if(err)
+    {
+        pSerx->close();
+        bIsConnected = false;
+    }
+    
     return bIsConnected;
 }
 
