@@ -89,6 +89,7 @@ public:
     int Home_Azimuth_MaxDomeII();
     int Goto_Azimuth_MaxDomeII(int nDir, int nTicks);
     int Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition);
+    int Goto_Azimuth_MaxDomeII(double newAz);
     int Ack_MaxDomeII();
     int SetPark_MaxDomeII(int nParkOnShutter, int nTicks);
     int SetTicksPerCount_MaxDomeII(int nTicks);

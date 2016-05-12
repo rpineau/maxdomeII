@@ -147,17 +147,13 @@ int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
 int X2Dome::dapiGotoAzEl(double dAz, double dEl)
 {
     int err;
-    int dir;
-    int ticks;
+
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
 
-    // convert dAz into ticks from home position and direction to move
-    maxDome.AzToTicks(dAz, dir, ticks);
-    
-    err = maxDome.Goto_Azimuth_MaxDomeII(dir, ticks);
+    err = maxDome.Goto_Azimuth_MaxDomeII(dAz);
 
     if(err)
         return ERR_CMDFAILED;

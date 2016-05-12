@@ -279,6 +279,18 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
     return -6;	// Response don't match command
 }
 
+
+int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
+{
+    int dir;
+    int ticks;
+    int err=0;
+
+    AzToTicks(newAz, dir, ticks);
+    err = Goto_Azimuth_MaxDomeII(dir, ticks);
+    return err;
+}
+
 /*
 	Ask Max Dome status
 
