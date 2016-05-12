@@ -1,5 +1,6 @@
 #include "maxdomeii.h"
 #include "../../licensedinterfaces/domedriverinterface.h"
+#include "../../licensedinterfaces/serialportparams2interface.h"
 #include "../../licensedinterfaces/modalsettingsdialoginterface.h"
 #include "../../licensedinterfaces/x2guiinterface.h"
 
@@ -14,6 +15,17 @@ class BasicIniUtilInterface;
 class TickCountInterface;
 
 #define DRIVER_VERSION      1.0
+#define PARENT_KEY			"X2Rotator"
+#define CHILD_KEY_PORTNAME	"PortName"
+
+#if defined(SB_WIN_BUILD)
+#define DEF_PORT_NAME					"COM1"
+#elif defined(SB_MAC_BUILD)
+#define DEF_PORT_NAME					"/dev/cu.KeySerial1"
+#elif defined(SB_LINUX_BUILD)
+#define DEF_PORT_NAME					"/dev/COM0"
+#endif
+
 enum lastCommand {AzGoto = 0, ShutterOpen, ShutterClose};
 
 /*!
@@ -23,7 +35,7 @@ enum lastCommand {AzGoto = 0, ShutterOpen, ShutterClose};
 
 Use this example to write an X2Dome driver.
 */
-class X2Dome: public DomeDriverInterface, public ModalSettingsDialogInterface, public X2GUIEventInterface
+class X2Dome: public DomeDriverInterface, public SerialPortParams2Interface, public ModalSettingsDialogInterface, public X2GUIEventInterface
 {
 public:
 
@@ -53,6 +65,9 @@ public:
 	virtual int									terminateLink(void)						;
 	virtual bool								isLinked(void) const					;
 	//@} 
+
+    virtual int initModalSettingsDialog(void){return 0;}
+    virtual int execModalSettingsDialog(void);
 
 	/*!\name HardwareInfoInterface Implementation
 	See HardwareInfoInterface.*/
@@ -88,8 +103,17 @@ public:
 	virtual int dapiIsFindHomeComplete(bool* pbComplete);
 	virtual int dapiSync(double dAz, double dEl);
 
-    virtual int initModalSettingsDialog(void){return 0;}
-    virtual int execModalSettingsDialog(void);
+    //SerialPortParams2Interface
+    virtual void			portName(BasicStringInterface& str) const			;
+    virtual void			setPortName(const char* szPort)						;
+    virtual unsigned int	baudRate() const			{return 9600;};
+    virtual void			setBaudRate(unsigned int)	{};
+    virtual bool			isBaudRateFixed() const		{return true;}
+
+    virtual SerXInterface::Parity	parity() const				{return SerXInterface::B_NOPARITY;}
+    virtual void					setParity(const SerXInterface::Parity& parity){parity;};
+    virtual bool					isParityFixed() const		{return true;}
+
 
 
     virtual void uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent);
@@ -112,10 +136,11 @@ private:
 	MutexInterface									*	m_pIOMutex;
 	TickCountInterface								*	m_pTickCount;
 
-	int         m_nPrivateISIndex;
+    void portNameOnToCharPtr(char* pszPort, const int& nMaxSize) const;
 
+
+	int         m_nPrivateISIndex;
 	int         m_bLinked;
-	
     CMaxDome    maxDome;
     int         mlastCommand;
 };

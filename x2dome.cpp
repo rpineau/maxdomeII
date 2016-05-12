@@ -62,9 +62,12 @@ X2Dome::~X2Dome()
 int X2Dome::establishLink(void)					
 {
     bool err;
+    char szPort[DRIVER_MAX_STRING];
+
     X2MutexLocker ml(GetMutex());
-    // need to figure out how to get the serial port device name
-    err = maxDome.Connect("");
+    // get serial port device name
+    portNameOnToCharPtr(szPort,DRIVER_MAX_STRING);
+    err = maxDome.Connect(szPort);
     if(err)
         return ERR_COMMNOLINK;
 
@@ -84,7 +87,72 @@ int X2Dome::terminateLink(void)
 	return m_bLinked;
 }
 
+int X2Dome::queryAbstraction(const char* pszName, void** ppVal)
+{
+    *ppVal = NULL;
+
+    if (!strcmp(pszName, LoggerInterface_Name))
+        *ppVal = GetLogger();
+    else if (!strcmp(pszName, ModalSettingsDialogInterface_Name))
+        *ppVal = dynamic_cast<ModalSettingsDialogInterface*>(this);
+    else if (!strcmp(pszName, X2GUIEventInterface_Name))
+        *ppVal = dynamic_cast<X2GUIEventInterface*>(this);
+    else if (!strcmp(pszName, SerialPortParams2Interface_Name))
+        *ppVal = dynamic_cast<SerialPortParams2Interface*>(this);
+    else
+    {
+        printf("pszName = %s\n",pszName);
+
+    }
+    
+    return SB_OK;
+}
+
+
+int X2Dome::execModalSettingsDialog()
+{
+    int nErr = SB_OK;
+    X2ModalUIUtil uiutil(this, GetTheSkyXFacadeForDrivers());
+    X2GUIInterface*					ui = uiutil.X2UI();
+    X2GUIExchangeInterface*			dx = NULL;//Comes after ui is loaded
+    bool bPressedOK = false;
+    printf("X2Dome::execModalSettingsDialog\n");
+    if (NULL == ui)
+    {
+        printf("ui is NULL :(\n");
+        return ERR_POINTER;
+    }
+    if ((nErr = ui->loadUserInterface("maxdomeII.ui", deviceType(), m_nPrivateISIndex)))
+        return nErr;
+
+    if (NULL == (dx = uiutil.X2DX()))
+    {
+        printf("dx is NULL :(\n");
+        return ERR_POINTER;
+    }
+    //Display the user interface
+    if ((nErr = ui->exec(bPressedOK)))
+        return nErr;
+
+    //Retreive values from the user interface
+    if (bPressedOK)
+    {
+        printf("Ok pressed\n");
+    }
+    return nErr;
+
+}
+
+void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
+{
+    
+}
+
+//
 //HardwareInfoInterface
+//
+#pragma mark - HardwareInfoInterface
+
 void X2Dome::deviceInfoNameShort(BasicStringInterface& str) const					
 {
 	str = "MaxDome II Dome Control System";
@@ -106,7 +174,11 @@ void X2Dome::deviceInfoModel(BasicStringInterface& str)
     str = "MaxDome II Dome Control System";
 }
 
+//
 //DriverInfoInterface
+//
+#pragma mark - DriverInfoInterface
+
  void	X2Dome::driverInfoDetailedInfo(BasicStringInterface& str) const	
 {
     str = "MaxDome II Dome Control System";
@@ -117,7 +189,11 @@ double	X2Dome::driverInfoVersion(void) const
 	return DRIVER_VERSION;
 }
 
+//
 //DomeDriverInterface
+//
+#pragma mark - DomeDriverInterface
+
 int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
 {
     int err;
@@ -326,62 +402,40 @@ int X2Dome::dapiSync(double dAz, double dEl)
 	return SB_OK;
 }
 
-int X2Dome::queryAbstraction(const char* pszName, void** ppVal)
+//
+// SerialPortParams2Interface
+//
+#pragma mark - SerialPortParams2Interface
+
+void X2Dome::portName(BasicStringInterface& str) const
 {
-	*ppVal = NULL;
+    char szPortName[DRIVER_MAX_STRING];
 
-    if (!strcmp(pszName, LoggerInterface_Name))
-		*ppVal = GetLogger();
-    else if (!strcmp(pszName, ModalSettingsDialogInterface_Name))
-        *ppVal = dynamic_cast<ModalSettingsDialogInterface*>(this);
-    else if (!strcmp(pszName, X2GUIEventInterface_Name))
-        *ppVal = dynamic_cast<X2GUIEventInterface*>(this);
-    else if (!strcmp(pszName, SerialPortParams2Interface_Name))
-        *ppVal = dynamic_cast<SerialPortParams2Interface*>(this);
-    else
-    {
-        printf("pszName = %s\n",pszName);
+    portNameOnToCharPtr(szPortName, DRIVER_MAX_STRING);
 
-    }
-
-	return SB_OK;
-}
-
-int X2Dome::execModalSettingsDialog()
-{
-    int nErr = SB_OK;
-    X2ModalUIUtil uiutil(this, GetTheSkyXFacadeForDrivers());
-    X2GUIInterface*					ui = uiutil.X2UI();
-    X2GUIExchangeInterface*			dx = NULL;//Comes after ui is loaded
-    bool bPressedOK = false;
-    printf("X2Dome::execModalSettingsDialog\n");
-    if (NULL == ui)
-    {
-        printf("ui is NULL :(\n");
-        return ERR_POINTER;
-    }
-    if ((nErr = ui->loadUserInterface("maxdomeII.ui", deviceType(), m_nPrivateISIndex)))
-        return nErr;
-
-    if (NULL == (dx = uiutil.X2DX()))
-    {
-        printf("dx is NULL :(\n");
-        return ERR_POINTER;
-    }
-    //Display the user interface
-    if ((nErr = ui->exec(bPressedOK)))
-        return nErr;
-
-    //Retreive values from the user interface
-    if (bPressedOK)
-    {
-        printf("Ok pressed\n");
-    }
-        return nErr;
+    str = szPortName;
 
 }
 
-void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
+void X2Dome::setPortName(const char* szPort)
 {
-
+    if (m_pIniUtil)
+        m_pIniUtil->writeString(PARENT_KEY, CHILD_KEY_PORTNAME, szPort);
+    
 }
+
+
+void X2Dome::portNameOnToCharPtr(char* pszPort, const int& nMaxSize) const
+{
+    if (NULL == pszPort)
+        return;
+
+    sprintf(pszPort, DEF_PORT_NAME);
+
+    if (m_pIniUtil)
+        m_pIniUtil->readString(PARENT_KEY, CHILD_KEY_PORTNAME, pszPort, pszPort, nMaxSize);
+    
+}
+
+
+

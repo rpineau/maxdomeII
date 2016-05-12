@@ -279,7 +279,13 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
     return -6;	// Response don't match command
 }
 
+/*
+	Go to a new azimuth position
+ 
+    @param : new azimuth position
+    @return : error code from Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
 
+*/
 int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
 {
     int dir;
