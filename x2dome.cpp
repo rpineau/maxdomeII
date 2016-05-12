@@ -69,7 +69,7 @@ int X2Dome::establishLink(void)
 
     X2MutexLocker ml(GetMutex());
     // get the device status to make sure we're properly connected.
-    err = maxDome.Status_MaxDomeII(&tmpShutterStatus, &tmpAzimuthStatus, &tmpAz, &tmpHomePosition);
+    err = maxDome.Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
     if(err)
         return ERR_COMMNOLINK;
 
@@ -126,7 +126,7 @@ double	X2Dome::driverInfoVersion(void) const
 int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
 {
     int err;
-    int dir;
+
     unsigned tmpAzInTicks;
     double tmpAz;
     unsigned tmpHomePosition;
@@ -139,10 +139,12 @@ int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
         return ERR_NOLINK;
 
     *pdEl=0.0f;
-    err = maxDome.Status_MaxDomeII(&tmpShutterStatus, &tmpAzimuthStatus, &tmpAzInTicks, &tmpHomePosition);
+    // returns number of ticks from home position for tmpAzInTicks
+    err = maxDome.Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAzInTicks, tmpHomePosition);
     if(err)
         return ERR_CMDFAILED;
-    maxDome.TicksToAz(tmpAzInTicks, dir, tmpAz);
+    
+    maxDome.TicksToAz(tmpAzInTicks, tmpAz);
     *pdAz = tmpAz;
     return SB_OK;
 }
@@ -157,7 +159,9 @@ int X2Dome::dapiGotoAzEl(double dAz, double dEl)
     if(!m_bLinked)
         return ERR_NOLINK;
 
+    // convert dAz into ticks from home position and direction to move
     maxDome.AzToTicks(dAz, dir, ticks);
+    
     err = maxDome.Goto_Azimuth_MaxDomeII(dir, ticks);
 
     if(err)

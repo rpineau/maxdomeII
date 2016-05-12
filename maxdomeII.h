@@ -88,7 +88,7 @@ public:
     int Abort_Azimuth_MaxDomeII();
     int Home_Azimuth_MaxDomeII();
     int Goto_Azimuth_MaxDomeII(int nDir, int nTicks);
-    int Status_MaxDomeII(enum SH_Status *nShutterStatus, enum AZ_Status *nAzimuthStatus, unsigned *nAzimuthPosition, unsigned *nHomePosition);
+    int Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition);
     int Ack_MaxDomeII();
     int SetPark_MaxDomeII(int nParkOnShutter, int nTicks);
     int SetTicksPerCount_MaxDomeII(int nTicks);
@@ -103,7 +103,7 @@ public:
 
     // convertion functions
     void AzToTicks(double pdAz, int &dir, int &ticks);
-    void TicksToAz(int ticks, int &dir, double &pdAz);
+    void TicksToAz(int ticks, double &pdAz);
 
 protected:
 
@@ -111,9 +111,16 @@ protected:
     int             ReadResponse_MaxDomeII(char *cMessage);
     bool            bIsConnected;
     int             mNbTicksPerRev;
-    unsigned        mAzimuthPosition;
-    unsigned        mHomePosition;
-    unsigned        mParkPosition;
+
+    unsigned        mAzimuthPositionInTicks;
+    double          mAzimuthPosition;
+
+    unsigned        mHomePositionInTicks;
+    double          mHomePosition;
+    
+    unsigned        mParkPositionInTicks;
+    double          mParkPosition;
+
     unsigned        mGotoTicks;
     SerXInterface   *pSerx;
 };

@@ -106,7 +106,6 @@ signed char CMaxDome::checksum_MaxDomeII(char *cMessage, int nLen)
 	Reads a response from MAX DOME II
 	It verifies message sintax and checksum
 
-	@param fd File descriptor
 	@param cMessage Pointer to a buffer to receive the message
 	@return 0 if message is Ok. -1 if no response or no start caracter found. -2 invalid declared message length. -3 message too short. -4 checksum error
  */
@@ -157,7 +156,6 @@ int CMaxDome::ReadResponse_MaxDomeII(char *cMessage)
 /*
 	Abort azimuth movement
 
-	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Abort_Azimuth_MaxDomeII()
@@ -196,7 +194,6 @@ int CMaxDome::Abort_Azimuth_MaxDomeII()
 /*
 	Move until 'home' position is detected
 
-	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Home_Azimuth_MaxDomeII()
@@ -229,7 +226,6 @@ int CMaxDome::Home_Azimuth_MaxDomeII()
 /*
 	Go to a new azimuth position
 
-	@param fd File descriptor
 	@param nDir Direcction of the movement. 0 E to W. 1 W to E
 	@param nTicks Ticks from home position in E to W direction.
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
@@ -273,14 +269,13 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
 /*
 	Ask Max Dome status
 
-	@param fd File descriptor
 	@param nShutterStatus Returns shutter status
 	@param nAzimuthStatus Returns azimuth status
 	@param nAzimuthPosition Returns azimuth current position (in ticks from home position)
 	@param nHomePosition Returns last position where home was detected
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Status_MaxDomeII(enum SH_Status *nShutterStatus, enum AZ_Status *nAzimuthStatus, unsigned *nAzimuthPosition, unsigned *nHomePosition)
+int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition)
 {
     unsigned char cMessage[MAX_BUFFER];
     int nErrorType;
@@ -303,12 +298,14 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status *nShutterStatus, enum AZ_Status *n
 
     if (cMessage[2] == (unsigned char)(STATUS_CMD | TO_COMPUTER))
     {
-        *nShutterStatus = (enum SH_Status)cMessage[3];
-        *nAzimuthStatus = (enum AZ_Status)cMessage[4];
-        *nAzimuthPosition = (unsigned)(((unsigned)cMessage[5]) * 256 + ((unsigned)cMessage[6]));
-        *nHomePosition = ((unsigned)cMessage[7]) * 256 + ((unsigned)cMessage[8]);
-        mAzimuthPosition = *nAzimuthPosition;
-        mHomePosition = *nHomePosition;
+        nShutterStatus = (enum SH_Status)cMessage[3];
+        nAzimuthStatus = (enum AZ_Status)cMessage[4];
+        nAzimuthPosition = (unsigned)(((unsigned)cMessage[5]) * 256 + ((unsigned)cMessage[6]));
+        nHomePosition = ((unsigned)cMessage[7]) * 256 + ((unsigned)cMessage[8]);
+        mAzimuthPositionInTicks = nAzimuthPosition;
+        TicksToAz(mAzimuthPositionInTicks, mAzimuthPosition);
+        mHomePositionInTicks = nHomePosition;
+        TicksToAz(mHomePositionInTicks, mHomePosition);
         return 0;
     }
 
@@ -318,7 +315,6 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status *nShutterStatus, enum AZ_Status *n
 /*
 	Ack comunication
 
-	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Ack_MaxDomeII()
@@ -357,7 +353,6 @@ int CMaxDome::Ack_MaxDomeII()
 /*
 	Set park coordinates and if need to park before to operating shutter
 
-	@param fd File descriptor
 	@param nParkOnShutter 0 operate shutter at any azimuth. 1 go to park position before operating shutter
 	@param nTicks Ticks from home position in E to W direction.
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
@@ -389,7 +384,7 @@ int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
 
     if (cMessage[2] == (char)(SETPARK_CMD | TO_COMPUTER))
     {
-        mParkPosition = mHomePosition + nTicks;
+        mParkPositionInTicks = mHomePositionInTicks + nTicks;
 
         return 0;
     }
@@ -410,12 +405,12 @@ int CMaxDome::Park_MaxDomeII()
     enum AZ_Status tmpAzimuthStatus;
 
     // where are we ?
-    nErrorType = Status_MaxDomeII(&tmpShutterStatus, &tmpAzimuthStatus, &tmpAz, &tmpHomePosition);
+    nErrorType = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
     if(nErrorType)
         return nErrorType;
     // how far do we need to move and in which direction.
     // nbticks to move = current position - (park - home)
-    ticks = tmpAzimuthStatus - (mParkPosition - tmpHomePosition);
+    ticks = tmpAzimuthStatus - (mParkPositionInTicks - tmpHomePosition);
     if (ticks <0)
     {
         dir = 1;
@@ -436,7 +431,6 @@ int CMaxDome::Park_MaxDomeII()
 /*
  Set ticks per turn of the dome
 
- @param fd File descriptor
  @param nTicks Ticks from home position in E to W direction.
  @return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
@@ -480,7 +474,6 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
 /*
 	Opens the shutter fully
 
-	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Open_Shutter_MaxDomeII()
@@ -514,7 +507,6 @@ int CMaxDome::Open_Shutter_MaxDomeII()
 /*
 	Opens the upper shutter only
 
-	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
@@ -548,7 +540,6 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
 /*
 	Close the shutter
 
-	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Close_Shutter_MaxDomeII()
@@ -582,7 +573,6 @@ int CMaxDome::Close_Shutter_MaxDomeII()
 /*
 	Abort shutter movement
 
-	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Abort_Shutter_MaxDomeII()
@@ -616,7 +606,6 @@ int CMaxDome::Abort_Shutter_MaxDomeII()
 /*
 	Exit shutter (?) Normally send at program exit
 	
-	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Exit_Shutter_MaxDomeII()
@@ -648,19 +637,17 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
 }
 
 /*
-	Convert Az to number of ticks to move from home and direction.
+	Convert pdAz to number of ticks from home and direction.
 
-	@param fd File descriptor
-	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
 
 void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
 {
     double nbDeg;
-    double degAz;
-    degAz = ((mAzimuthPosition * 360) / mNbTicksPerRev) - mHomePosition;
-
-    nbDeg = (pdAz - degAz );
+    
+    // delta between home position and pdAz
+    nbDeg = pdAz - mHomePosition;
+    
     // 0 E to W. 1 W to E
     if (nbDeg<0)
     {
@@ -670,12 +657,16 @@ void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
     else{
         dir =0;
     }
-    ticks = mHomePosition + (int) (((double)mNbTicksPerRev/360.0f) * nbDeg);
+    ticks = mHomePositionInTicks + (int) (((double)mNbTicksPerRev/360.0f) * nbDeg);
 }
 
-void CMaxDome::TicksToAz(int ticks, int &dir, double &pdAz)
+/*
+	Convert ticks from home to Az
+ 
+*/
+
+void CMaxDome::TicksToAz(int ticks, double &pdAz)
 {
-    pdAz = ((mHomePosition + ticks)*360.0f) / (double)mNbTicksPerRev;
-    dir = 1;
+    pdAz = ((mHomePositionInTicks + ticks)*360.0f) / (double)mNbTicksPerRev;
 }
 
