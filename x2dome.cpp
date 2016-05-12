@@ -334,67 +334,91 @@ int X2Dome::dapiFindHome(void)
 
 int X2Dome::dapiIsGotoComplete(bool* pbComplete)
 {
+    int err;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
-    // ERR_COMMANDINPROGRESS
-	return SB_OK;
+
+    err = maxDome.IsGoToComplete(*pbComplete);
+    if(err)
+        return ERR_CMDFAILED;
+    return SB_OK;
 }
 
 int X2Dome::dapiIsOpenComplete(bool* pbComplete)
 {
+    int err;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
     
-    // ERR_COMMANDINPROGRESS
-	return SB_OK;
+    err = maxDome.IsOpenComplete(*pbComplete);
+    if(err)
+        return ERR_CMDFAILED;
+
+    return SB_OK;
 }
 
 int	X2Dome::dapiIsCloseComplete(bool* pbComplete)
 {
+    int err;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
-    
-    // ERR_COMMANDINPROGRESS
-	return SB_OK;
+
+    err = maxDome.IsCloseComplete(*pbComplete);
+    if(err)
+        return ERR_CMDFAILED;
+
+    return SB_OK;
 }
 
 int X2Dome::dapiIsParkComplete(bool* pbComplete)
 {
+    int err;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
-    
-    // ERR_COMMANDINPROGRESS
-	return SB_OK;
+
+    err = maxDome.IsParkComplete(*pbComplete);
+    if(err)
+        return ERR_CMDFAILED;
+
+    return SB_OK;
 }
 
 int X2Dome::dapiIsUnparkComplete(bool* pbComplete)
 {
+    int err;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
-    
-    // ERR_COMMANDINPROGRESS
-	return SB_OK;
+
+    err = maxDome.IsUnparkComplete(*pbComplete);
+    if(err)
+        return ERR_CMDFAILED;
+
+    return SB_OK;
 }
 
 int X2Dome::dapiIsFindHomeComplete(bool* pbComplete)
 {
+    int err;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
-    
-    // ERR_COMMANDINPROGRESS
-	return SB_OK;
+
+    err = maxDome.IsFindHomeComplete(*pbComplete);
+    if(err)
+        return ERR_CMDFAILED;
+
+    return SB_OK;
 }
 
 int X2Dome::dapiSync(double dAz, double dEl)

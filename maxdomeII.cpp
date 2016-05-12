@@ -706,3 +706,154 @@ void CMaxDome::TicksToAz(int ticks, double &pdAz)
     pdAz = ((mHomePositionInTicks + ticks)*360.0f) / (double)mNbTicksPerRev;
 }
 
+
+int CMaxDome::IsGoToComplete(bool &complete)
+{
+    int err = 0;
+    unsigned tmpAz;
+    unsigned tmpHomePosition;
+    enum SH_Status tmpShutterStatus;
+    enum AZ_Status tmpAzimuthStatus;
+
+    err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
+    if(err)
+        return err;
+
+    if((mGotoTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
+    {
+        complete = true;
+    }
+    else
+    {
+        complete = false;
+    }
+
+    return err;
+}
+
+int CMaxDome::IsOpenComplete(bool &complete)
+{
+    int err=0;
+    unsigned tmpAz;
+    unsigned tmpHomePosition;
+    enum SH_Status tmpShutterStatus;
+    enum AZ_Status tmpAzimuthStatus;
+
+    err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
+    if(err)
+        return err;
+
+    if( tmpShutterStatus == Ss_OPEN)
+    {
+        complete = true;
+    }
+    else
+    {
+        complete = false;
+    }
+
+    return err;
+
+}
+
+int CMaxDome::IsCloseComplete(bool &complete)
+{
+    int err=0;
+    unsigned tmpAz;
+    unsigned tmpHomePosition;
+    enum SH_Status tmpShutterStatus;
+    enum AZ_Status tmpAzimuthStatus;
+
+    err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
+    if(err)
+        return err;
+
+    if( tmpShutterStatus == Ss_CLOSED)
+    {
+        complete = true;
+    }
+    else
+    {
+        complete = false;
+    }
+
+    return err;
+}
+
+
+int CMaxDome::IsParkComplete(bool &complete)
+{
+    int err=0;
+    unsigned tmpAz;
+    unsigned tmpHomePosition;
+    enum SH_Status tmpShutterStatus;
+    enum AZ_Status tmpAzimuthStatus;
+
+    err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
+    if(err)
+        return err;
+
+    if((mParkPositionInTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
+
+    {
+        complete = true;
+    }
+    else
+    {
+        complete = false;
+    }
+
+    return err;
+
+}
+
+int CMaxDome::IsUnparkComplete(bool &complete)
+{
+    int err=0;
+    unsigned tmpAz;
+    unsigned tmpHomePosition;
+    enum SH_Status tmpShutterStatus;
+    enum AZ_Status tmpAzimuthStatus;
+
+    err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
+    if(err)
+        return err;
+
+    if(tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2)
+    {
+        complete = true;
+    }
+    else
+    {
+        complete = false;
+    }
+
+    return err;
+
+}
+
+int CMaxDome::IsFindHomeComplete(bool &complete)
+{
+    int err=0;
+    unsigned tmpAz;
+    unsigned tmpHomePosition;
+    enum SH_Status tmpShutterStatus;
+    enum AZ_Status tmpAzimuthStatus;
+
+    err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
+    if(err)
+        return err;
+
+     if((mHomePositionInTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
+    {
+        complete = true;
+    }
+    else
+    {
+        complete = false;
+    }
+
+    return err;
+
+}
+

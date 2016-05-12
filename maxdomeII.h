@@ -67,7 +67,7 @@
 #define MAXDOMEII_WE_DIR 0x02
 
 // Azimuth motor status. When motor is idle, sometimes returns 0, sometimes 4. After connect, it returns 5
-enum AZ_Status {As_IDLE = 1, As_MOVING_WE, As_MOVING_EW, As_IDEL2, As_ERROR};
+enum AZ_Status {As_IDLE = 1, As_MOVING_WE, As_MOVING_EW, As_IDLE2, As_ERROR};
 
 // Shutter status
 enum SH_Status {Ss_CLOSED = 0, Ss_OPENING, Ss_OPEN, Ss_CLOSING, Ss_ABORTED, Ss_ERROR};
@@ -106,6 +106,14 @@ public:
     void AzToTicks(double pdAz, int &dir, int &ticks);
     void TicksToAz(int ticks, double &pdAz);
 
+    // command complete functions
+    int IsGoToComplete(bool &complete);
+    int IsOpenComplete(bool &complete);
+    int IsCloseComplete(bool &complete);
+    int IsParkComplete(bool &complete);
+    int IsUnparkComplete(bool &complete);
+    int IsFindHomeComplete(bool &complete);
+    
 protected:
 
     signed char     checksum_MaxDomeII(char *cMessage, int nLen);
