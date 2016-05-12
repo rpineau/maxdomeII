@@ -338,7 +338,7 @@ int X2Dome::dapiIsGotoComplete(bool* pbComplete)
 
     if(!m_bLinked)
         return ERR_NOLINK;
-    
+    // ERR_COMMANDINPROGRESS
 	return SB_OK;
 }
 
@@ -349,6 +349,7 @@ int X2Dome::dapiIsOpenComplete(bool* pbComplete)
     if(!m_bLinked)
         return ERR_NOLINK;
     
+    // ERR_COMMANDINPROGRESS
 	return SB_OK;
 }
 
@@ -359,6 +360,7 @@ int	X2Dome::dapiIsCloseComplete(bool* pbComplete)
     if(!m_bLinked)
         return ERR_NOLINK;
     
+    // ERR_COMMANDINPROGRESS
 	return SB_OK;
 }
 
@@ -369,6 +371,7 @@ int X2Dome::dapiIsParkComplete(bool* pbComplete)
     if(!m_bLinked)
         return ERR_NOLINK;
     
+    // ERR_COMMANDINPROGRESS
 	return SB_OK;
 }
 
@@ -379,6 +382,7 @@ int X2Dome::dapiIsUnparkComplete(bool* pbComplete)
     if(!m_bLinked)
         return ERR_NOLINK;
     
+    // ERR_COMMANDINPROGRESS
 	return SB_OK;
 }
 
@@ -389,6 +393,7 @@ int X2Dome::dapiIsFindHomeComplete(bool* pbComplete)
     if(!m_bLinked)
         return ERR_NOLINK;
     
+    // ERR_COMMANDINPROGRESS
 	return SB_OK;
 }
 

@@ -441,14 +441,19 @@ int CMaxDome::Park_MaxDomeII()
         return nErrorType;
     // how far do we need to move and in which direction.
     // nbticks to move = current position - (park - home)
-    ticks = tmpAzimuthStatus - (mParkPositionInTicks - tmpHomePosition);
+
+    // this doesn't look right,tmpAzimuthStatus is an enum, tmpAzimuthStatus should probably be tmpAz
+    // ticks = tmpAzimuthStatus - (mParkPositionInTicks - tmpHomePosition);
+    ticks = tmpAz - (mParkPositionInTicks - tmpHomePosition);
     if (ticks <0)
     {
         dir = 1;
         ticks = -ticks;
     }
 
-    if (ticks == tmpAzimuthStatus)
+    // this doesn't look right,tmpAzimuthStatus is an enum, tmpAzimuthStatus should probably be tmpAz
+    // if (ticks == tmpAzimuthStatus)
+    if (ticks == tmpAz)
     {
         // park = home
         nErrorType = Home_Azimuth_MaxDomeII();
