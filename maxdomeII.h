@@ -103,6 +103,7 @@ public:
 
     // convertion functions
     void AzToTicks(double pdAz, int &dir, int &ticks);
+    void TicksToAz(int ticks, int &dir, double &pdAz);
 
 protected:
 
@@ -112,6 +113,8 @@ protected:
     int             mNbTicksPerRev;
     unsigned        mAzimuthPosition;
     unsigned        mHomePosition;
+    unsigned        mParkPosition;
+    unsigned        mGotoTicks;
     SerXInterface   *pSerx;
 };
 

@@ -262,7 +262,11 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
         return nReturn;
 
     if (cMessage[2] == (char)(GOTO_CMD | TO_COMPUTER))
+    {
+        mGotoTicks = nTicks;
         return 0;
+    }
+
     return -6;	// Response don't match command
 }
 
@@ -384,10 +388,50 @@ int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
         return nReturn;
 
     if (cMessage[2] == (char)(SETPARK_CMD | TO_COMPUTER))
-        return 0;
+    {
+        mParkPosition = mHomePosition + nTicks;
 
+        return 0;
+    }
     return -6;	// Response don't match command
 }
+
+//
+// send the dome to its park position
+//
+int CMaxDome::Park_MaxDomeII()
+{
+    int nErrorType;
+    int dir = 0;
+    int ticks;
+    unsigned tmpAz;
+    unsigned tmpHomePosition;
+    enum SH_Status tmpShutterStatus;
+    enum AZ_Status tmpAzimuthStatus;
+
+    // where are we ?
+    nErrorType = Status_MaxDomeII(&tmpShutterStatus, &tmpAzimuthStatus, &tmpAz, &tmpHomePosition);
+    if(nErrorType)
+        return nErrorType;
+    // how far do we need to move and in which direction.
+    // nbticks to move = current position - (park - home)
+    ticks = tmpAzimuthStatus - (mParkPosition - tmpHomePosition);
+    if (ticks <0)
+    {
+        dir = 1;
+        ticks = -ticks;
+    }
+
+    if (ticks == tmpAzimuthStatus)
+    {
+        // park = home
+        nErrorType = Home_Azimuth_MaxDomeII();
+    }
+    else
+        nErrorType = Goto_Azimuth_MaxDomeII(dir, ticks);
+    return nErrorType;
+}
+
 
 /*
  Set ticks per turn of the dome
@@ -604,7 +648,7 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
 }
 
 /*
-	Convert Az to number of ticks to move and direction.
+	Convert Az to number of ticks to move from home and direction.
 
 	@param fd File descriptor
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
@@ -613,7 +657,10 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
 void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
 {
     double nbDeg;
-    nbDeg = (pdAz - mAzimuthPosition );
+    double degAz;
+    degAz = ((mAzimuthPosition * 360) / mNbTicksPerRev) - mHomePosition;
+
+    nbDeg = (pdAz - degAz );
     // 0 E to W. 1 W to E
     if (nbDeg<0)
     {
@@ -623,6 +670,12 @@ void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
     else{
         dir =0;
     }
-    ticks = (int) (((double)mNbTicksPerRev/360.0f) * nbDeg);
+    ticks = mHomePosition + (int) (((double)mNbTicksPerRev/360.0f) * nbDeg);
+}
+
+void CMaxDome::TicksToAz(int ticks, int &dir, double &pdAz)
+{
+    pdAz = ((mHomePosition + ticks)*360.0f) / (double)mNbTicksPerRev;
+    dir = 1;
 }
 

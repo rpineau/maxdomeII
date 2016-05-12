@@ -61,8 +61,19 @@ X2Dome::~X2Dome()
 
 int X2Dome::establishLink(void)					
 {
+    int err;
+    unsigned tmpAz;
+    unsigned tmpHomePosition;
+    enum SH_Status tmpShutterStatus;
+    enum AZ_Status tmpAzimuthStatus;
+
     X2MutexLocker ml(GetMutex());
-	m_bLinked = true;
+    // get the device status to make sure we're properly connected.
+    err = maxDome.Status_MaxDomeII(&tmpShutterStatus, &tmpAzimuthStatus, &tmpAz, &tmpHomePosition);
+    if(err)
+        return ERR_COMMNOLINK;
+
+    m_bLinked = true;
 	return SB_OK;
 }
 
@@ -115,7 +126,9 @@ double	X2Dome::driverInfoVersion(void) const
 int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
 {
     int err;
-    unsigned tmpAz;
+    int dir;
+    unsigned tmpAzInTicks;
+    double tmpAz;
     unsigned tmpHomePosition;
     enum SH_Status tmpShutterStatus;
     enum AZ_Status tmpAzimuthStatus;
@@ -126,9 +139,10 @@ int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
         return ERR_NOLINK;
 
     *pdEl=0.0f;
-    err = maxDome.Status_MaxDomeII(&tmpShutterStatus, &tmpAzimuthStatus, &tmpAz, &tmpHomePosition);
+    err = maxDome.Status_MaxDomeII(&tmpShutterStatus, &tmpAzimuthStatus, &tmpAzInTicks, &tmpHomePosition);
     if(err)
         return ERR_CMDFAILED;
+    maxDome.TicksToAz(tmpAzInTicks, dir, tmpAz);
     *pdAz = tmpAz;
     return SB_OK;
 }
@@ -177,10 +191,15 @@ int X2Dome::dapiAbort(void)
 
 int X2Dome::dapiOpen(void)
 {
+    int err;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
+
+    err = maxDome.Open_Shutter_MaxDomeII();
+    if(err)
+        return ERR_CMDFAILED;
 
     mlastCommand = ShutterOpen;
 	return SB_OK;
@@ -188,10 +207,15 @@ int X2Dome::dapiOpen(void)
 
 int X2Dome::dapiClose(void)
 {
+    int err;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
+
+    err = maxDome.Close_Shutter_MaxDomeII();
+    if(err)
+        return ERR_CMDFAILED;
 
     mlastCommand = ShutterClose;
 	return SB_OK;
@@ -199,11 +223,16 @@ int X2Dome::dapiClose(void)
 
 int X2Dome::dapiPark(void)
 {
+    int err;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
-    
+
+    err = maxDome.Park_MaxDomeII();
+    if(err)
+        return ERR_CMDFAILED;
+
 	return SB_OK;
 }
 
@@ -219,12 +248,17 @@ int X2Dome::dapiUnpark(void)
 
 int X2Dome::dapiFindHome(void)
 {
+    int err;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
-    
-	return SB_OK;
+
+    err = maxDome.Home_Azimuth_MaxDomeII();
+    if(err)
+        return ERR_CMDFAILED;
+
+    return SB_OK;
 }
 
 int X2Dome::dapiIsGotoComplete(bool* pbComplete)
