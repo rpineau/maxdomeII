@@ -727,13 +727,9 @@ int CMaxDome::IsGoToComplete(bool &complete)
         return err;
 
     if((mGotoTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
-    {
         complete = true;
-    }
     else
-    {
         complete = false;
-    }
 
     return err;
 }
@@ -751,13 +747,9 @@ int CMaxDome::IsOpenComplete(bool &complete)
         return err;
 
     if( tmpShutterStatus == Ss_OPEN)
-    {
         complete = true;
-    }
     else
-    {
         complete = false;
-    }
 
     return err;
 
@@ -776,14 +768,10 @@ int CMaxDome::IsCloseComplete(bool &complete)
         return err;
 
     if( tmpShutterStatus == Ss_CLOSED)
-    {
         complete = true;
-    }
     else
-    {
         complete = false;
-    }
-
+ 
     return err;
 }
 
@@ -801,14 +789,9 @@ int CMaxDome::IsParkComplete(bool &complete)
         return err;
 
     if((mParkPositionInTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
-
-    {
         complete = true;
-    }
     else
-    {
         complete = false;
-    }
 
     return err;
 
@@ -827,13 +810,9 @@ int CMaxDome::IsUnparkComplete(bool &complete)
         return err;
 
     if(tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2)
-    {
         complete = true;
-    }
     else
-    {
         complete = false;
-    }
 
     return err;
 
@@ -851,14 +830,10 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
     if(err)
         return err;
 
-     if((mHomePositionInTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
-    {
+    if((mHomePositionInTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
         complete = true;
-    }
     else
-    {
         complete = false;
-    }
 
     return err;
 
