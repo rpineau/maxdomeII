@@ -130,6 +130,9 @@ protected:
     unsigned        mParkPositionInTicks;
     double          mParkPosition;
 
+    unsigned        mCurrentAzPositionInTicks;
+    double          mCurrentAzPosition;
+
     unsigned        mGotoTicks;
     SerXInterface   *pSerx;
 };

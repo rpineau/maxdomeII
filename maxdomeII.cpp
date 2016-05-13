@@ -676,25 +676,32 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
 	Convert pdAz to number of ticks from home and direction.
 
  */
-
 void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
 {
-    double nbDeg;
-    
-    // delta between home position and pdAz
-    nbDeg = pdAz - mHomePosition;
-    
-    // 0 E to W. 1 W to E
-    if (nbDeg<0)
+    double nbDeg = 0;
+    dir = 0;
+
+    if(pdAz < mHomePositionInTicks)
     {
-        nbDeg = -nbDeg;
+        nbDeg = 360 - mHomePositionInTicks + pdAz;
+    }
+    else
+    {
+        nbDeg = pdAz - mHomePositionInTicks;
+    }
+
+    if( (mCurrentAzPosition < pdAz) && (mCurrentAzPosition <(pdAz -180)))
+    {
         dir = 1;
     }
-    else{
-        dir =0;
+    else if (mCurrentAzPosition > pdAz)
+    {
+        dir = 1;
     }
-    ticks = mHomePositionInTicks + (int) (((double)mNbTicksPerRev/360.0f) * nbDeg);
+
+    ticks = nbDeg/360 * mNbTicksPerRev;
 }
+
 
 /*
 	Convert ticks from home to Az
