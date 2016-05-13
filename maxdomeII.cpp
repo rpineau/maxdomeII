@@ -47,6 +47,36 @@ CMaxDome::~CMaxDome()
 
 }
 
+int CMaxDome::Init_Communication()
+{
+    char cMessage[MAX_BUFFER];
+    unsigned long  nBytesWrite;
+    int nReturn;
+    int nErrorType = SB_OK;
+
+    cMessage[0] = 0x01;
+    cMessage[1] = 0x02;		// Will follow 2 bytes more
+    cMessage[2] = ACK_CMD;
+    cMessage[3] = checksum_MaxDomeII(cMessage, 3);
+    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
+
+    if (nErrorType != SB_OK)
+        return -5;
+
+
+    if (nBytesWrite != 4)
+        return -5;
+
+    nReturn = ReadResponse_MaxDomeII(cMessage);
+    if (nReturn != 0)
+        return nReturn;
+
+    if (cMessage[2] == (char)(ACK_CMD | TO_COMPUTER))
+        return 0;
+
+    return -6;	// Response don't match command
+
+}
 
 bool CMaxDome::Connect(const char *szPort)
 {
@@ -69,7 +99,14 @@ bool CMaxDome::Connect(const char *szPort)
     // bIsConnected = GetFirmware(szFirmware);
     pSerx->purgeTxRx();
 
-    
+    // init the comms
+    err = Init_Communication();
+    if(err)
+    {
+        pSerx->close();
+        bIsConnected = false;
+    }
+
     // get the device status to make sure we're properly connected.
     err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
 
@@ -442,8 +479,6 @@ int CMaxDome::Park_MaxDomeII()
     // how far do we need to move and in which direction.
     // nbticks to move = current position - (park - home)
 
-    // this doesn't look right,tmpAzimuthStatus is an enum, tmpAzimuthStatus should probably be tmpAz
-    // ticks = tmpAzimuthStatus - (mParkPositionInTicks - tmpHomePosition);
     ticks = tmpAz - (mParkPositionInTicks - tmpHomePosition);
     if (ticks <0)
     {
@@ -451,8 +486,6 @@ int CMaxDome::Park_MaxDomeII()
         ticks = -ticks;
     }
 
-    // this doesn't look right,tmpAzimuthStatus is an enum, tmpAzimuthStatus should probably be tmpAz
-    // if (ticks == tmpAzimuthStatus)
     if (ticks == tmpAz)
     {
         // park = home

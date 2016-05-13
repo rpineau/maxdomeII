@@ -85,6 +85,7 @@ public:
     void        SetSerxPointer(SerXInterface *p) { pSerx = p; }
 
     // Dome commands
+    int Init_Communication();
     int Abort_Azimuth_MaxDomeII();
     int Home_Azimuth_MaxDomeII();
     int Goto_Azimuth_MaxDomeII(int nDir, int nTicks);
