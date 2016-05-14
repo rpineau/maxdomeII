@@ -37,11 +37,23 @@
 
 CMaxDome::CMaxDome()
 {
+    // set some sane values
     pSerx = NULL;
     bIsConnected = false;
+
+    mNbTicksPerRev = 0;
+
+    mCurrentAzPosition = 0;
+    mCurrentAzPositionInTicks = 0;
+
+    mHomePosition = 0;
+    mHomePositionInTicks = 0;
+
+    mCloseShutterBeforePark = true;
+    mShutterOpened = false;
+    
     mParked = true;
     mHomed = false;
-    
 }
 
 CMaxDome::~CMaxDome()
@@ -222,7 +234,6 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
     cMessage[1] = 0x02;		// Will follow 2 bytes more
     cMessage[2] = ABORT_CMD;
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
-    // nErrorType = tty_write(fd, cMessage, 4, &nBytesWrite);
 
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
 
@@ -259,7 +270,7 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
     cMessage[1] = 0x02;		// Will follow 2 bytes more
     cMessage[2] = HOME_CMD;
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
-    //nErrorType = tty_write(fd, cMessage, 4, &nBytesWrite);
+
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
 
     if (nErrorType != SB_OK)
@@ -297,11 +308,9 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
     cMessage[4] = (char)(nTicks / 256);
     cMessage[5] = (char)(nTicks % 256);
     cMessage[6] = checksum_MaxDomeII(cMessage, 6);
-    // nErrorType = tty_write(fd, cMessage, 7, &nBytesWrite);
+
     nErrorType = pSerx->writeFile(cMessage, 7, nBytesWrite);
 
-    //fprintf(stderr,"\nOut: %ld %02x %02x %02x %02x %02x %02x %02x\n", nBytesWrite, (int)cMessage[0], (int)cMessage[1], (int)cMessage[2], (int)cMessage[3], (int)cMessage[4], (int)cMessage[5], (int)cMessage[6]);
-    //if (nErrorType != SB_OK)
     if (nBytesWrite != 7)
         return -5;
 
@@ -330,7 +339,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
 int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
 {
     int dir;
-    unsigned ticks;
+    int ticks;
     int err=0;
 
     AzToTicks(newAz, dir, ticks);
@@ -358,7 +367,7 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     cMessage[1] = 0x02;		// Will follow 2 bytes more
     cMessage[2] = STATUS_CMD;
     cMessage[3] = checksum_MaxDomeII((char*)cMessage, 3);
-    // nErrorType = tty_write(fd, cMessage, 4, &nBytesWrite);
+
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
 
     if (nErrorType != SB_OK)
@@ -400,25 +409,20 @@ int CMaxDome::Ack_MaxDomeII(void)
     cMessage[1] = 0x02;		// Will follow 2 bytes more
     cMessage[2] = ACK_CMD;
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
-    // nErrorType = tty_write(fd, cMessage, 4, &nBytesWrite);
+
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
 
-    //nBytesWrite = write(fd, cMessage, 4);
-    //if (nBytesWrite != 4)
-    //	nErrorType = TTY_WRITE_ERROR;
-    //fprintf(stderr,"\nOut: %ld %02x %02x %02x %02x\n", nBytesWrite, (int)cMessage[0], (int)cMessage[1], (int)cMessage[2], (int)cMessage[3]);
     if (nErrorType != SB_OK)
         return -5;
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
-    //fprintf(stderr,"\nIn: %02x %02x %02x %02x %02x\n", cMessage[0], cMessage[1], cMessage[2], cMessage[3], cMessage[4]);
+
     if (nReturn != 0)
         return nReturn;
 
     if (cMessage[2] == (char)(ACK_CMD | TO_COMPUTER))
         return 0;
 
-    //fprintf(stderr,"\nIn: %02x %02x", (unsigned char)(ACK_CMD | TO_COMPUTER), cMessage[2]);
     return -6;	// Response don't match command
 }
 
@@ -429,7 +433,7 @@ int CMaxDome::Ack_MaxDomeII(void)
 	@param nTicks Ticks from home position in E to W direction.
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, unsigned nTicks)
+int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
@@ -444,7 +448,7 @@ int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, unsigned nTicks)
     cMessage[4] = (char)(nTicks / 256);
     cMessage[5] = (char)(nTicks % 256);
     cMessage[6] = checksum_MaxDomeII(cMessage, 6);
-    //nErrorType = tty_write(fd, cMessage, 7, &nBytesWrite);
+
     nErrorType = pSerx->writeFile(cMessage, 7, nBytesWrite);
 
     if (nErrorType != SB_OK)
@@ -466,10 +470,10 @@ int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, double dAz)
 
 {
     int err;
-    unsigned nTicks;
+    int nTicks;
     int dir;
 
-    AzToTicks(dAz, dir, nTicks);
+    AzToTicks(dAz, dir, (int &)nTicks);
     err = SetPark_MaxDomeII(nParkOnShutter, nTicks);
     return err;
 }
@@ -481,7 +485,7 @@ int CMaxDome::Sync_Dome(double dAz)
     int dir;
 
     mAzimuthPosition = dAz;
-    AzToTicks(dAz, dir, mAzimuthPositionInTicks);
+    AzToTicks(dAz, dir, (int &)mAzimuthPositionInTicks);
     return err;
 }
 
@@ -548,7 +552,7 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
     cMessage[3] = (char)(nTicks / 256);
     cMessage[4] = (char)(nTicks % 256);
     cMessage[5] = checksum_MaxDomeII(cMessage, 5);
-    // nErrorType = tty_write(fd, cMessage, 6, &nBytesWrite);
+
     nErrorType = pSerx->writeFile(cMessage, 6, nBytesWrite);
     if (nErrorType != SB_OK)
         return -5;
@@ -588,7 +592,7 @@ int CMaxDome::Open_Shutter_MaxDomeII()
     cMessage[2] = SHUTTER_CMD;
     cMessage[3] = OPEN_SHUTTER;
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
-    // nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
     if (nErrorType != SB_OK)
@@ -621,7 +625,7 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
     cMessage[2] = SHUTTER_CMD;
     cMessage[3] = OPEN_UPPER_ONLY_SHUTTER;
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
-    // nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
     if (nErrorType != SB_OK)
@@ -654,7 +658,7 @@ int CMaxDome::Close_Shutter_MaxDomeII()
     cMessage[2] = SHUTTER_CMD;
     cMessage[3] = CLOSE_SHUTTER;
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
-    // nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
     if (nErrorType != SB_OK)
@@ -687,7 +691,7 @@ int CMaxDome::Abort_Shutter_MaxDomeII()
     cMessage[2] = SHUTTER_CMD;
     cMessage[3] = ABORT_SHUTTER;
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
-    // nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
     if (nErrorType != SB_OK)
@@ -720,7 +724,7 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
     cMessage[2] = SHUTTER_CMD;
     cMessage[3] = EXIT_SHUTTER;
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
-    // nErrorType = tty_write(fd, cMessage, 5, &nBytesWrite);
+
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
     if (nErrorType != SB_OK)
@@ -740,20 +744,15 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
 	Convert pdAz to number of ticks from home and direction.
 
  */
-void CMaxDome::AzToTicks(double pdAz, int &dir, unsigned &ticks)
+void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
 {
-    double nbDeg = 0;
     dir = 0;
 
-    if(pdAz < mHomePositionInTicks)
-    {
-        nbDeg = 360 - mHomePositionInTicks + pdAz;
-    }
-    else
-    {
-        nbDeg = pdAz - mHomePositionInTicks;
-    }
+    ticks = floor(0.5 + (pdAz - mHomePosition) * mNbTicksPerRev / 360.0);
+    while (ticks > mNbTicksPerRev) ticks -= mNbTicksPerRev;
+    while (ticks < 0) ticks += mNbTicksPerRev;
 
+    // find the dirrection with the shortest path
     if( (mCurrentAzPosition < pdAz) && (mCurrentAzPosition <(pdAz -180)))
     {
         dir = 1;
@@ -763,7 +762,6 @@ void CMaxDome::AzToTicks(double pdAz, int &dir, unsigned &ticks)
         dir = 1;
     }
 
-    ticks = nbDeg/360 * mNbTicksPerRev;
 }
 
 
@@ -772,9 +770,12 @@ void CMaxDome::AzToTicks(double pdAz, int &dir, unsigned &ticks)
  
 */
 
-void CMaxDome::TicksToAz(unsigned ticks, double &pdAz)
+void CMaxDome::TicksToAz(int ticks, double &pdAz)
 {
-    pdAz = ((mHomePositionInTicks + ticks)*360.0f) / (double)mNbTicksPerRev;
+    
+    pdAz = mHomePositionInTicks + ticks * 360.0 / mNbTicksPerRev;
+    while (pdAz < 0) pdAz += 360;
+    while (pdAz >= 360) pdAz -= 360;
 }
 
 
@@ -811,7 +812,10 @@ int CMaxDome::IsOpenComplete(bool &complete)
         return err;
 
     if( tmpShutterStatus == Ss_OPEN)
+    {
         complete = true;
+        mShutterOpened = true;
+    }
     else
         complete = false;
 
@@ -832,7 +836,10 @@ int CMaxDome::IsCloseComplete(bool &complete)
         return err;
 
     if( tmpShutterStatus == Ss_CLOSED)
+    {
         complete = true;
+        mShutterOpened = false;
+    }
     else
         complete = false;
  

@@ -31,7 +31,7 @@
 
 #ifndef __MAXDOMEII__
 #define __MAXDOMEII__
-
+#include <math.h>
 #include "../../licensedinterfaces/sberrorx.h"
 #include "../../licensedinterfaces/serxinterface.h"
 
@@ -92,7 +92,7 @@ public:
     int Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition);
     int Goto_Azimuth_MaxDomeII(double newAz);
     int Ack_MaxDomeII(void);
-    int SetPark_MaxDomeII(int nParkOnShutter, unsigned nTicks);
+    int SetPark_MaxDomeII(int nParkOnShutter, int nTicks);
     int SetPark_MaxDomeII(int nParkOnShutter, double dAz);
     int SetTicksPerCount_MaxDomeII(int nTicks);
     int Park_MaxDomeII(void);
@@ -107,8 +107,8 @@ public:
     int Exit_Shutter_MaxDomeII(void);
 
     // convertion functions
-    void AzToTicks(double pdAz, int &dir, unsigned &ticks);
-    void TicksToAz(unsigned ticks, double &pdAz);
+    void AzToTicks(double pdAz, int &dir, int &ticks);
+    void TicksToAz(int ticks, double &pdAz);
 
     // command complete functions
     int IsGoToComplete(bool &complete);
@@ -126,6 +126,9 @@ protected:
 
     bool            mHomed;
     bool            mParked;
+    bool            mCloseShutterBeforePark;
+    bool            mShutterOpened;
+    
     unsigned        mNbTicksPerRev;
 
     unsigned        mAzimuthPositionInTicks;
