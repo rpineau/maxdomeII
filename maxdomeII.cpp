@@ -5,7 +5,7 @@
 //  Created by Rodolphe Pineau on 4/9/2016.
 //
 // most of the code comes from the INDI driver.
-// The following is the original header.
+// The following is the original author header.
 /*
  Max Dome II Driver
  Copyright (C) 2009 Ferran Casarramona (ferran.casarramona@gmail.com)
@@ -272,7 +272,7 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
     if (cMessage[2] == (char)(HOME_CMD | TO_COMPUTER))
         return 0;
 
-    return -6;	// Response don't match command
+    return -6;	// Response doesn't match command
 }
 
 /*
@@ -312,6 +312,8 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
     if (cMessage[2] == (char)(GOTO_CMD | TO_COMPUTER))
     {
         mGotoTicks = nTicks;
+        mHomed = false;
+        mParked = false;
         return 0;
     }
 
