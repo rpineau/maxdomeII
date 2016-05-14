@@ -87,6 +87,7 @@ int X2Dome::terminateLink(void)
 	return m_bLinked;
 }
 
+
 int X2Dome::queryAbstraction(const char* pszName, void** ppVal)
 {
     *ppVal = NULL;
@@ -99,15 +100,11 @@ int X2Dome::queryAbstraction(const char* pszName, void** ppVal)
         *ppVal = dynamic_cast<X2GUIEventInterface*>(this);
     else if (!strcmp(pszName, SerialPortParams2Interface_Name))
         *ppVal = dynamic_cast<SerialPortParams2Interface*>(this);
-    else
-    {
-        printf("pszName = %s\n",pszName);
-
-    }
     
     return SB_OK;
 }
 
+#pragma mark - UI binding
 
 int X2Dome::execModalSettingsDialog()
 {
@@ -309,11 +306,16 @@ int X2Dome::dapiPark(void)
 
 int X2Dome::dapiUnpark(void)
 {
+    int err;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
-    
+
+    err = maxDome.Unpark();
+    if(err)
+        return ERR_CMDFAILED;
+
 	return SB_OK;
 }
 
@@ -423,11 +425,16 @@ int X2Dome::dapiIsFindHomeComplete(bool* pbComplete)
 
 int X2Dome::dapiSync(double dAz, double dEl)
 {
+    int err;
+
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
-    
+
+    err= maxDome.Sync_Dome(dAz);
+    if (err)
+        return ERR_CMDFAILED;
 	return SB_OK;
 }
 

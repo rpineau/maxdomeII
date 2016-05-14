@@ -39,6 +39,8 @@ CMaxDome::CMaxDome()
 {
     pSerx = NULL;
     bIsConnected = false;
+    mParked = true;
+    mHomed = false;
     
 }
 
@@ -47,7 +49,7 @@ CMaxDome::~CMaxDome()
 
 }
 
-int CMaxDome::Init_Communication()
+int CMaxDome::Init_Communication(void)
 {
     char cMessage[MAX_BUFFER];
     unsigned long  nBytesWrite;
@@ -208,7 +210,7 @@ int CMaxDome::ReadResponse_MaxDomeII(char *cMessage)
 
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Abort_Azimuth_MaxDomeII()
+int CMaxDome::Abort_Azimuth_MaxDomeII(void)
 {
     char cMessage[MAX_BUFFER];
     // int nErrorType;
@@ -246,7 +248,7 @@ int CMaxDome::Abort_Azimuth_MaxDomeII()
 
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Home_Azimuth_MaxDomeII()
+int CMaxDome::Home_Azimuth_MaxDomeII(void)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
@@ -326,7 +328,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
 int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
 {
     int dir;
-    int ticks;
+    unsigned ticks;
     int err=0;
 
     AzToTicks(newAz, dir, ticks);
@@ -385,7 +387,7 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
 
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Ack_MaxDomeII()
+int CMaxDome::Ack_MaxDomeII(void)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType = SB_OK;
@@ -425,7 +427,7 @@ int CMaxDome::Ack_MaxDomeII()
 	@param nTicks Ticks from home position in E to W direction.
 	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
  */
-int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
+int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, unsigned nTicks)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
@@ -453,16 +455,38 @@ int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
     if (cMessage[2] == (char)(SETPARK_CMD | TO_COMPUTER))
     {
         mParkPositionInTicks = mHomePositionInTicks + nTicks;
-
         return 0;
     }
     return -6;	// Response don't match command
 }
 
+int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, double dAz)
+
+{
+    int err;
+    unsigned nTicks;
+    int dir;
+
+    AzToTicks(dAz, dir, nTicks);
+    err = SetPark_MaxDomeII(nParkOnShutter, nTicks);
+    return err;
+}
+
+
+int CMaxDome::Sync_Dome(double dAz)
+{
+    int err = 0;
+    int dir;
+
+    mAzimuthPosition = dAz;
+    AzToTicks(dAz, dir, mAzimuthPositionInTicks);
+    return err;
+}
+
 //
 // send the dome to its park position
 //
-int CMaxDome::Park_MaxDomeII()
+int CMaxDome::Park_MaxDomeII(void)
 {
     int nErrorType;
     int dir = 0;
@@ -496,6 +520,11 @@ int CMaxDome::Park_MaxDomeII()
     return nErrorType;
 }
 
+int CMaxDome::Unpark(void)
+{
+    mParked = false;
+    return 0;
+}
 
 /*
  Set ticks per turn of the dome
@@ -709,7 +738,7 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
 	Convert pdAz to number of ticks from home and direction.
 
  */
-void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
+void CMaxDome::AzToTicks(double pdAz, int &dir, unsigned &ticks)
 {
     double nbDeg = 0;
     dir = 0;
@@ -741,7 +770,7 @@ void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
  
 */
 
-void CMaxDome::TicksToAz(int ticks, double &pdAz)
+void CMaxDome::TicksToAz(unsigned ticks, double &pdAz)
 {
     pdAz = ((mHomePositionInTicks + ticks)*360.0f) / (double)mNbTicksPerRev;
 }
@@ -822,7 +851,10 @@ int CMaxDome::IsParkComplete(bool &complete)
         return err;
 
     if((mParkPositionInTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
+    {
         complete = true;
+        mParked = true;
+    }
     else
         complete = false;
 
@@ -843,7 +875,10 @@ int CMaxDome::IsUnparkComplete(bool &complete)
         return err;
 
     if(tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2)
+    {
         complete = true;
+        mParked = false;
+    }
     else
         complete = false;
 
@@ -864,7 +899,10 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
         return err;
 
     if((mHomePositionInTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
+    {
         complete = true;
+        mHomed = true;
+    }
     else
         complete = false;
 

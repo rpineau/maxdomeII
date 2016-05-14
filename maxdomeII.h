@@ -85,27 +85,30 @@ public:
     void        SetSerxPointer(SerXInterface *p) { pSerx = p; }
 
     // Dome commands
-    int Init_Communication();
-    int Abort_Azimuth_MaxDomeII();
-    int Home_Azimuth_MaxDomeII();
+    int Init_Communication(void);
+    int Abort_Azimuth_MaxDomeII(void);
+    int Home_Azimuth_MaxDomeII(void);
     int Goto_Azimuth_MaxDomeII(int nDir, int nTicks);
     int Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition);
     int Goto_Azimuth_MaxDomeII(double newAz);
-    int Ack_MaxDomeII();
-    int SetPark_MaxDomeII(int nParkOnShutter, int nTicks);
+    int Ack_MaxDomeII(void);
+    int SetPark_MaxDomeII(int nParkOnShutter, unsigned nTicks);
+    int SetPark_MaxDomeII(int nParkOnShutter, double dAz);
     int SetTicksPerCount_MaxDomeII(int nTicks);
-    int Park_MaxDomeII();
+    int Park_MaxDomeII(void);
+    int Unpark(void);
+    int Sync_Dome(double dAz);
 
     //  Shutter commands
-    int Open_Shutter_MaxDomeII();
-    int Open_Upper_Shutter_Only_MaxDomeII();
-    int Close_Shutter_MaxDomeII();
-    int Abort_Shutter_MaxDomeII();
-    int Exit_Shutter_MaxDomeII();
+    int Open_Shutter_MaxDomeII(void);
+    int Open_Upper_Shutter_Only_MaxDomeII(void);
+    int Close_Shutter_MaxDomeII(void);
+    int Abort_Shutter_MaxDomeII(void);
+    int Exit_Shutter_MaxDomeII(void);
 
     // convertion functions
-    void AzToTicks(double pdAz, int &dir, int &ticks);
-    void TicksToAz(int ticks, double &pdAz);
+    void AzToTicks(double pdAz, int &dir, unsigned &ticks);
+    void TicksToAz(unsigned ticks, double &pdAz);
 
     // command complete functions
     int IsGoToComplete(bool &complete);
@@ -120,7 +123,10 @@ protected:
     signed char     checksum_MaxDomeII(char *cMessage, int nLen);
     int             ReadResponse_MaxDomeII(char *cMessage);
     bool            bIsConnected;
-    int             mNbTicksPerRev;
+
+    bool            mHomed;
+    bool            mParked;
+    unsigned        mNbTicksPerRev;
 
     unsigned        mAzimuthPositionInTicks;
     double          mAzimuthPosition;
