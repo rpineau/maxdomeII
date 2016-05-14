@@ -461,6 +461,7 @@ int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
     if (cMessage[2] == (char)(SETPARK_CMD | TO_COMPUTER))
     {
         mParkPositionInTicks = mHomePositionInTicks + nTicks;
+        mCloseShutterBeforePark = nParkOnShutter;
         return 0;
     }
     return -6;	// Response don't match command
