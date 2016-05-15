@@ -72,6 +72,9 @@ enum AZ_Status {As_IDLE = 1, As_MOVING_WE, As_MOVING_EW, As_IDLE2, As_ERROR};
 // Shutter status
 enum SH_Status {Ss_CLOSED = 0, Ss_OPENING, Ss_OPEN, Ss_CLOSING, Ss_ABORTED, Ss_ERROR};
 
+// Error code
+enum MD2_Erros {MD2_OK=0, MD2_CANT_CONNECT, BAD_CMD_RESPONSE};
+
 class CMaxDome
 {
 public:
@@ -118,6 +121,19 @@ public:
     int IsUnparkComplete(bool &complete);
     int IsFindHomeComplete(bool &complete);
     
+    // getter/setter
+    int getNbTicksPerRev();
+    void setNbTicksPerRev(int nbTicksPerRev);
+
+    double getHomeAz();
+    void setHomeAz(double dAz);
+
+    double getParkAz();
+    void setParkAz(double dAz);
+
+    bool getCloseShutterBeforePark();
+    void setCloseShutterBeforePark(bool close);
+
 protected:
 
     signed char     checksum_MaxDomeII(char *cMessage, int nLen);
@@ -131,14 +147,11 @@ protected:
     
     unsigned        mNbTicksPerRev;
 
-    unsigned        mAzimuthPositionInTicks;
-    double          mAzimuthPosition;
-
-    unsigned        mHomePositionInTicks;
-    double          mHomePosition;
+    unsigned        mHomeAzInTicks;
+    double          mHomeAz;
     
-    unsigned        mParkPositionInTicks;
-    double          mParkPosition;
+    unsigned        mParkAzInTicks;
+    double          mParkAz;
 
     unsigned        mCurrentAzPositionInTicks;
     double          mCurrentAzPosition;

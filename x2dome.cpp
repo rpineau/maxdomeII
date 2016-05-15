@@ -24,7 +24,10 @@ X2Dome::X2Dome(const char* pszSelection,
 					MutexInterface*						pIOMutex,
 					TickCountInterface*					pTickCount)
 {
-	m_nPrivateISIndex				= nISIndex;
+    int iTmp;
+    double dTmp;
+
+    m_nPrivateISIndex				= nISIndex;
 	m_pSerX							= pSerX;
 	m_pTheSkyXForMounts				= pTheSkyXForMounts;
 	m_pSleeper						= pSleeper;
@@ -36,6 +39,27 @@ X2Dome::X2Dome(const char* pszSelection,
 	m_bLinked = false;
     maxDome.SetSerxPointer(pSerX);
 
+    if (m_pIniUtil)
+    {
+        iTmp = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, iTmp);
+        maxDome.setNbTicksPerRev(iTmp);
+
+        dTmp = m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_HOME_AZ, dTmp);
+        maxDome.setHomeAz(dTmp);
+
+        dTmp = m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, dTmp);
+        maxDome.setParkAz(dTmp);
+
+        iTmp = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, iTmp);
+        maxDome.setNbTicksPerRev(iTmp);
+
+        mHasShutterControl = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, mHasShutterControl);
+        mIsRollOffRoof = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, mIsRollOffRoof);
+
+        iTmp = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, iTmp);
+        maxDome.setCloseShutterBeforePark(iTmp?false:true); // if we can operate at any Az then CloseShutterBeforePark is false
+    }
+    
 }
 
 
@@ -127,6 +151,32 @@ int X2Dome::execModalSettingsDialog()
         printf("dx is NULL :(\n");
         return ERR_POINTER;
     }
+    
+    // set controls state depending on the connection state
+    if(mHasShutterControl)
+    {
+        dx->setChecked("hasShutterCtrl",true);
+
+        if(maxDome.getCloseShutterBeforePark())
+            dx->setChecked("radioButtonradioButtonShutterPark", true);
+        else
+            dx->setChecked("radioButtonShutterAnyAz", true);
+
+        if (mIsRollOffRoof)
+            dx->setChecked("isRoolOffRoof",true);
+        else
+            dx->setChecked("isRoolOffRoof",false);
+    }
+    else
+    {
+        dx->setChecked("hasShutterCtrl",false);
+        dx->setEnabled("groupBoxShutter", false);
+    }
+    
+    // disable Auto Calibrate for now
+    dx->setEnabled("autoCalibrate",false);
+    
+    
     //Display the user interface
     if ((nErr = ui->exec(bPressedOK)))
         return nErr;
@@ -135,6 +185,14 @@ int X2Dome::execModalSettingsDialog()
     if (bPressedOK)
     {
         printf("Ok pressed\n");
+        if(!m_bLinked)
+        {
+        
+        }
+        else
+        {
+            
+        }
     }
     return nErr;
 
@@ -152,7 +210,7 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 
 void X2Dome::deviceInfoNameShort(BasicStringInterface& str) const					
 {
-	str = "MaxDome II Dome Control System";
+	str = "MaxDome II";
 }
 void X2Dome::deviceInfoNameLong(BasicStringInterface& str) const					
 {
@@ -160,7 +218,7 @@ void X2Dome::deviceInfoNameLong(BasicStringInterface& str) const
 }
 void X2Dome::deviceInfoDetailedDescription(BasicStringInterface& str) const		
 {
-    str = "MaxDome II Dome Control System";
+    str = "MaxDome II Dome Control System by Rodolphe Pineau";
 }
  void X2Dome::deviceInfoFirmwareVersion(BasicStringInterface& str)					
 {
@@ -168,7 +226,7 @@ void X2Dome::deviceInfoDetailedDescription(BasicStringInterface& str) const
 }
 void X2Dome::deviceInfoModel(BasicStringInterface& str)
 {
-    str = "MaxDome II Dome Control System";
+    str = "MaxDome II";
 }
 
 //

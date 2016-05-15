@@ -46,8 +46,8 @@ CMaxDome::CMaxDome()
     mCurrentAzPosition = 0;
     mCurrentAzPositionInTicks = 0;
 
-    mHomePosition = 0;
-    mHomePositionInTicks = 0;
+    mHomeAz = 0;
+    mHomeAzInTicks = 0;
 
     mCloseShutterBeforePark = true;
     mShutterOpened = false;
@@ -66,7 +66,7 @@ int CMaxDome::Init_Communication(void)
     char cMessage[MAX_BUFFER];
     unsigned long  nBytesWrite;
     int nReturn;
-    int nErrorType = SB_OK;
+    int nErrorType = MD2_OK;
 
     cMessage[0] = 0x01;
     cMessage[1] = 0x02;		// Will follow 2 bytes more
@@ -74,12 +74,12 @@ int CMaxDome::Init_Communication(void)
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
 
-    if (nErrorType != SB_OK)
-        return -5;
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
 
 
     if (nBytesWrite != 4)
-        return -5;
+        return MD2_CANT_CONNECT;
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
@@ -88,7 +88,7 @@ int CMaxDome::Init_Communication(void)
     if (cMessage[2] == (char)(ACK_CMD | TO_COMPUTER))
         return 0;
 
-    return -6;	// Response don't match command
+    return BAD_CMD_RESPONSE;	// Response don't match command
 
 }
 
@@ -177,21 +177,20 @@ int CMaxDome::ReadResponse_MaxDomeII(char *cMessage)
 {
     unsigned long nBytesRead;
     int nLen = MAX_BUFFER;
-    // int nErrorType = SB_OK;
     char nChecksum;
-    int nErrorType = SB_OK;
+    int nErrorType = MD2_OK;
     *cMessage = 0x00;
     cMessage[13] = 0x00;
 
     // Look for a 0x01 starting character, until time out occurs or MAX_BUFFER characters was read
-    while (*cMessage != 0x01 && nErrorType == SB_OK)
+    while (*cMessage != 0x01 && nErrorType == MD2_OK)
     {
         // nErrorType = tty_read(fd, cMessage, 1, MAXDOME_TIMEOUT, &nBytesRead);
         nErrorType = pSerx->readFile(cMessage, 1, nBytesRead, MAXDOME_TIMEOUT);
         //fprintf(stderr,"\nIn 1: %ld %02x\n", nBytesRead, (int)cMessage[0]);
     }
 
-    if (nErrorType != SB_OK || *cMessage != 0x01)
+    if (nErrorType != MD2_OK || *cMessage != 0x01)
         return -1;
 
     // Read message length
@@ -199,7 +198,7 @@ int CMaxDome::ReadResponse_MaxDomeII(char *cMessage)
     nErrorType = pSerx->readFile(cMessage + 1, 1, nBytesRead, MAXDOME_TIMEOUT);
 
     //fprintf(stderr,"\nInLen: %d\n",(int) cMessage[1]);
-    if (nErrorType != SB_OK || cMessage[1] < 0x02 || cMessage[1] > 0x0E)
+    if (nErrorType != MD2_OK || cMessage[1] < 0x02 || cMessage[1] > 0x0E)
         return -2;
 
     nLen = cMessage[1];
@@ -208,7 +207,7 @@ int CMaxDome::ReadResponse_MaxDomeII(char *cMessage)
     nErrorType = pSerx->readFile(cMessage + 2, nLen, nBytesRead, MAXDOME_TIMEOUT);
 
     //fprintf(stderr,"\nIn: %s\n", cMessage);
-    if (nErrorType != SB_OK || nBytesRead != nLen)
+    if (nErrorType != MD2_OK || nBytesRead != nLen)
         return -3;
 
     nChecksum = checksum_MaxDomeII(cMessage, nLen + 2);
@@ -220,7 +219,7 @@ int CMaxDome::ReadResponse_MaxDomeII(char *cMessage)
 /*
 	Abort azimuth movement
 
-	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
+	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Abort_Azimuth_MaxDomeII(void)
 {
@@ -228,7 +227,7 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
     // int nErrorType;
     unsigned long  nBytesWrite;
     int nReturn;
-    int nErrorType = SB_OK;
+    int nErrorType = MD2_OK;
 
     cMessage[0] = 0x01;
     cMessage[1] = 0x02;		// Will follow 2 bytes more
@@ -237,12 +236,12 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
 
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
 
-    if (nErrorType != SB_OK)
-        return -5;
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
     
 
     if (nBytesWrite != 4)
-        return -5;
+        return MD2_CANT_CONNECT;
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
@@ -251,13 +250,13 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
     if (cMessage[2] == (char)(ABORT_CMD | TO_COMPUTER))
         return 0;
 
-    return -6;	// Response don't match command
+    return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
 /*
 	Move until 'home' position is detected
 
-	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
+	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Home_Azimuth_MaxDomeII(void)
 {
@@ -273,8 +272,8 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
 
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
 
-    if (nErrorType != SB_OK)
-        return -5;
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
@@ -283,7 +282,7 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
     if (cMessage[2] == (char)(HOME_CMD | TO_COMPUTER))
         return 0;
 
-    return -6;	// Response doesn't match command
+    return BAD_CMD_RESPONSE;	// Response doesn't match command
 }
 
 /*
@@ -291,7 +290,7 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
 
 	@param nDir Direcction of the movement. 0 E to W. 1 W to E
 	@param nTicks Ticks from home position in E to W direction.
-	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
+	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
 {
@@ -312,7 +311,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
     nErrorType = pSerx->writeFile(cMessage, 7, nBytesWrite);
 
     if (nBytesWrite != 7)
-        return -5;
+        return MD2_CANT_CONNECT;
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
@@ -326,7 +325,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
         return 0;
     }
 
-    return -6;	// Response don't match command
+    return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
 /*
@@ -354,7 +353,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
 	@param nAzimuthStatus Returns azimuth status
 	@param nAzimuthPosition Returns azimuth current position (in ticks from home position)
 	@param nHomePosition Returns last position where home was detected
-	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
+	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition)
 {
@@ -370,8 +369,8 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
 
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
 
-    if (nErrorType != SB_OK)
-        return -5;
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
 
     nReturn = ReadResponse_MaxDomeII((char*)cMessage);
     if (nReturn != 0)
@@ -383,25 +382,25 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
         nAzimuthStatus = (enum AZ_Status)cMessage[4];
         nAzimuthPosition = (unsigned)(((unsigned)cMessage[5]) * 256 + ((unsigned)cMessage[6]));
         nHomePosition = ((unsigned)cMessage[7]) * 256 + ((unsigned)cMessage[8]);
-        mAzimuthPositionInTicks = nAzimuthPosition;
-        TicksToAz(mAzimuthPositionInTicks, mAzimuthPosition);
-        mHomePositionInTicks = nHomePosition;
-        TicksToAz(mHomePositionInTicks, mHomePosition);
+        mCurrentAzPositionInTicks = nAzimuthPosition;
+        TicksToAz(mCurrentAzPositionInTicks, mCurrentAzPosition);
+        mHomeAzInTicks = nHomePosition;
+        TicksToAz(mHomeAzInTicks, mHomeAz);
         return 0;
     }
 
-    return -6;	// Response don't match command
+    return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
 /*
 	Ack comunication
 
-	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
+	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Ack_MaxDomeII(void)
 {
     char cMessage[MAX_BUFFER];
-    int nErrorType = SB_OK;
+    int nErrorType = MD2_OK;
     unsigned long  nBytesWrite;;
     int nReturn;
 
@@ -412,8 +411,8 @@ int CMaxDome::Ack_MaxDomeII(void)
 
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
 
-    if (nErrorType != SB_OK)
-        return -5;
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
 
@@ -423,7 +422,7 @@ int CMaxDome::Ack_MaxDomeII(void)
     if (cMessage[2] == (char)(ACK_CMD | TO_COMPUTER))
         return 0;
 
-    return -6;	// Response don't match command
+    return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
 /*
@@ -431,7 +430,7 @@ int CMaxDome::Ack_MaxDomeII(void)
 
 	@param nParkOnShutter 0 operate shutter at any azimuth. 1 go to park position before operating shutter
 	@param nTicks Ticks from home position in E to W direction.
-	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
+	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
 int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
 {
@@ -451,8 +450,8 @@ int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
 
     nErrorType = pSerx->writeFile(cMessage, 7, nBytesWrite);
 
-    if (nErrorType != SB_OK)
-        return -5;
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
@@ -460,11 +459,11 @@ int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
 
     if (cMessage[2] == (char)(SETPARK_CMD | TO_COMPUTER))
     {
-        mParkPositionInTicks = mHomePositionInTicks + nTicks;
+        mParkAzInTicks = mHomeAzInTicks + nTicks;
         mCloseShutterBeforePark = nParkOnShutter;
         return 0;
     }
-    return -6;	// Response don't match command
+    return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
 int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, double dAz)
@@ -485,8 +484,8 @@ int CMaxDome::Sync_Dome(double dAz)
     int err = 0;
     int dir;
 
-    mAzimuthPosition = dAz;
-    AzToTicks(dAz, dir, (int &)mAzimuthPositionInTicks);
+    mCurrentAzPosition = dAz;
+    AzToTicks(dAz, dir, (int &)mCurrentAzPositionInTicks);
     return err;
 }
 
@@ -510,7 +509,7 @@ int CMaxDome::Park_MaxDomeII(void)
     // how far do we need to move and in which direction.
     // nbticks to move = current position - (park - home)
 
-    ticks = tmpAz - (mParkPositionInTicks - tmpHomePosition);
+    ticks = tmpAz - (mParkAzInTicks - tmpHomePosition);
     if (ticks <0)
     {
         dir = 1;
@@ -537,7 +536,7 @@ int CMaxDome::Unpark(void)
  Set ticks per turn of the dome
 
  @param nTicks Ticks from home position in E to W direction.
- @return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
+ @return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
 int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
 {
@@ -555,8 +554,8 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
     cMessage[5] = checksum_MaxDomeII(cMessage, 5);
 
     nErrorType = pSerx->writeFile(cMessage, 6, nBytesWrite);
-    if (nErrorType != SB_OK)
-        return -5;
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
@@ -567,7 +566,7 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
         mNbTicksPerRev = nTicks;
         return 0;
     }
-    return -6;	// Response don't match command
+    return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -579,7 +578,7 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
 /*
 	Opens the shutter fully
 
-	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
+	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Open_Shutter_MaxDomeII()
 {
@@ -596,8 +595,8 @@ int CMaxDome::Open_Shutter_MaxDomeII()
 
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
-    if (nErrorType != SB_OK)
-        return -5;
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
@@ -606,13 +605,13 @@ int CMaxDome::Open_Shutter_MaxDomeII()
     if (cMessage[2] == (char)(SHUTTER_CMD | TO_COMPUTER))
         return 0;
 
-    return -6;	// Response don't match command
+    return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
 /*
 	Opens the upper shutter only
 
-	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
+	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
 {
@@ -629,8 +628,8 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
 
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
-    if (nErrorType != SB_OK)
-        return -5;
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
@@ -639,13 +638,13 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
     if (cMessage[2] == (char)(SHUTTER_CMD | TO_COMPUTER))
         return 0;
 
-    return -6;	// Response don't match command
+    return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
 /*
 	Close the shutter
 
-	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
+	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Close_Shutter_MaxDomeII()
 {
@@ -662,8 +661,8 @@ int CMaxDome::Close_Shutter_MaxDomeII()
 
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
-    if (nErrorType != SB_OK)
-        return -5;
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
@@ -672,13 +671,13 @@ int CMaxDome::Close_Shutter_MaxDomeII()
     if (cMessage[2] == (char)(SHUTTER_CMD | TO_COMPUTER))
         return 0;
 
-    return -6;	// Response don't match command
+    return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
 /*
 	Abort shutter movement
 
-	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
+	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Abort_Shutter_MaxDomeII()
 {
@@ -695,8 +694,8 @@ int CMaxDome::Abort_Shutter_MaxDomeII()
 
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
-    if (nErrorType != SB_OK)
-        return -5;
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
@@ -705,13 +704,13 @@ int CMaxDome::Abort_Shutter_MaxDomeII()
     if (cMessage[2] == (char)(SHUTTER_CMD | TO_COMPUTER))
         return 0;
 
-    return -6;	// Response don't match command
+    return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
 /*
 	Exit shutter (?) Normally send at program exit
 	
-	@return 0 command received by MAX DOME. -5 Couldn't send command. -6 Response don't match command. See ReadResponse() return
+	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
 int CMaxDome::Exit_Shutter_MaxDomeII()
 {
@@ -728,8 +727,8 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
 
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
 
-    if (nErrorType != SB_OK)
-        return -5;
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
@@ -738,7 +737,7 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
     if (cMessage[2] == (char)(SHUTTER_CMD | TO_COMPUTER))
         return 0;
 
-    return -6;	// Response don't match command
+    return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
 /*
@@ -749,7 +748,7 @@ void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
 {
     dir = 0;
 
-    ticks = floor(0.5 + (pdAz - mHomePosition) * mNbTicksPerRev / 360.0);
+    ticks = floor(0.5 + (pdAz - mHomeAz) * mNbTicksPerRev / 360.0);
     while (ticks > mNbTicksPerRev) ticks -= mNbTicksPerRev;
     while (ticks < 0) ticks += mNbTicksPerRev;
 
@@ -774,7 +773,7 @@ void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
 void CMaxDome::TicksToAz(int ticks, double &pdAz)
 {
     
-    pdAz = mHomePositionInTicks + ticks * 360.0 / mNbTicksPerRev;
+    pdAz = mHomeAzInTicks + ticks * 360.0 / mNbTicksPerRev;
     while (pdAz < 0) pdAz += 360;
     while (pdAz >= 360) pdAz -= 360;
 }
@@ -860,7 +859,7 @@ int CMaxDome::IsParkComplete(bool &complete)
     if(err)
         return err;
 
-    if((mParkPositionInTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
+    if((mParkAzInTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
     {
         complete = true;
         mParked = true;
@@ -908,7 +907,7 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
     if(err)
         return err;
 
-    if((mHomePositionInTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
+    if((mHomeAzInTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
     {
         complete = true;
         mHomed = true;
@@ -918,5 +917,50 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
 
     return err;
 
+}
+
+#pragma mark - Getter / Setter
+
+int CMaxDome::getNbTicksPerRev()
+{
+    return mNbTicksPerRev;
+}
+
+void CMaxDome::setNbTicksPerRev(int nbTicksPerRev)
+{
+    mNbTicksPerRev = nbTicksPerRev;
+}
+
+
+double CMaxDome::getHomeAz()
+{
+    return mHomeAz;
+}
+
+void CMaxDome::setHomeAz(double dAz)
+{
+    mHomeAz = dAz;
+}
+
+
+double CMaxDome::getParkAz()
+{
+    return mParkAz;
+    
+}
+
+void CMaxDome::setParkAz(double dAz)
+{
+    mParkAz = dAz;
+}
+
+bool CMaxDome::getCloseShutterBeforePark()
+{
+    return mCloseShutterBeforePark;
+}
+
+void CMaxDome::setCloseShutterBeforePark(bool close)
+{
+    mCloseShutterBeforePark = close;
 }
 

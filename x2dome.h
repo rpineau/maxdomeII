@@ -15,8 +15,18 @@ class BasicIniUtilInterface;
 class TickCountInterface;
 
 #define DRIVER_VERSION      1.0
-#define PARENT_KEY			"X2Rotator"
+
+#define PARENT_KEY			"MadomeII"
 #define CHILD_KEY_PORTNAME	"PortName"
+#define CHILD_KEY_TICKS_PER_REV "NbTicksPerRev"
+#define CHILD_KEY_HOME_AZ "HomeAzimuth"
+#define CHILD_KEY_PARK_AZ "ParkAzimuth"
+#define CHILD_KEY_SHUTTER_CONTROL "ShutterCtrl"
+#define CHILD_KEY_ROOL_OFF_ROOF "RollOffRoof"
+#define CHILD_KEY_SHUTTER_OPER_ANY_Az "ShutterOperAnyAz"
+#define CHILD_KEY_
+#define CHILD_KEY_
+#define CHILD_KEY_
 
 #if defined(SB_WIN_BUILD)
 #define DEF_PORT_NAME					"COM1"
@@ -143,4 +153,6 @@ private:
 	int         m_bLinked;
     CMaxDome    maxDome;
     int         mlastCommand;
+    bool        mHasShutterControl;
+    bool        mIsRollOffRoof;
 };
