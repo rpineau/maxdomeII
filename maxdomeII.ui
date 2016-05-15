@@ -98,7 +98,7 @@
           </layout>
          </item>
          <item row="9" column="0">
-          <widget class="QCheckBox" name="checkBox">
+          <widget class="QCheckBox" name="hasShutterCtrl">
            <property name="text">
             <string>Has shutter control</string>
            </property>
@@ -218,7 +218,7 @@
         <zorder>groupBoxShutter</zorder>
         <zorder></zorder>
         <zorder></zorder>
-        <zorder>checkBox</zorder>
+        <zorder>hasShutterCtrl</zorder>
         <zorder></zorder>
         <zorder>autoCalibrate</zorder>
         <zorder>isRoolOffRoof</zorder>

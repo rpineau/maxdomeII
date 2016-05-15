@@ -24,9 +24,6 @@ class TickCountInterface;
 #define CHILD_KEY_SHUTTER_CONTROL "ShutterCtrl"
 #define CHILD_KEY_ROOL_OFF_ROOF "RollOffRoof"
 #define CHILD_KEY_SHUTTER_OPER_ANY_Az "ShutterOperAnyAz"
-#define CHILD_KEY_
-#define CHILD_KEY_
-#define CHILD_KEY_
 
 #if defined(SB_WIN_BUILD)
 #define DEF_PORT_NAME					"COM1"
