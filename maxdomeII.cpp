@@ -72,15 +72,17 @@ int CMaxDome::Init_Communication(void)
     cMessage[1] = 0x02;		// Will follow 2 bytes more
     cMessage[2] = ACK_CMD;
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
-    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
 
+    printf("sending Init sequence to MaxDome II\n");
+    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
+    
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;
 
 
     if (nBytesWrite != 4)
         return MD2_CANT_CONNECT;
-
+    printf("Reading response from Init sequence\n");
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
         return nReturn;
@@ -101,6 +103,7 @@ bool CMaxDome::Connect(const char *szPort)
     enum AZ_Status tmpAzimuthStatus;
 
     // 19200 8N1
+    printf("Opening port %s\n", szPort);
     if(pSerx->open(szPort,19200) == 0)
         bIsConnected = true;
     else
@@ -110,15 +113,21 @@ bool CMaxDome::Connect(const char *szPort)
     if(!bIsConnected)
         return false;
 
+    printf("Purging RxTx\n");
     // bIsConnected = GetFirmware(szFirmware);
     pSerx->purgeTxRx();
 
+    printf("Purging RxTx Done\n");
     // init the comms
     err = Init_Communication();
+    printf("err from Init_Communication = %d\n",err);
     if(err)
     {
         pSerx->close();
         bIsConnected = false;
+        
+        printf("bIsConnected = %d\n",bIsConnected);
+        return bIsConnected;
     }
 
     // get the device status to make sure we're properly connected.
@@ -183,30 +192,27 @@ int CMaxDome::ReadResponse_MaxDomeII(char *cMessage)
     cMessage[13] = 0x00;
 
     // Look for a 0x01 starting character, until time out occurs or MAX_BUFFER characters was read
-    while (*cMessage != 0x01 && nErrorType == MD2_OK)
+    while (*cMessage != 0x01 && nErrorType == MD2_OK )
     {
-        // nErrorType = tty_read(fd, cMessage, 1, MAXDOME_TIMEOUT, &nBytesRead);
-        nErrorType = pSerx->readFile(cMessage, 1, nBytesRead, MAXDOME_TIMEOUT);
-        //fprintf(stderr,"\nIn 1: %ld %02x\n", nBytesRead, (int)cMessage[0]);
+        nErrorType = pSerx->readFile(cMessage, 1, nBytesRead, MAX_TIMEOUT);
+        if (nBytesRead !=1) // timeout
+            nErrorType = MD2_CANT_CONNECT;
+        printf("nErrorType = %d\n", nErrorType);
     }
 
     if (nErrorType != MD2_OK || *cMessage != 0x01)
-        return -1;
+        return MD2_CANT_CONNECT;
 
     // Read message length
-    // nErrorType = tty_read(fd, cMessage + 1, 1, MAXDOME_TIMEOUT, &nBytesRead);
-    nErrorType = pSerx->readFile(cMessage + 1, 1, nBytesRead, MAXDOME_TIMEOUT);
+    nErrorType = pSerx->readFile(cMessage + 1, 1, nBytesRead, MAX_TIMEOUT);
 
-    //fprintf(stderr,"\nInLen: %d\n",(int) cMessage[1]);
-    if (nErrorType != MD2_OK || cMessage[1] < 0x02 || cMessage[1] > 0x0E)
+    if (nErrorType != MD2_OK || nBytesRead!=1 || cMessage[1] < 0x02 || cMessage[1] > 0x0E)
         return -2;
 
     nLen = cMessage[1];
     // Read the rest of the message
-    //nErrorType = tty_read(fd, cMessage + 2, nLen, MAXDOME_TIMEOUT, &nBytesRead);
-    nErrorType = pSerx->readFile(cMessage + 2, nLen, nBytesRead, MAXDOME_TIMEOUT);
+    nErrorType = pSerx->readFile(cMessage + 2, nLen, nBytesRead, MAX_TIMEOUT);
 
-    //fprintf(stderr,"\nIn: %s\n", cMessage);
     if (nErrorType != MD2_OK || nBytesRead != nLen)
         return -3;
 
@@ -366,8 +372,11 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     cMessage[1] = 0x02;		// Will follow 2 bytes more
     cMessage[2] = STATUS_CMD;
     cMessage[3] = checksum_MaxDomeII((char*)cMessage, 3);
-
+    
+    printf("Sending data to MaxDome II\n");
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
+
+    printf("Sending data to MaxDome II nErrorType = %d\n", nErrorType);
 
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;

@@ -35,9 +35,8 @@
 #include "../../licensedinterfaces/sberrorx.h"
 #include "../../licensedinterfaces/serxinterface.h"
 
-#define MAXDOME_TIMEOUT	5		/* FD timeout in seconds */
 #define MAX_BUFFER 15			// Message length can be up to 12 bytes.
-
+#define MAX_TIMEOUT 5000        // timeout after 5 seonds. (value is in ms).
 // Start byte
 #define START 0x01
 

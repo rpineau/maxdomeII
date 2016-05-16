@@ -85,14 +85,16 @@ X2Dome::~X2Dome()
 
 int X2Dome::establishLink(void)					
 {
-    bool err;
+    bool connected;
     char szPort[DRIVER_MAX_STRING];
 
     X2MutexLocker ml(GetMutex());
     // get serial port device name
     portNameOnToCharPtr(szPort,DRIVER_MAX_STRING);
-    err = maxDome.Connect(szPort);
-    if(err)
+    printf("Connecting to MaxDome II using port %s\n", szPort);
+    connected = maxDome.Connect(szPort);
+    printf("Connecting to MaxDome II connected=%d\n", connected);
+    if(!connected)
         return ERR_COMMNOLINK;
 
     m_bLinked = true;
