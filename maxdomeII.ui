@@ -121,7 +121,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QRadioButton" name="radioButtonradioButtonShutterPark">
+             <widget class="QRadioButton" name="radioButtonShutterPark">
               <property name="text">
                <string>Park Dome Before Operating Shutter</string>
               </property>

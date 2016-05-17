@@ -35,14 +35,18 @@ X2Dome::X2Dome(const char* pszSelection,
 	m_pTickCount					= pTickCount;
 
 	m_bLinked = false;
+    printf("Calling SetSerxPointer\n");
     maxDome.SetSerxPointer(pSerX);
 
     if (m_pIniUtil)
     {   
+        printf("Calling getNbTicksPerRev\n");
         maxDome.setNbTicksPerRev( m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, maxDome.getNbTicksPerRev()) );
 
+        printf("Calling getHomeAz\n");
         maxDome.setHomeAz( m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_HOME_AZ, maxDome.getHomeAz()) );
 
+        printf("Calling getParkAz\n");
         maxDome.setParkAz( m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, maxDome.getParkAz()) );
 
 
@@ -50,7 +54,13 @@ X2Dome::X2Dome(const char* pszSelection,
 
         mIsRollOffRoof = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, mIsRollOffRoof);
 
-        maxDome.setCloseShutterBeforePark( m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, maxDome.getCloseShutterBeforePark()) ? false : true); // if we can operate at any Az then CloseShutterBeforePark is false
+        printf("Calling setCloseShutterBeforePark\n");
+        int i = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, false);
+        printf("CHILD_KEY_SHUTTER_OPER_ANY_Az = %d\n",i);
+        
+        maxDome.setCloseShutterBeforePark( ! m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, false)); // if we can operate at any Az then CloseShutterBeforePark is false
+        printf("maxDome.getCloseShutterBeforePark() = %d\n", maxDome.getCloseShutterBeforePark());
+        
     }
 }
 
@@ -134,7 +144,7 @@ int X2Dome::execModalSettingsDialog()
 
     double dHomeAz;
     double dParkAz;
-    bool parkBeforeClose;
+    bool operateAnyAz;
     int nTicksPerRev;
 
     printf("X2Dome::execModalSettingsDialog\n");
@@ -158,7 +168,7 @@ int X2Dome::execModalSettingsDialog()
         dx->setChecked("hasShutterCtrl",true);
 
         if(maxDome.getCloseShutterBeforePark())
-            dx->setChecked("radioButtonradioButtonShutterPark", true);
+            dx->setChecked("radioButtonShutterPark", true);
         else
             dx->setChecked("radioButtonShutterAnyAz", true);
 
@@ -190,7 +200,9 @@ int X2Dome::execModalSettingsDialog()
         printf("Ok pressed\n");
         dx->propertyDouble("homePosition", "value", dHomeAz);
         dx->propertyDouble("parkPosition", "value", dParkAz);
-        parkBeforeClose = dx->isChecked("radioButtonradioButtonShutterPark");
+        operateAnyAz = dx->isChecked("radioButtonShutterAnyAz");
+        
+        printf("operateAnyAz = %d\n", operateAnyAz);
         dx->propertyInt("ticksPerRev", "value", nTicksPerRev);
         mHasShutterControl = dx->isChecked("hasShutterCtrl");
         mIsRollOffRoof = dx->isChecked("isRoolOffRoof");
@@ -198,7 +210,7 @@ int X2Dome::execModalSettingsDialog()
         {
             maxDome.setHomeAz(dHomeAz);
             maxDome.setParkAz(dHomeAz);
-            maxDome.SetPark_MaxDomeII(parkBeforeClose, dParkAz);
+            maxDome.SetPark_MaxDomeII(!operateAnyAz, dParkAz);
             maxDome.setNbTicksPerRev(nTicksPerRev);
         }
 
@@ -208,7 +220,7 @@ int X2Dome::execModalSettingsDialog()
         nErr = m_pIniUtil->writeDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, dParkAz);
         nErr = m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, mHasShutterControl);
         nErr = m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, mIsRollOffRoof);
-        nErr = m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, parkBeforeClose);
+        nErr = m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, operateAnyAz);
         
     }
     return nErr;

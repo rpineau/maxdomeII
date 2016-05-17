@@ -938,7 +938,8 @@ int CMaxDome::getNbTicksPerRev()
 void CMaxDome::setNbTicksPerRev(int nbTicksPerRev)
 {
     mNbTicksPerRev = nbTicksPerRev;
-    SetTicksPerCount_MaxDomeII(mNbTicksPerRev);
+    if(bIsConnected)
+        SetTicksPerCount_MaxDomeII(mNbTicksPerRev);
 }
 
 
