@@ -52,7 +52,6 @@ X2Dome::X2Dome(const char* pszSelection,
 
         maxDome.setCloseShutterBeforePark( m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, maxDome.getCloseShutterBeforePark()) ? false : true); // if we can operate at any Az then CloseShutterBeforePark is false
     }
-    
 }
 
 
@@ -193,8 +192,9 @@ int X2Dome::execModalSettingsDialog()
         dx->propertyDouble("parkPosition", "value", dParkAz);
         parkBeforeClose = dx->isChecked("radioButtonradioButtonShutterPark");
         dx->propertyInt("ticksPerRev", "value", nTicksPerRev);
+        mHasShutterControl = dx->isChecked("hasShutterCtrl");
         mIsRollOffRoof = dx->isChecked("isRoolOffRoof");
-        if(!m_bLinked)
+        if(m_bLinked)
         {
             maxDome.setHomeAz(dHomeAz);
             maxDome.setParkAz(dHomeAz);
@@ -202,7 +202,14 @@ int X2Dome::execModalSettingsDialog()
             maxDome.setNbTicksPerRev(nTicksPerRev);
         }
 
-        // save the values
+        // save the values to persistent storage
+        nErr = m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, nTicksPerRev);
+        nErr = m_pIniUtil->writeDouble(PARENT_KEY, CHILD_KEY_HOME_AZ, dHomeAz);
+        nErr = m_pIniUtil->writeDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, dParkAz);
+        nErr = m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, mHasShutterControl);
+        nErr = m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, mIsRollOffRoof);
+        nErr = m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, parkBeforeClose);
+        
     }
     return nErr;
 

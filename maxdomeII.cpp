@@ -197,7 +197,7 @@ int CMaxDome::ReadResponse_MaxDomeII(char *cMessage)
         nErrorType = pSerx->readFile(cMessage, 1, nBytesRead, MAX_TIMEOUT);
         if (nBytesRead !=1) // timeout
             nErrorType = MD2_CANT_CONNECT;
-        printf("nErrorType = %d\n", nErrorType);
+        printf("[ReadResponse_MaxDomeII] nErrorType = %d\n", nErrorType);
     }
 
     if (nErrorType != MD2_OK || *cMessage != 0x01)
