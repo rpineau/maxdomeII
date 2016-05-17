@@ -24,8 +24,6 @@ X2Dome::X2Dome(const char* pszSelection,
 					MutexInterface*						pIOMutex,
 					TickCountInterface*					pTickCount)
 {
-    int iTmp;
-    double dTmp;
 
     m_nPrivateISIndex				= nISIndex;
 	m_pSerX							= pSerX;
@@ -40,24 +38,19 @@ X2Dome::X2Dome(const char* pszSelection,
     maxDome.SetSerxPointer(pSerX);
 
     if (m_pIniUtil)
-    {
-        iTmp = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, iTmp);
-        maxDome.setNbTicksPerRev(iTmp);
+    {   
+        maxDome.setNbTicksPerRev( m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, maxDome.getNbTicksPerRev()) );
 
-        dTmp = m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_HOME_AZ, dTmp);
-        maxDome.setHomeAz(dTmp);
+        maxDome.setHomeAz( m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_HOME_AZ, maxDome.getHomeAz()) );
 
-        dTmp = m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, dTmp);
-        maxDome.setParkAz(dTmp);
+        maxDome.setParkAz( m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, maxDome.getParkAz()) );
 
-        iTmp = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, iTmp);
-        maxDome.setNbTicksPerRev(iTmp);
 
         mHasShutterControl = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, mHasShutterControl);
+
         mIsRollOffRoof = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, mIsRollOffRoof);
 
-        iTmp = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, iTmp);
-        maxDome.setCloseShutterBeforePark(iTmp?false:true); // if we can operate at any Az then CloseShutterBeforePark is false
+        maxDome.setCloseShutterBeforePark( m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, maxDome.getCloseShutterBeforePark()) ? false : true); // if we can operate at any Az then CloseShutterBeforePark is false
     }
     
 }
@@ -139,6 +132,12 @@ int X2Dome::execModalSettingsDialog()
     X2GUIInterface*					ui = uiutil.X2UI();
     X2GUIExchangeInterface*			dx = NULL;//Comes after ui is loaded
     bool bPressedOK = false;
+
+    double dHomeAz;
+    double dParkAz;
+    bool parkBeforeClose;
+    int nTicksPerRev;
+
     printf("X2Dome::execModalSettingsDialog\n");
     if (NULL == ui)
     {
@@ -177,8 +176,11 @@ int X2Dome::execModalSettingsDialog()
     
     // disable Auto Calibrate for now
     dx->setEnabled("autoCalibrate",false);
-    
-    
+
+    dx->setPropertyInt("ticksPerRev","value", maxDome.getNbTicksPerRev());
+    dx->setPropertyDouble("homePosition","value", maxDome.getHomeAz());
+    dx->setPropertyDouble("parkPosition","value", maxDome.getParkAz());
+
     //Display the user interface
     if ((nErr = ui->exec(bPressedOK)))
         return nErr;
@@ -187,14 +189,20 @@ int X2Dome::execModalSettingsDialog()
     if (bPressedOK)
     {
         printf("Ok pressed\n");
+        dx->propertyDouble("homePosition", "value", dHomeAz);
+        dx->propertyDouble("parkPosition", "value", dParkAz);
+        parkBeforeClose = dx->isChecked("radioButtonradioButtonShutterPark");
+        dx->propertyInt("ticksPerRev", "value", nTicksPerRev);
+        mIsRollOffRoof = dx->isChecked("isRoolOffRoof");
         if(!m_bLinked)
         {
-        
+            maxDome.setHomeAz(dHomeAz);
+            maxDome.setParkAz(dHomeAz);
+            maxDome.SetPark_MaxDomeII(parkBeforeClose, dParkAz);
+            maxDome.setNbTicksPerRev(nTicksPerRev);
         }
-        else
-        {
-            
-        }
+
+        // save the values
     }
     return nErr;
 
@@ -238,7 +246,7 @@ void X2Dome::deviceInfoModel(BasicStringInterface& str)
 
  void	X2Dome::driverInfoDetailedInfo(BasicStringInterface& str) const	
 {
-    str = "MaxDome II Dome Control System";
+    str = "MaxDome II plugin v1.0 beta";
 }
 
 double	X2Dome::driverInfoVersion(void) const
@@ -266,6 +274,13 @@ int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
     if(!m_bLinked)
         return ERR_NOLINK;
 
+    if(mIsRollOffRoof)
+    {
+        *pdAz = maxDome.getCurrentAz();
+        *pdEl = 0.0f;
+        return SB_OK;
+    }
+
     *pdEl=0.0f;
     // returns number of ticks from home position for tmpAzInTicks
     err = maxDome.Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAzInTicks, tmpHomePosition);
@@ -286,6 +301,12 @@ int X2Dome::dapiGotoAzEl(double dAz, double dEl)
     if(!m_bLinked)
         return ERR_NOLINK;
 
+    if(mIsRollOffRoof)
+    {
+        maxDome.setCurrentAz(dAz);
+        return SB_OK;
+    }
+
     err = maxDome.Goto_Azimuth_MaxDomeII(dAz);
 
     if(err)
@@ -303,9 +324,12 @@ int X2Dome::dapiAbort(void)
     if(!m_bLinked)
         return ERR_NOLINK;
 
+
     switch(mlastCommand)
     {
         case AzGoto:
+            if(mIsRollOffRoof)
+                break;
             maxDome.Abort_Azimuth_MaxDomeII();
             break;
         
@@ -357,6 +381,15 @@ int X2Dome::dapiPark(void)
     if(!m_bLinked)
         return ERR_NOLINK;
 
+    if(mIsRollOffRoof)
+    {
+        err = maxDome.Close_Shutter_MaxDomeII();
+        if(err)
+            return ERR_CMDFAILED;
+
+        return SB_OK;
+    }
+
     err = maxDome.Park_MaxDomeII();
     if(err)
         return ERR_CMDFAILED;
@@ -387,6 +420,9 @@ int X2Dome::dapiFindHome(void)
     if(!m_bLinked)
         return ERR_NOLINK;
 
+    if(mIsRollOffRoof)
+        return SB_OK;
+
     err = maxDome.Home_Azimuth_MaxDomeII();
     if(err)
         return ERR_CMDFAILED;
@@ -401,6 +437,13 @@ int X2Dome::dapiIsGotoComplete(bool* pbComplete)
 
     if(!m_bLinked)
         return ERR_NOLINK;
+
+    if(mIsRollOffRoof)
+    {
+        *pbComplete = true;
+        return SB_OK;
+
+    }
 
     err = maxDome.IsGoToComplete(*pbComplete);
     if(err)
@@ -445,7 +488,11 @@ int X2Dome::dapiIsParkComplete(bool* pbComplete)
 
     if(!m_bLinked)
         return ERR_NOLINK;
-
+    if(mIsRollOffRoof)
+    {
+        *pbComplete = true;
+        return SB_OK;
+    }
     err = maxDome.IsParkComplete(*pbComplete);
     if(err)
         return ERR_CMDFAILED;
@@ -460,6 +507,12 @@ int X2Dome::dapiIsUnparkComplete(bool* pbComplete)
 
     if(!m_bLinked)
         return ERR_NOLINK;
+
+    if(mIsRollOffRoof)
+    {
+        *pbComplete = true;
+        return SB_OK;
+    }
 
     err = maxDome.IsUnparkComplete(*pbComplete);
     if(err)
@@ -476,6 +529,12 @@ int X2Dome::dapiIsFindHomeComplete(bool* pbComplete)
     if(!m_bLinked)
         return ERR_NOLINK;
 
+    if(mIsRollOffRoof)
+    {
+        *pbComplete = true;
+        return SB_OK;
+    }
+
     err = maxDome.IsFindHomeComplete(*pbComplete);
     if(err)
         return ERR_CMDFAILED;
@@ -491,6 +550,9 @@ int X2Dome::dapiSync(double dAz, double dEl)
 
     if(!m_bLinked)
         return ERR_NOLINK;
+
+    if(mIsRollOffRoof)
+        return SB_OK;
 
     err= maxDome.Sync_Dome(dAz);
     if (err)

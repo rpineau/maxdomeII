@@ -89,9 +89,9 @@
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="homePosition">
+            <widget class="QDoubleSpinBox" name="homePosition">
              <property name="maximum">
-              <number>65535</number>
+              <double>359.990000000000009</double>
              </property>
             </widget>
            </item>
@@ -191,9 +191,9 @@
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="pakPosition">
+            <widget class="QDoubleSpinBox" name="parkPosition">
              <property name="maximum">
-              <number>65535</number>
+              <double>359.990000000000009</double>
              </property>
             </widget>
            </item>
@@ -207,19 +207,9 @@
           </widget>
          </item>
         </layout>
-        <zorder>ticksPerRev</zorder>
-        <zorder>label</zorder>
-        <zorder>homePosition</zorder>
-        <zorder>label_3</zorder>
-        <zorder>pakPosition</zorder>
-        <zorder>verticalLayoutWidget</zorder>
-        <zorder>horizontalLayoutWidget</zorder>
-        <zorder>layoutWidget</zorder>
         <zorder>groupBoxShutter</zorder>
         <zorder></zorder>
-        <zorder></zorder>
         <zorder>hasShutterCtrl</zorder>
-        <zorder></zorder>
         <zorder>autoCalibrate</zorder>
         <zorder>isRoolOffRoof</zorder>
        </widget>

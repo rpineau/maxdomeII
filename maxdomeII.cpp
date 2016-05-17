@@ -938,6 +938,7 @@ int CMaxDome::getNbTicksPerRev()
 void CMaxDome::setNbTicksPerRev(int nbTicksPerRev)
 {
     mNbTicksPerRev = nbTicksPerRev;
+    SetTicksPerCount_MaxDomeII(mNbTicksPerRev);
 }
 
 
@@ -949,13 +950,14 @@ double CMaxDome::getHomeAz()
 void CMaxDome::setHomeAz(double dAz)
 {
     mHomeAz = dAz;
+
 }
 
 
 double CMaxDome::getParkAz()
 {
     return mParkAz;
-    
+
 }
 
 void CMaxDome::setParkAz(double dAz)
@@ -973,3 +975,12 @@ void CMaxDome::setCloseShutterBeforePark(bool close)
     mCloseShutterBeforePark = close;
 }
 
+double CMaxDome::getCurrentAz()
+{
+    return mCurrentAzPosition;
+}
+
+void CMaxDome::setCurrentAz(double dAz)
+{
+    mCurrentAzPosition = dAz;
+}

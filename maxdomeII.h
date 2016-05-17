@@ -133,6 +133,9 @@ public:
     bool getCloseShutterBeforePark();
     void setCloseShutterBeforePark(bool close);
 
+    double getCurrentAz();
+    void setCurrentAz(double dAz);
+
 protected:
 
     signed char     checksum_MaxDomeII(char *cMessage, int nLen);
