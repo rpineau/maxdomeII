@@ -50,14 +50,16 @@ X2Dome::X2Dome(const char* pszSelection,
         maxDome.setParkAz( m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, maxDome.getParkAz()) );
 
 
-        mHasShutterControl = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, mHasShutterControl);
+        mHasShutterControl = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, true);
+
+        mOpenUpperShutterOnly = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPEN_UPPER_ONLY, false);
 
         mIsRollOffRoof = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, mIsRollOffRoof);
 
         printf("Calling setCloseShutterBeforePark\n");
         int i = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, false);
         printf("CHILD_KEY_SHUTTER_OPER_ANY_Az = %d\n",i);
-        
+
         maxDome.setCloseShutterBeforePark( ! m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, false)); // if we can operate at any Az then CloseShutterBeforePark is false
         printf("maxDome.getCloseShutterBeforePark() = %d\n", maxDome.getCloseShutterBeforePark());
         
@@ -167,6 +169,11 @@ int X2Dome::execModalSettingsDialog()
     {
         dx->setChecked("hasShutterCtrl",true);
 
+        if(mOpenUpperShutterOnly)
+            dx->setChecked("openUpperShutterOnly", true);
+        else
+            dx->setChecked("openUpperShutterOnly", false);
+
         if(maxDome.getCloseShutterBeforePark())
             dx->setChecked("radioButtonShutterPark", true);
         else
@@ -201,10 +208,11 @@ int X2Dome::execModalSettingsDialog()
         dx->propertyDouble("homePosition", "value", dHomeAz);
         dx->propertyDouble("parkPosition", "value", dParkAz);
         operateAnyAz = dx->isChecked("radioButtonShutterAnyAz");
-        
+        mOpenUpperShutterOnly = dx->isChecked("openUpperShutterOnly");
         printf("operateAnyAz = %d\n", operateAnyAz);
         dx->propertyInt("ticksPerRev", "value", nTicksPerRev);
         mHasShutterControl = dx->isChecked("hasShutterCtrl");
+
         mIsRollOffRoof = dx->isChecked("isRoolOffRoof");
         if(m_bLinked)
         {
@@ -215,12 +223,13 @@ int X2Dome::execModalSettingsDialog()
         }
 
         // save the values to persistent storage
-        nErr = m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, nTicksPerRev);
-        nErr = m_pIniUtil->writeDouble(PARENT_KEY, CHILD_KEY_HOME_AZ, dHomeAz);
-        nErr = m_pIniUtil->writeDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, dParkAz);
-        nErr = m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, mHasShutterControl);
-        nErr = m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, mIsRollOffRoof);
-        nErr = m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, operateAnyAz);
+        nErr |= m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, nTicksPerRev);
+        nErr |= m_pIniUtil->writeDouble(PARENT_KEY, CHILD_KEY_HOME_AZ, dHomeAz);
+        nErr |= m_pIniUtil->writeDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, dParkAz);
+        nErr |= m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, mHasShutterControl);
+        nErr |= m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPEN_UPPER_ONLY, mOpenUpperShutterOnly);
+        nErr |= m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, mIsRollOffRoof);
+        nErr |= m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, operateAnyAz);
         
     }
     return nErr;
@@ -367,8 +376,10 @@ int X2Dome::dapiOpen(void)
 
     if(!m_bLinked)
         return ERR_NOLINK;
-
-    err = maxDome.Open_Shutter_MaxDomeII();
+    if(mOpenUpperShutterOnly)
+        err = maxDome.Open_Upper_Shutter_Only_MaxDomeII();
+    else
+        err = maxDome.Open_Shutter_MaxDomeII();
     if(err)
         return ERR_CMDFAILED;
 

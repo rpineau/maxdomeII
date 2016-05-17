@@ -22,6 +22,7 @@ class TickCountInterface;
 #define CHILD_KEY_HOME_AZ "HomeAzimuth"
 #define CHILD_KEY_PARK_AZ "ParkAzimuth"
 #define CHILD_KEY_SHUTTER_CONTROL "ShutterCtrl"
+#define CHILD_KEY_SHUTTER_OPEN_UPPER_ONLY "ShutterOpenUpperOnly"
 #define CHILD_KEY_ROOL_OFF_ROOF "RollOffRoof"
 #define CHILD_KEY_SHUTTER_OPER_ANY_Az "ShutterOperAnyAz"
 
@@ -151,5 +152,6 @@ private:
     CMaxDome    maxDome;
     int         mlastCommand;
     bool        mHasShutterControl;
+    bool        mOpenUpperShutterOnly;
     bool        mIsRollOffRoof;
 };

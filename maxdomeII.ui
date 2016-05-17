@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>522</width>
-    <height>352</height>
+    <height>373</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -66,6 +66,13 @@
          <string>MaxDome  II Params</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
+         <item row="11" column="0">
+          <widget class="QCheckBox" name="isRoolOffRoof">
+           <property name="text">
+            <string>Roll off Roof</string>
+           </property>
+          </widget>
+         </item>
          <item row="5" column="0" rowspan="2">
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
@@ -104,7 +111,7 @@
            </property>
           </widget>
          </item>
-         <item row="11" column="0">
+         <item row="12" column="0">
           <widget class="QGroupBox" name="groupBoxShutter">
            <property name="title">
             <string>Shutter Operation</string>
@@ -200,9 +207,9 @@
           </layout>
          </item>
          <item row="10" column="0">
-          <widget class="QCheckBox" name="isRoolOffRoof">
+          <widget class="QCheckBox" name="openUpperShutterOnly">
            <property name="text">
-            <string>Roll off Roof</string>
+            <string>Open Upper Shutter Only</string>
            </property>
           </widget>
          </item>
@@ -212,6 +219,7 @@
         <zorder>hasShutterCtrl</zorder>
         <zorder>autoCalibrate</zorder>
         <zorder>isRoolOffRoof</zorder>
+        <zorder>openUpperShutterOnly</zorder>
        </widget>
       </item>
      </layout>
