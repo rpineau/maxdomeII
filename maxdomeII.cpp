@@ -408,7 +408,6 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
         mCurrentAzPositionInTicks = nAzimuthPosition;
         TicksToAz(mCurrentAzPositionInTicks, mCurrentAzPosition);
         mHomeAzInTicks = nHomePosition;
-        TicksToAz(mHomeAzInTicks, mHomeAz);
         return 0;
     }
 
@@ -477,14 +476,15 @@ int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
         return MD2_CANT_CONNECT;
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
 
     if (cMessage[2] == (char)(SETPARK_CMD | TO_COMPUTER))
     {
         mParkAzInTicks = mHomeAzInTicks + nTicks;
         mCloseShutterBeforePark = nParkOnShutter;
-        return 0;
+        TicksToAz(mParkAzInTicks, mParkAz);
+        return MD2_OK;
     }
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
@@ -518,34 +518,8 @@ int CMaxDome::Sync_Dome(double dAz)
 int CMaxDome::Park_MaxDomeII(void)
 {
     int nErrorType;
-    int dir = 0;
-    int ticks;
-    unsigned tmpAz;
-    unsigned tmpHomePosition;
-    enum SH_Status tmpShutterStatus;
-    enum AZ_Status tmpAzimuthStatus;
 
-    // where are we ?
-    nErrorType = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
-    if(nErrorType)
-        return nErrorType;
-    // how far do we need to move and in which direction.
-    // nbticks to move = current position - (park - home)
-
-    ticks = tmpAz - (mParkAzInTicks - tmpHomePosition);
-    if (ticks <0)
-    {
-        dir = 1;
-        ticks = -ticks;
-    }
-
-    if (ticks == tmpAz)
-    {
-        // park = home
-        nErrorType = Home_Azimuth_MaxDomeII();
-    }
-    else
-        nErrorType = Goto_Azimuth_MaxDomeII(dir, ticks);
+    nErrorType = Goto_Azimuth_MaxDomeII(mParkAz);
     return nErrorType;
 }
 
