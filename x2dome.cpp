@@ -168,6 +168,10 @@ int X2Dome::execModalSettingsDialog()
     if(mHasShutterControl)
     {
         dx->setChecked("hasShutterCtrl",true);
+        dx->setEnabled("radioButtonShutterAnyAz", true);
+        dx->setEnabled("isRoolOffRoof", true);
+        dx->setEnabled("radioButtonShutterAnyAz", true);
+        dx->setEnabled("groupBoxShutter", true);
 
         if(mOpenUpperShutterOnly)
             dx->setChecked("openUpperShutterOnly", true);
@@ -187,7 +191,15 @@ int X2Dome::execModalSettingsDialog()
     else
     {
         dx->setChecked("hasShutterCtrl",false);
+        dx->setChecked("radioButtonShutterAnyAz",false);
+        dx->setChecked("openUpperShutterOnly",false);
+        dx->setChecked("isRoolOffRoof",false);
+
+        dx->setEnabled("openUpperShutterOnly", false);
+        dx->setEnabled("isRoolOffRoof", false);
         dx->setEnabled("groupBoxShutter", false);
+        dx->setEnabled("radioButtonShutterAnyAz", false);
+        
     }
     
     // disable Auto Calibrate for now
@@ -204,16 +216,22 @@ int X2Dome::execModalSettingsDialog()
     //Retreive values from the user interface
     if (bPressedOK)
     {
-        printf("Ok pressed\n");
         dx->propertyDouble("homePosition", "value", dHomeAz);
         dx->propertyDouble("parkPosition", "value", dParkAz);
         operateAnyAz = dx->isChecked("radioButtonShutterAnyAz");
-        mOpenUpperShutterOnly = dx->isChecked("openUpperShutterOnly");
-        printf("operateAnyAz = %d\n", operateAnyAz);
         dx->propertyInt("ticksPerRev", "value", nTicksPerRev);
         mHasShutterControl = dx->isChecked("hasShutterCtrl");
+        if(mHasShutterControl)
+        {
+            mOpenUpperShutterOnly = dx->isChecked("openUpperShutterOnly");
+            mIsRollOffRoof = dx->isChecked("isRoolOffRoof");
+        }
+        else
+        {
+            mOpenUpperShutterOnly = false;
+            mIsRollOffRoof = false;
+        }
 
-        mIsRollOffRoof = dx->isChecked("isRoolOffRoof");
         if(m_bLinked)
         {
             maxDome.setHomeAz(dHomeAz);
@@ -238,7 +256,24 @@ int X2Dome::execModalSettingsDialog()
 
 void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 {
-    
+    if (!strcmp(pszEvent, "on_timer"))
+    {
+        if(uiex->isChecked("hasShutterCtrl"))
+        {
+            uiex->setEnabled("openUpperShutterOnly", true);
+            uiex->setEnabled("isRoolOffRoof", true);
+            uiex->setEnabled("groupBoxShutter", true);
+            uiex->setEnabled("radioButtonShutterAnyAz", true);
+        }
+        else
+        {
+            uiex->setEnabled("openUpperShutterOnly", false);
+            uiex->setEnabled("isRoolOffRoof", false);
+            uiex->setEnabled("groupBoxShutter", false);
+            uiex->setEnabled("radioButtonShutterAnyAz", false);
+            
+        }
+    }
 }
 
 //
