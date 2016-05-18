@@ -135,8 +135,22 @@ bool CMaxDome::Connect(const char *szPort)
 
     if(err)
     {
-        pSerx->close();
         bIsConnected = false;
+        pSerx->close();
+    }
+
+    // sset a few things on connect
+    if (bIsConnected)
+    {
+        // if(mHomeOnCnnect)
+        //      Home_Azimuth_MaxDomeII();
+        err |= SetPark_MaxDomeII(mCloseShutterBeforePark, mParkAz);
+        err |= SetTicksPerCount_MaxDomeII(mNbTicksPerRev);
+        if(err)
+        {
+            bIsConnected = false; // if this fails we're not properly connectiong.
+            pSerx->close();
+        }
     }
     
     return bIsConnected;
@@ -916,7 +930,7 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
     if(err)
         return err;
 
-    if((mHomeAzInTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
+    if((tmpHomePosition == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
     {
         complete = true;
         mHomed = true;
@@ -963,7 +977,11 @@ double CMaxDome::getParkAz()
 
 void CMaxDome::setParkAz(double dAz)
 {
+    int dir;
     mParkAz = dAz;
+    AzToTicks(dAz, dir, (int &)mParkAzInTicks);
+
+
 }
 
 bool CMaxDome::getCloseShutterBeforePark()
