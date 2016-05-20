@@ -411,6 +411,10 @@ int X2Dome::dapiOpen(void)
 
     if(!m_bLinked)
         return ERR_NOLINK;
+
+    if(!mHasShutterControl)
+        return SB_OK;
+
     if(mOpenUpperShutterOnly)
         err = maxDome.Open_Upper_Shutter_Only_MaxDomeII();
     else
@@ -429,6 +433,9 @@ int X2Dome::dapiClose(void)
 
     if(!m_bLinked)
         return ERR_NOLINK;
+
+    if(!mHasShutterControl)
+        return SB_OK;
 
     err = maxDome.Close_Shutter_MaxDomeII();
     if(err)
@@ -524,6 +531,12 @@ int X2Dome::dapiIsOpenComplete(bool* pbComplete)
     if(!m_bLinked)
         return ERR_NOLINK;
     
+    if(!mHasShutterControl)
+    {
+        *pbComplete = true;
+        return SB_OK;
+    }
+
     err = maxDome.IsOpenComplete(*pbComplete);
     if(err)
         return ERR_CMDFAILED;
@@ -539,6 +552,12 @@ int	X2Dome::dapiIsCloseComplete(bool* pbComplete)
     if(!m_bLinked)
         return ERR_NOLINK;
 
+    if(!mHasShutterControl)
+    {
+        *pbComplete = true;
+        return SB_OK;
+    }
+
     err = maxDome.IsCloseComplete(*pbComplete);
     if(err)
         return ERR_CMDFAILED;
@@ -553,11 +572,13 @@ int X2Dome::dapiIsParkComplete(bool* pbComplete)
 
     if(!m_bLinked)
         return ERR_NOLINK;
+
     if(mIsRollOffRoof)
     {
         *pbComplete = true;
         return SB_OK;
     }
+
     err = maxDome.IsParkComplete(*pbComplete);
     if(err)
         return ERR_CMDFAILED;
