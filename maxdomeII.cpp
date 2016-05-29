@@ -73,7 +73,6 @@ int CMaxDome::Init_Communication(void)
     cMessage[2] = ACK_CMD;
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
 
-    printf("sending Init sequence to MaxDome II\n");
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
     
     if (nErrorType != MD2_OK)
@@ -82,7 +81,7 @@ int CMaxDome::Init_Communication(void)
 
     if (nBytesWrite != 4)
         return MD2_CANT_CONNECT;
-    printf("Reading response from Init sequence\n");
+
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if (nReturn != 0)
         return nReturn;
@@ -103,7 +102,6 @@ bool CMaxDome::Connect(const char *szPort)
     enum AZ_Status tmpAzimuthStatus;
 
     // 19200 8N1
-    printf("Opening port %s\n", szPort);
     if(pSerx->open(szPort,19200) == 0)
         bIsConnected = true;
     else
@@ -113,20 +111,15 @@ bool CMaxDome::Connect(const char *szPort)
     if(!bIsConnected)
         return false;
 
-    printf("Purging RxTx\n");
     // bIsConnected = GetFirmware(szFirmware);
     pSerx->purgeTxRx();
 
-    printf("Purging RxTx Done\n");
     // init the comms
     err = Init_Communication();
-    printf("err from Init_Communication = %d\n",err);
     if(err)
     {
         pSerx->close();
         bIsConnected = false;
-        
-        printf("bIsConnected = %d\n",bIsConnected);
         return bIsConnected;
     }
 
@@ -211,7 +204,6 @@ int CMaxDome::ReadResponse_MaxDomeII(char *cMessage)
         nErrorType = pSerx->readFile(cMessage, 1, nBytesRead, MAX_TIMEOUT);
         if (nBytesRead !=1) // timeout
             nErrorType = MD2_CANT_CONNECT;
-        printf("[ReadResponse_MaxDomeII] nErrorType = %d\n", nErrorType);
     }
 
     if (nErrorType != MD2_OK || *cMessage != 0x01)
@@ -387,10 +379,7 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     cMessage[2] = STATUS_CMD;
     cMessage[3] = checksum_MaxDomeII((char*)cMessage, 3);
     
-    printf("Sending data to MaxDome II\n");
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
-
-    printf("Sending data to MaxDome II nErrorType = %d\n", nErrorType);
 
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;

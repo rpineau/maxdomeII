@@ -35,34 +35,17 @@ X2Dome::X2Dome(const char* pszSelection,
 	m_pTickCount					= pTickCount;
 
 	m_bLinked = false;
-    printf("Calling SetSerxPointer\n");
     maxDome.SetSerxPointer(pSerX);
 
     if (m_pIniUtil)
     {   
-        printf("Calling getNbTicksPerRev\n");
         maxDome.setNbTicksPerRev( m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, maxDome.getNbTicksPerRev()) );
-
-        printf("Calling getHomeAz\n");
         maxDome.setHomeAz( m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_HOME_AZ, maxDome.getHomeAz()) );
-
-        printf("Calling getParkAz\n");
         maxDome.setParkAz( m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, maxDome.getParkAz()) );
-
-
         mHasShutterControl = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, true);
-
         mOpenUpperShutterOnly = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPEN_UPPER_ONLY, false);
-
         mIsRollOffRoof = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, mIsRollOffRoof);
-
-        printf("Calling setCloseShutterBeforePark\n");
-        int i = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, false);
-        printf("CHILD_KEY_SHUTTER_OPER_ANY_Az = %d\n",i);
-
         maxDome.setCloseShutterBeforePark( ! m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, false)); // if we can operate at any Az then CloseShutterBeforePark is false
-        printf("maxDome.getCloseShutterBeforePark() = %d\n", maxDome.getCloseShutterBeforePark());
-        
     }
 }
 
@@ -95,9 +78,7 @@ int X2Dome::establishLink(void)
     X2MutexLocker ml(GetMutex());
     // get serial port device name
     portNameOnToCharPtr(szPort,DRIVER_MAX_STRING);
-    printf("Connecting to MaxDome II using port %s\n", szPort);
     connected = maxDome.Connect(szPort);
-    printf("Connecting to MaxDome II connected=%d\n", connected);
     if(!connected)
         return ERR_COMMNOLINK;
 
@@ -149,21 +130,15 @@ int X2Dome::execModalSettingsDialog()
     bool operateAnyAz;
     int nTicksPerRev;
 
-    printf("X2Dome::execModalSettingsDialog\n");
     if (NULL == ui)
-    {
-        printf("ui is NULL :(\n");
         return ERR_POINTER;
-    }
+
     if ((nErr = ui->loadUserInterface("maxdomeII.ui", deviceType(), m_nPrivateISIndex)))
         return nErr;
 
     if (NULL == (dx = uiutil.X2DX()))
-    {
-        printf("dx is NULL :(\n");
         return ERR_POINTER;
-    }
-    
+
     // set controls state depending on the connection state
     if(mHasShutterControl)
     {
