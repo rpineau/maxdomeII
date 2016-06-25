@@ -615,7 +615,7 @@ int X2Dome::dapiSync(double dAz, double dEl)
     if(mIsRollOffRoof)
         return SB_OK;
 
-    err= maxDome.Sync_Dome(dAz);
+    err = maxDome.Sync_Dome(dAz);
     if (err)
         return ERR_CMDFAILED;
 	return SB_OK;

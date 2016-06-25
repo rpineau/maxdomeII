@@ -447,7 +447,7 @@ int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
 {
     char cMessage[MAX_BUFFER];
     int nErrorType;
-    unsigned long  nBytesWrite;;
+    unsigned long  nBytesWrite;
     int nReturn;
 
     cMessage[0] = 0x01;

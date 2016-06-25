@@ -72,7 +72,7 @@ enum AZ_Status {As_IDLE = 1, As_MOVING_WE, As_MOVING_EW, As_IDLE2, As_ERROR};
 enum SH_Status {Ss_CLOSED = 0, Ss_OPENING, Ss_OPEN, Ss_CLOSING, Ss_ABORTED, Ss_ERROR};
 
 // Error code
-enum MD2_Erros {MD2_OK=0, MD2_CANT_CONNECT, BAD_CMD_RESPONSE};
+enum MD2_Errors {MD2_OK=0, MD2_CANT_CONNECT, BAD_CMD_RESPONSE};
 
 class CMaxDome
 {
