@@ -157,6 +157,10 @@ private:
     bool        mOpenUpperShutterOnly;
     bool        mIsRollOffRoof;
 
+    bool        mHomingDome;
+    bool        mInitCalibration;
+    bool        mCalibratingDome;
+
     char        mLogBuffer[LOG_BUFFER_SIZE];
 
 };

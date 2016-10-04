@@ -186,6 +186,8 @@ int X2Dome::execModalSettingsDialog()
     dx->setPropertyDouble("homePosition","value", maxDome.getHomeAz());
     dx->setPropertyDouble("parkPosition","value", maxDome.getParkAz());
 
+    X2MutexLocker ml(GetMutex());
+
     //Display the user interface
     if ((nErr = ui->exec(bPressedOK)))
         return nErr;
@@ -233,24 +235,123 @@ int X2Dome::execModalSettingsDialog()
 
 void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 {
-    if (!strcmp(pszEvent, "on_timer"))
-    {
-        if(uiex->isChecked("hasShutterCtrl"))
-        {
+    bool complete = false;
+    int err;
+    char tmpBuf[20];
+    char errorMessage[LOG_BUFFER_SIZE];
+
+    if (!strcmp(pszEvent, "on_pushButtonCancel_clicked")) {
+        maxDome.Abort_Azimuth_MaxDomeII();
+        maxDome.Abort_Shutter_MaxDomeII();
+    }
+
+    if (!strcmp(pszEvent, "on_timer")) {
+        if(uiex->isChecked("hasShutterCtrl")) {
             uiex->setEnabled("openUpperShutterOnly", true);
             uiex->setEnabled("isRoolOffRoof", true);
             uiex->setEnabled("groupBoxShutter", true);
             uiex->setEnabled("radioButtonShutterAnyAz", true);
+            mHasShutterControl = true;
         }
-        else
-        {
+        else {
             uiex->setEnabled("openUpperShutterOnly", false);
             uiex->setEnabled("isRoolOffRoof", false);
             uiex->setEnabled("groupBoxShutter", false);
             uiex->setEnabled("radioButtonShutterAnyAz", false);
-            
+            mHasShutterControl = false;
+        }
+        // deal with auto calibrate here.
+        if(m_bLinked) {
+            // are we going to Home position to calibrate ?
+            if(mHomingDome) {
+                // are we home ?
+                complete = false;
+                err = maxDome.IsFindHomeComplete(complete);
+                if (err) {
+                    uiex->setEnabled("pushButton",true);
+                    uiex->setEnabled("pushButtonOK",true);
+                    snprintf(errorMessage, LOG_BUFFER_SIZE, "Error homing dome while calibrating : Error %d", err);
+                    uiex->messageBox("MaxDome II Calibrate", errorMessage);
+                    mHomingDome = false;
+                    mInitCalibration = false;
+                    mCalibratingDome = false;
+                    return;
+                }
+                if(complete) {
+                    mHomingDome = false;
+                    mCalibratingDome = false;
+                    mInitCalibration = true;
+                    // move 10 ticks forward to the right from inside the dome (hopefully) :)
+                    maxDome.Goto_Azimuth_MaxDomeII(1, 10);
+                    // nexDome.calibrate();
+                    return;
+                }
+            }
+
+            if(mInitCalibration) {
+                err = maxDome.IsGoToComplete(complete);
+                if (err) {
+                    uiex->setEnabled("pushButton",true);
+                    uiex->setEnabled("pushButtonOK",true);
+                    snprintf(errorMessage, LOG_BUFFER_SIZE, "Error moving dome while calibrating : Error %d", err);
+                    uiex->messageBox("MaxDome II Calibrate", errorMessage);
+                    mHomingDome = false;
+                    mInitCalibration = false;
+                    mCalibratingDome = false;
+                    return;
+                }
+
+                if(complete) {
+                    mCalibratingDome = true;
+                    mInitCalibration = false;
+                    maxDome.Home_Azimuth_MaxDomeII();
+                }
+                else {
+                    return;
+                }
+
+            }
+
+            if(mCalibratingDome) {
+                err = maxDome.IsFindHomeComplete(complete);
+                if (err) {
+                    uiex->setEnabled("pushButton",true);
+                    uiex->setEnabled("pushButtonOK",true);
+                    snprintf(errorMessage, LOG_BUFFER_SIZE, "Error on 2nd homing dome while calibrating : Error %d", err);
+                    uiex->messageBox("MaxDome II Calibrate", errorMessage);
+                    mHomingDome = false;
+                    mInitCalibration = false;
+                    mCalibratingDome = false;
+                    return;
+                }
+                if(complete) {
+                    mHomingDome = false;
+                    mCalibratingDome = false;
+                    mInitCalibration = false;
+                    // enable "ok" and "calibrate"
+                    uiex->setEnabled("pushButton",true);
+                    uiex->setEnabled("pushButtonOK",true);
+                    // read step per rev from dome
+                    snprintf(tmpBuf,16,"%d",maxDome.getNbTicksPerRev());
+                    uiex->setPropertyString("ticksPerRev","text", tmpBuf);
+                    return;
+                }
+            }
+
+        }
+
+    }
+
+    if (!strcmp(pszEvent, "on_push_clicked")) {
+        if(m_bLinked) {
+            // disable "ok" and "calibrate"
+            uiex->setEnabled("pushButton",false);
+            uiex->setEnabled("pushButtonOK",false);
+            maxDome.Home_Azimuth_MaxDomeII();
+            mHomingDome = true;
         }
     }
+
 }
 
 //

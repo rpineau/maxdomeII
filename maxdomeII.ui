@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>522</width>
-    <height>373</height>
+    <height>387</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -138,7 +138,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QPushButton" name="autoCalibrate">
+          <widget class="QPushButton" name="pushButton">
            <property name="text">
             <string>Auto Calibrate</string>
            </property>
@@ -215,9 +215,8 @@
          </item>
         </layout>
         <zorder>groupBoxShutter</zorder>
-        <zorder></zorder>
         <zorder>hasShutterCtrl</zorder>
-        <zorder>autoCalibrate</zorder>
+        <zorder>pushButton</zorder>
         <zorder>isRoolOffRoof</zorder>
         <zorder>openUpperShutterOnly</zorder>
        </widget>
