@@ -102,7 +102,9 @@ bool CMaxDome::Connect(const char *szPort)
     enum AZ_Status tmpAzimuthStatus;
 
     // 19200 8N1
-    if(pSerx->open(szPort,19200) == 0)
+    // if(pSerx->open(szPort,19200) == 0)
+    if(pSerx->open(szPort, 19200, SerXInterface::B_NOPARITY, "-DTR_CONTROL 1") == 0)
+
         bIsConnected = true;
     else
         bIsConnected = false;
