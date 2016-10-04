@@ -36,6 +36,8 @@ X2Dome::X2Dome(const char* pszSelection,
 
 	m_bLinked = false;
     maxDome.SetSerxPointer(pSerX);
+    maxDome.setLogger(pLogger);
+
 
     if (m_pIniUtil)
     {   

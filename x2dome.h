@@ -34,6 +34,8 @@ class TickCountInterface;
 #define DEF_PORT_NAME					"/dev/COM0"
 #endif
 
+#define LOG_BUFFER_SIZE 256
+
 enum lastCommand {AzGoto = 0, ShutterOpen, ShutterClose};
 
 /*!
@@ -154,4 +156,7 @@ private:
     bool        mHasShutterControl;
     bool        mOpenUpperShutterOnly;
     bool        mIsRollOffRoof;
+
+    char        mLogBuffer[LOG_BUFFER_SIZE];
+
 };

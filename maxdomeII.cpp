@@ -38,6 +38,8 @@
 CMaxDome::CMaxDome()
 {
     // set some sane values
+    bDebugLog = false;
+
     pSerx = NULL;
     bIsConnected = false;
 
@@ -967,4 +969,9 @@ double CMaxDome::getCurrentAz()
 void CMaxDome::setCurrentAz(double dAz)
 {
     mCurrentAzPosition = dAz;
+}
+
+void CMaxDome::setDebugLog(bool enable)
+{
+    bDebugLog = enable;
 }

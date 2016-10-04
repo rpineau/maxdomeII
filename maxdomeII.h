@@ -34,6 +34,9 @@
 #include <math.h>
 #include "../../licensedinterfaces/sberrorx.h"
 #include "../../licensedinterfaces/serxinterface.h"
+#include "../../licensedinterfaces/loggerinterface.h"
+
+#define ND_LOG_BUFFER_SIZE 256
 
 #define MAX_BUFFER 15			// Message length can be up to 12 bytes.
 #define MAX_TIMEOUT 5000        // timeout after 5 seonds. (value is in ms).
@@ -85,6 +88,7 @@ public:
     bool        IsConnected(void) { return bIsConnected; }
 
     void        SetSerxPointer(SerXInterface *p) { pSerx = p; }
+    void        setLogger(LoggerInterface *pLogger) { mLogger = pLogger; };
 
     // Dome commands
     int Init_Communication(void);
@@ -136,6 +140,8 @@ public:
     double getCurrentAz();
     void setCurrentAz(double dAz);
 
+    void setDebugLog(bool enable);
+
 protected:
 
     signed char     checksum_MaxDomeII(char *cMessage, int nLen);
@@ -160,6 +166,11 @@ protected:
 
     unsigned        mGotoTicks;
     SerXInterface   *pSerx;
+
+    LoggerInterface *mLogger;
+    bool            bDebugLog;
+    char            mLogBuffer[ND_LOG_BUFFER_SIZE];
+
 };
 
 #endif
