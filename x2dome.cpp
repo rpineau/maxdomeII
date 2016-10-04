@@ -180,7 +180,7 @@ int X2Dome::execModalSettingsDialog()
     }
     
     // disable Auto Calibrate for now
-    dx->setEnabled("autoCalibrate",false);
+    dx->setEnabled("pushButton",true);
 
     dx->setPropertyInt("ticksPerRev","value", maxDome.getNbTicksPerRev());
     dx->setPropertyDouble("homePosition","value", maxDome.getHomeAz());
@@ -342,7 +342,7 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 
     }
 
-    if (!strcmp(pszEvent, "on_push_clicked")) {
+    if (!strcmp(pszEvent, "on_pushButton_clicked")) {
         if(m_bLinked) {
             // disable "ok" and "calibrate"
             uiex->setEnabled("pushButton",false);
