@@ -118,8 +118,13 @@ bool CMaxDome::Connect(const char *szPort)
     // bIsConnected = GetFirmware(szFirmware);
     pSerx->purgeTxRx();
 
+    printf("bIsConnected = %d\n", bIsConnected);
+
     // init the comms
     err = Init_Communication();
+    printf("Init_Communication err = %d\n", err);
+    printf("bIsConnected = %d\n", bIsConnected);
+
     if(err)
     {
         pSerx->close();
@@ -129,7 +134,8 @@ bool CMaxDome::Connect(const char *szPort)
 
     // get the device status to make sure we're properly connected.
     err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
-
+    printf("Status_MaxDomeII err = %d\n", err);
+    printf("bIsConnected = %d\n", bIsConnected);
     if(err)
     {
         bIsConnected = false;
@@ -264,7 +270,7 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
 int CMaxDome::Home_Azimuth_MaxDomeII(void)
 {
     char cMessage[MAX_BUFFER];
-    char cHexMessage[MAX_BUFFER+1];
+    char cHexMessage[(MAX_BUFFER*3)+1];
     
     int nErrorType;
     unsigned long  nBytesWrite;;
@@ -316,7 +322,7 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
 int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
 {
     char cMessage[MAX_BUFFER];
-    char cHexMessage[MAX_BUFFER+1];
+    char cHexMessage[(MAX_BUFFER*3)+1];
     int nErrorType=0;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -394,7 +400,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
 int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition)
 {
     unsigned char cMessage[MAX_BUFFER];
-    char cHexMessage[MAX_BUFFER+1];
+    char cHexMessage[(MAX_BUFFER*3)+1];
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -1015,9 +1021,10 @@ void CMaxDome::setDebugLog(bool enable)
 
 void  CMaxDome::hexdump(char* inputData, char *outBuffer, int size)
 {
+    char *buf = outBuffer;
     int idx=0;
     for(idx=0; idx<size; idx++){
-        sprintf(outBuffer++,"%02X ",*inputData++);
+        sprintf(buf++,"%02X ",inputData[idx]);
     }
     *outBuffer = 0; // terminate the string
 }
