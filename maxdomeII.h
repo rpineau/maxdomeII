@@ -141,7 +141,6 @@ public:
     void setCurrentAz(double dAz);
 
     void setDebugLog(bool enable);
-
 protected:
 
     signed char     checksum_MaxDomeII(char *cMessage, int nLen);
@@ -170,6 +169,8 @@ protected:
     LoggerInterface *mLogger;
     bool            bDebugLog;
     char            mLogBuffer[ND_LOG_BUFFER_SIZE];
+    void            hexdump(char* inputData, char *outBuffer, int size);
+    
 
 };
 
