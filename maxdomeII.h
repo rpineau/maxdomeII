@@ -12,21 +12,21 @@
 /*
  Max Dome II Driver
  Copyright (C) 2009 Ferran Casarramona (ferran.casarramona@gmail.com)
-
+ 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
-
+ 
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
-
+ 
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
+ 
  */
 
 #ifndef __MAXDOMEII__
@@ -82,14 +82,14 @@ class CMaxDome
 public:
     CMaxDome();
     ~CMaxDome();
-
+    
     bool        Connect(const char *szPort);
     void        Disconnect(void);
     bool        IsConnected(void) { return bIsConnected; }
-
+    
     void        SetSerxPointer(SerXInterface *p) { pSerx = p; }
     void        setLogger(LoggerInterface *pLogger) { mLogger = pLogger; };
-
+    
     // Dome commands
     int Init_Communication(void);
     int Abort_Azimuth_MaxDomeII(void);
@@ -104,18 +104,18 @@ public:
     int Park_MaxDomeII(void);
     int Unpark(void);
     int Sync_Dome(double dAz);
-
+    
     //  Shutter commands
     int Open_Shutter_MaxDomeII(void);
     int Open_Upper_Shutter_Only_MaxDomeII(void);
     int Close_Shutter_MaxDomeII(void);
     int Abort_Shutter_MaxDomeII(void);
     int Exit_Shutter_MaxDomeII(void);
-
+    
     // convertion functions
     void AzToTicks(double pdAz, int &dir, int &ticks);
     void TicksToAz(int ticks, double &pdAz);
-
+    
     // command complete functions
     int IsGoToComplete(bool &complete);
     int IsOpenComplete(bool &complete);
@@ -127,51 +127,51 @@ public:
     // getter/setter
     int getNbTicksPerRev();
     void setNbTicksPerRev(int nbTicksPerRev);
-
+    
     double getHomeAz();
     void setHomeAz(double dAz);
-
+    
     double getParkAz();
     void setParkAz(double dAz);
-
+    
     bool getCloseShutterBeforePark();
     void setCloseShutterBeforePark(bool close);
-
+    
     double getCurrentAz();
     void setCurrentAz(double dAz);
-
+    
     void setDebugLog(bool enable);
 protected:
-
-    signed char     checksum_MaxDomeII(char *cMessage, int nLen);
-    int             ReadResponse_MaxDomeII(char *cMessage);
+    
+    signed char     checksum_MaxDomeII(unsigned char *cMessage, int nLen);
+    int             ReadResponse_MaxDomeII(unsigned char *cMessage);
     bool            bIsConnected;
-
+    
     bool            mHomed;
     bool            mParked;
     bool            mCloseShutterBeforePark;
     bool            mShutterOpened;
     
     unsigned        mNbTicksPerRev;
-
+    
     unsigned        mHomeAzInTicks;
     double          mHomeAz;
     
     unsigned        mParkAzInTicks;
     double          mParkAz;
-
+    
     unsigned        mCurrentAzPositionInTicks;
     double          mCurrentAzPosition;
-
+    
     unsigned        mGotoTicks;
     SerXInterface   *pSerx;
-
+    
     LoggerInterface *mLogger;
     bool            bDebugLog;
     char            mLogBuffer[ND_LOG_BUFFER_SIZE];
-    void            hexdump(char* inputData, char *outBuffer, int size);
+    void            hexdump(unsigned char* inputData, unsigned char *outBuffer, int size);
     
-
+    
 };
 
 #endif
