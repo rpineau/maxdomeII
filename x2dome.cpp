@@ -283,7 +283,6 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
                     mInitCalibration = true;
                     // move 10 ticks forward to the right from inside the dome (hopefully) :)
                     maxDome.Goto_Azimuth_MaxDomeII(1, 10);
-                    // nexDome.calibrate();
                     return;
                 }
             }
