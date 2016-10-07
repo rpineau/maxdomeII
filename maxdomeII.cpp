@@ -797,7 +797,7 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
  */
 void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
 {
-    dir = 0;
+    dir = MAXDOMEII_EW_DIR;
     
     ticks = floor(0.5 + (pdAz - mHomeAz) * mNbTicksPerRev / 360.0);
     while (ticks > mNbTicksPerRev) ticks -= mNbTicksPerRev;
