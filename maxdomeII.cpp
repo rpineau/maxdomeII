@@ -547,7 +547,9 @@ int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, double dAz)
     int err;
     int nTicks;
     int dir;
-    
+
+    mParkAz = dAz;
+
     AzToTicks(dAz, dir, (int &)nTicks);
     err = SetPark_MaxDomeII(nParkOnShutter, nTicks);
     return err;

@@ -216,7 +216,6 @@ int X2Dome::execModalSettingsDialog()
         if(m_bLinked)
         {
             maxDome.setHomeAz(dHomeAz);
-            maxDome.setParkAz(dHomeAz);
             maxDome.SetPark_MaxDomeII(!operateAnyAz, dParkAz);
             maxDome.setNbTicksPerRev(nTicksPerRev);
         }
