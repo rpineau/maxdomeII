@@ -332,7 +332,7 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
 /*
 	Go to a new azimuth position
  
-	@param nDir Direcction of the movement. 0 E to W. 1 W to E
+	@param nDir Direcction of the movement. 1 E to W. 2 W to E
 	@param nTicks Ticks from home position in E to W direction.
 	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
@@ -804,15 +804,20 @@ void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
     while (ticks < 0) ticks += mNbTicksPerRev;
     
     // find the dirrection with the shortest path
-    if( (mCurrentAzPosition < pdAz) && (mCurrentAzPosition <(pdAz -180)))
+    if (pdAz > mCurrentAzPosition)
     {
-        dir = 1;
+        if (pdAz - mCurrentAzPosition > 180.0)
+            dir = MAXDOMEII_WE_DIR;
+        else
+            dir = MAXDOMEII_EW_DIR;
     }
-    else if (mCurrentAzPosition > pdAz)
+    else
     {
-        dir = 1;
+        if (mCurrentAzPosition - pdAz > 180.0)
+            dir = MAXDOMEII_EW_DIR;
+        else
+            dir = MAXDOMEII_WE_DIR;
     }
-    
 }
 
 
