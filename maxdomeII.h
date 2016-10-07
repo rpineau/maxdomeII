@@ -36,9 +36,9 @@
 #include "../../licensedinterfaces/serxinterface.h"
 #include "../../licensedinterfaces/loggerinterface.h"
 
-#define ND_LOG_BUFFER_SIZE 256
+#define LOG_BUFFER_SIZE 256
 
-#define MAX_BUFFER 15			// Message length can be up to 12 bytes.
+#define MD_BUFFER_SIZE 15			// Message length can be up to 12 bytes.
 #define MAX_TIMEOUT 5000        // timeout after 5 seonds. (value is in ms).
 // Start byte
 #define START 0x01
@@ -75,7 +75,7 @@ enum AZ_Status {As_IDLE = 1, As_MOVING_WE, As_MOVING_EW, As_IDLE2, As_ERROR};
 enum SH_Status {Ss_CLOSED = 0, Ss_OPENING, Ss_OPEN, Ss_CLOSING, Ss_ABORTED, Ss_ERROR};
 
 // Error code
-enum MD2_Errors {MD2_OK=0, MD2_CANT_CONNECT, BAD_CMD_RESPONSE};
+enum MD2_Errors {MD2_OK=0, MD2_CANT_CONNECT, BAD_CMD_RESPONSE, MD2_NOT_CONNECTED};
 
 class CMaxDome
 {
@@ -168,7 +168,7 @@ protected:
     
     LoggerInterface *mLogger;
     bool            bDebugLog;
-    char            mLogBuffer[ND_LOG_BUFFER_SIZE];
+    char            mLogBuffer[LOG_BUFFER_SIZE];
     void            hexdump(unsigned char* inputData, unsigned char *outBuffer, int size);
     
     

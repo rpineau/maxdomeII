@@ -50,7 +50,10 @@ CMaxDome::CMaxDome()
     
     mHomeAz = 0;
     mHomeAzInTicks = 0;
-    
+
+    mParkAzInTicks = 0;
+    mParkAz = 0;
+
     mCloseShutterBeforePark = true;
     mShutterOpened = false;
     
@@ -65,8 +68,8 @@ CMaxDome::~CMaxDome()
 
 int CMaxDome::Init_Communication(void)
 {
-    unsigned char cMessage[MAX_BUFFER];
-    unsigned char cHexMessage[ND_LOG_BUFFER_SIZE];
+    unsigned char cMessage[MD_BUFFER_SIZE];
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     unsigned long  nBytesWrite;
     int nReturn;
     int nErrorType = MD2_OK;
@@ -77,8 +80,8 @@ int CMaxDome::Init_Communication(void)
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
     
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MAX_BUFFER);
-        snprintf(mLogBuffer,ND_LOG_BUFFER_SIZE,"[CMaxDome::Init_Communication] cMessage = %s",cHexMessage);
+        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Init_Communication] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
         printf("%s\n",mLogBuffer);
     }
@@ -94,8 +97,8 @@ int CMaxDome::Init_Communication(void)
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MAX_BUFFER);
-        snprintf(mLogBuffer,ND_LOG_BUFFER_SIZE,"[CMaxDome::Init_Communication] response = %s\n",cHexMessage);
+        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Init_Communication] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
         printf("%s\n",mLogBuffer);
     }
@@ -156,8 +159,7 @@ bool CMaxDome::Connect(const char *szPort)
         bIsConnected = false;
         pSerx->close();
     }
-    
-    // getParkAz();
+
     return bIsConnected;
 }
 
@@ -175,7 +177,7 @@ void CMaxDome::Disconnect(void)
 /*
 	Calculates or checks the checksum
 	It ignores first byte
-	For security we limit the checksum calculation to MAX_BUFFER length
+	For security we limit the checksum calculation to MD_BUFFER_SIZE length
  
 	@param cMessage Pointer to unsigned char array with the message
 	@param nLen Length of the message
@@ -186,7 +188,7 @@ signed char CMaxDome::checksum_MaxDomeII(unsigned char *cMessage, int nLen)
     int nIdx;
     char nChecksum = 0;
     
-    for (nIdx = 1; nIdx < nLen && nIdx < MAX_BUFFER; nIdx++)
+    for (nIdx = 1; nIdx < nLen && nIdx < MD_BUFFER_SIZE; nIdx++)
     {
         nChecksum -= cMessage[nIdx];
     }
@@ -204,13 +206,13 @@ signed char CMaxDome::checksum_MaxDomeII(unsigned char *cMessage, int nLen)
 int CMaxDome::ReadResponse_MaxDomeII(unsigned char *cMessage)
 {
     unsigned long nBytesRead;
-    int nLen = MAX_BUFFER;
+    int nLen = MD_BUFFER_SIZE;
     char nChecksum;
     int nErrorType = MD2_OK;
     
-    memset(cMessage, 0, MAX_BUFFER);
+    memset(cMessage, 0, MD_BUFFER_SIZE);
     
-    // Look for a 0x01 starting character, until time out occurs or MAX_BUFFER characters was read
+    // Look for a 0x01 starting character, until time out occurs or MD_BUFFER_SIZE characters was read
     while (*cMessage != 0x01 && nErrorType == MD2_OK )
     {
         nErrorType = pSerx->readFile(cMessage, 1, nBytesRead, MAX_TIMEOUT);
@@ -247,7 +249,7 @@ int CMaxDome::ReadResponse_MaxDomeII(unsigned char *cMessage)
  */
 int CMaxDome::Abort_Azimuth_MaxDomeII(void)
 {
-    unsigned char cMessage[MAX_BUFFER];
+    unsigned char cMessage[MD_BUFFER_SIZE];
     // int nErrorType;
     unsigned long  nBytesWrite;
     int nReturn;
@@ -284,22 +286,22 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
  */
 int CMaxDome::Home_Azimuth_MaxDomeII(void)
 {
-    unsigned char cMessage[MAX_BUFFER];
-    unsigned char cHexMessage[ND_LOG_BUFFER_SIZE];
+    unsigned char cMessage[MD_BUFFER_SIZE];
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
     
-    memset(cMessage, 0, MAX_BUFFER);
+    memset(cMessage, 0, MD_BUFFER_SIZE);
     cMessage[0] = 0x01;
     cMessage[1] = 0x02;		// Will follow 2 bytes more
     cMessage[2] = HOME_CMD;
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
     
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MAX_BUFFER);
-        snprintf(mLogBuffer,ND_LOG_BUFFER_SIZE,"[CMaxDome::Home_Azimuth_MaxDomeII] cMessage = %s",cHexMessage);
+        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Home_Azimuth_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
         printf("%s\n",mLogBuffer);
     }
@@ -312,8 +314,8 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
     nReturn = ReadResponse_MaxDomeII(cMessage);
     
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MAX_BUFFER);
-        snprintf(mLogBuffer,ND_LOG_BUFFER_SIZE,"[CMaxDome::Home_Azimuth_MaxDomeII] response = %s\n",cHexMessage);
+        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Home_Azimuth_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
         printf("%s\n",mLogBuffer);
     }
@@ -336,8 +338,8 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
  */
 int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
 {
-    unsigned char cMessage[MAX_BUFFER];
-    unsigned char cHexMessage[ND_LOG_BUFFER_SIZE];
+    unsigned char cMessage[MD_BUFFER_SIZE];
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     int nErrorType=0;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -352,8 +354,8 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
     cMessage[6] = checksum_MaxDomeII(cMessage, 6);
     
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MAX_BUFFER);
-        snprintf(mLogBuffer,ND_LOG_BUFFER_SIZE,"[CMaxDome::Goto_Azimuth_MaxDomeII] cMessage = %s",cHexMessage);
+        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Goto_Azimuth_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
         printf("%s\n",mLogBuffer);
     }
@@ -368,8 +370,8 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
         return nReturn;
     
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MAX_BUFFER);
-        snprintf(mLogBuffer,ND_LOG_BUFFER_SIZE,"[CMaxDome::Goto_Azimuth_MaxDomeII] response = %s\n",cHexMessage);
+        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Goto_Azimuth_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
         printf("%s\n",mLogBuffer);
     }
@@ -414,8 +416,8 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
  */
 int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition)
 {
-    unsigned char cMessage[MAX_BUFFER];
-    unsigned char cHexMessage[ND_LOG_BUFFER_SIZE];
+    unsigned char cMessage[MD_BUFFER_SIZE];
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -426,8 +428,8 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
     
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MAX_BUFFER);
-        snprintf(mLogBuffer,ND_LOG_BUFFER_SIZE,"[CMaxDome::Status_MaxDomeII] cMessage = %s",cHexMessage);
+        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Status_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
         printf("%s\n",mLogBuffer);
     }
@@ -440,8 +442,8 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     nReturn = ReadResponse_MaxDomeII(cMessage);
     
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MAX_BUFFER);
-        snprintf(mLogBuffer,ND_LOG_BUFFER_SIZE,"[CMaxDome::Status_MaxDomeII] response = %s\n",cHexMessage);
+        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Status_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
         printf("%s\n",mLogBuffer);
     }
@@ -470,7 +472,7 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
  */
 int CMaxDome::Ack_MaxDomeII(void)
 {
-    unsigned char cMessage[MAX_BUFFER];
+    unsigned char cMessage[MD_BUFFER_SIZE];
     int nErrorType = MD2_OK;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -505,7 +507,7 @@ int CMaxDome::Ack_MaxDomeII(void)
  */
 int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
 {
-    unsigned char cMessage[MAX_BUFFER];
+    unsigned char cMessage[MD_BUFFER_SIZE];
     int nErrorType;
     unsigned long  nBytesWrite;
     int nReturn;
@@ -575,6 +577,9 @@ int CMaxDome::Park_MaxDomeII(void)
 int CMaxDome::Unpark(void)
 {
     mParked = false;
+    mCurrentAzPosition = mParkAz;
+    Sync_Dome(mCurrentAzPosition);
+
     return 0;
 }
 
@@ -586,7 +591,7 @@ int CMaxDome::Unpark(void)
  */
 int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
 {
-    unsigned char cMessage[MAX_BUFFER];
+    unsigned char cMessage[MD_BUFFER_SIZE];
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -628,7 +633,7 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
  */
 int CMaxDome::Open_Shutter_MaxDomeII()
 {
-    unsigned char cMessage[MAX_BUFFER];
+    unsigned char cMessage[MD_BUFFER_SIZE];
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -661,7 +666,7 @@ int CMaxDome::Open_Shutter_MaxDomeII()
  */
 int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
 {
-    unsigned char cMessage[MAX_BUFFER];
+    unsigned char cMessage[MD_BUFFER_SIZE];
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -694,7 +699,7 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
  */
 int CMaxDome::Close_Shutter_MaxDomeII()
 {
-    unsigned char cMessage[MAX_BUFFER];
+    unsigned char cMessage[MD_BUFFER_SIZE];
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -727,7 +732,7 @@ int CMaxDome::Close_Shutter_MaxDomeII()
  */
 int CMaxDome::Abort_Shutter_MaxDomeII()
 {
-    unsigned char cMessage[MAX_BUFFER];
+    unsigned char cMessage[MD_BUFFER_SIZE];
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -760,7 +765,7 @@ int CMaxDome::Abort_Shutter_MaxDomeII()
  */
 int CMaxDome::Exit_Shutter_MaxDomeII()
 {
-    unsigned char cMessage[MAX_BUFFER];
+    unsigned char cMessage[MD_BUFFER_SIZE];
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -920,25 +925,14 @@ int CMaxDome::IsParkComplete(bool &complete)
 int CMaxDome::IsUnparkComplete(bool &complete)
 {
     int err=0;
-    unsigned tmpAz;
-    unsigned tmpHomePosition;
-    enum SH_Status tmpShutterStatus;
-    enum AZ_Status tmpAzimuthStatus;
-    
-    err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
-    if(err)
-        return err;
-    
-    if(tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2)
-    {
-        complete = true;
-        mParked = false;
-    }
-    else
-        complete = false;
-    
+
+    if(!bIsConnected)
+        return MD2_NOT_CONNECTED;
+
+    mParked = false;
+    complete = true;
+
     return err;
-    
 }
 
 int CMaxDome::IsFindHomeComplete(bool &complete)
@@ -974,21 +968,45 @@ int CMaxDome::getNbTicksPerRev()
 
 void CMaxDome::setNbTicksPerRev(int nbTicksPerRev)
 {
+    int err = 0;
     mNbTicksPerRev = nbTicksPerRev;
-    if(bIsConnected)
-        SetTicksPerCount_MaxDomeII(mNbTicksPerRev);
+    if(bIsConnected) {
+        err = SetTicksPerCount_MaxDomeII(mNbTicksPerRev);
+        if(err) {
+            snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::setNbTicksPerRev -> SetTicksPerCount_MaxDomeII] err = %d",err);
+            mLogger->out(mLogBuffer);
+            printf("%s\n",mLogBuffer);
+        }
+    }
 }
 
 
 double CMaxDome::getHomeAz()
 {
+/*
+    int err=0;
+    unsigned tmpAz;
+    unsigned tmpHomePosition;
+    enum SH_Status tmpShutterStatus;
+    enum AZ_Status tmpAzimuthStatus;
+    if(bIsConnected) {
+        err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
+        if(err)
+            return err;
+        TicksToAz(tmpHomePosition, mHomeAz);
+    }
+*/
     return mHomeAz;
 }
 
 void CMaxDome::setHomeAz(double dAz)
 {
     mHomeAz = dAz;
-    
+/*
+    if(bIsConnected) {
+
+    }
+*/
 }
 
 
@@ -997,16 +1015,16 @@ double CMaxDome::getParkAz()
     //if(bIsConnected)
     //    getDomeParkAz(mParkAz);
     return mParkAz;
-    
 }
 
 void CMaxDome::setParkAz(double dAz)
 {
     int dir;
     mParkAz = dAz;
-    AzToTicks(dAz, dir, (int &)mParkAzInTicks);
-    
-    
+    if(bIsConnected) {
+        AzToTicks(dAz, dir, (int &)mParkAzInTicks);
+        SetPark_MaxDomeII(mCloseShutterBeforePark, dAz);
+    }
 }
 
 bool CMaxDome::getCloseShutterBeforePark()
