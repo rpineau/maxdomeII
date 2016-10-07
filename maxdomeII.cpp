@@ -43,7 +43,7 @@ CMaxDome::CMaxDome()
     pSerx = NULL;
     bIsConnected = false;
     
-    mNbTicksPerRev = 0;
+    mNbTicksPerRev = 227; // default value for Sirius 2.3m dome.
     
     mCurrentAzPosition = 0;
     mCurrentAzPositionInTicks = 0;
@@ -64,6 +64,67 @@ CMaxDome::CMaxDome()
 CMaxDome::~CMaxDome()
 {
     
+}
+
+bool CMaxDome::Connect(const char *szPort)
+{
+    int err;
+    unsigned tmpAz;
+    unsigned tmpHomePosition;
+    enum SH_Status tmpShutterStatus;
+    enum AZ_Status tmpAzimuthStatus;
+
+    // 19200 8N1
+    // if(pSerx->open(szPort,19200) == 0)
+    if(pSerx->open(szPort, 19200, SerXInterface::B_NOPARITY, "-DTR_CONTROL 1") == 0)
+
+        bIsConnected = true;
+    else
+        bIsConnected = false;
+
+    // Check to see if we can't even connect to the device
+    if(!bIsConnected)
+        return false;
+
+    // bIsConnected = GetFirmware(szFirmware);
+    pSerx->purgeTxRx();
+
+    printf("bIsConnected = %d\n", bIsConnected);
+
+    // init the comms
+    err = Init_Communication();
+    printf("Init_Communication err = %d\n", err);
+    printf("bIsConnected = %d\n", bIsConnected);
+
+    if(err)
+    {
+        pSerx->close();
+        bIsConnected = false;
+        return bIsConnected;
+    }
+
+    // get the device status to make sure we're properly connected.
+    err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
+    printf("Status_MaxDomeII err = %d\n", err);
+    printf("bIsConnected = %d\n", bIsConnected);
+    if(err)
+    {
+        bIsConnected = false;
+        pSerx->close();
+    }
+
+    return bIsConnected;
+}
+
+
+void CMaxDome::Disconnect(void)
+{
+    if(bIsConnected)
+    {
+        Exit_Shutter_MaxDomeII();
+        pSerx->close();
+    }
+    bIsConnected = false;
 }
 
 int CMaxDome::Init_Communication(void)
@@ -113,66 +174,6 @@ int CMaxDome::Init_Communication(void)
     
 }
 
-bool CMaxDome::Connect(const char *szPort)
-{
-    int err;
-    unsigned tmpAz;
-    unsigned tmpHomePosition;
-    enum SH_Status tmpShutterStatus;
-    enum AZ_Status tmpAzimuthStatus;
-    
-    // 19200 8N1
-    // if(pSerx->open(szPort,19200) == 0)
-    if(pSerx->open(szPort, 19200, SerXInterface::B_NOPARITY, "-DTR_CONTROL 1") == 0)
-        
-        bIsConnected = true;
-    else
-        bIsConnected = false;
-    
-    // Check to see if we can't even connect to the device
-    if(!bIsConnected)
-        return false;
-    
-    // bIsConnected = GetFirmware(szFirmware);
-    pSerx->purgeTxRx();
-    
-    printf("bIsConnected = %d\n", bIsConnected);
-    
-    // init the comms
-    err = Init_Communication();
-    printf("Init_Communication err = %d\n", err);
-    printf("bIsConnected = %d\n", bIsConnected);
-    
-    if(err)
-    {
-        pSerx->close();
-        bIsConnected = false;
-        return bIsConnected;
-    }
-    
-    // get the device status to make sure we're properly connected.
-    err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
-    printf("Status_MaxDomeII err = %d\n", err);
-    printf("bIsConnected = %d\n", bIsConnected);
-    if(err)
-    {
-        bIsConnected = false;
-        pSerx->close();
-    }
-
-    return bIsConnected;
-}
-
-
-void CMaxDome::Disconnect(void)
-{
-    if(bIsConnected)
-    {
-        Exit_Shutter_MaxDomeII();
-        pSerx->close();
-    }
-    bIsConnected = false;
-}
 
 /*
 	Calculates or checks the checksum
