@@ -945,6 +945,8 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
         return err;
     
     if((tmpAz == 1) && (tmpAzimuthStatus == As_IDLE2)) {
+        // goto mHomeAz to be clean as the find home pass home by 1 click (at least)
+        Goto_Azimuth_MaxDomeII(mHomeAz);
         complete = true;
         mHomed = true;
     }
