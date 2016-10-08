@@ -418,7 +418,6 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
 int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -428,13 +427,7 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     cMessage[2] = STATUS_CMD;
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
     
-    if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
-        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Status_MaxDomeII] cMessage = %s",cHexMessage);
-        mLogger->out(mLogBuffer);
-        printf("%s\n",mLogBuffer);
-    }
-    
+
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
     
     if (nErrorType != MD2_OK)
@@ -442,12 +435,6 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
     
-    if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
-        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Status_MaxDomeII] response = %s\n",cHexMessage);
-        mLogger->out(mLogBuffer);
-        printf("%s\n",mLogBuffer);
-    }
     if (nReturn != 0)
         return nReturn;
     
@@ -832,7 +819,7 @@ void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
 void CMaxDome::TicksToAz(int ticks, double &pdAz)
 {
     
-    pdAz = mHomeAzInTicks + ticks * 360.0 / mNbTicksPerRev;
+    pdAz = mHomeAz + (ticks * 360.0 / mNbTicksPerRev);
     while (pdAz < 0) pdAz += 360;
     while (pdAz >= 360) pdAz -= 360;
 }
