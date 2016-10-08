@@ -34,8 +34,6 @@ X2Dome::X2Dome(const char* pszSelection,
 	m_pIOMutex						= pIOMutex;
 	m_pTickCount					= pTickCount;
 
-    int ticks;
-
 	m_bLinked = false;
     maxDome.SetSerxPointer(pSerX);
     maxDome.setLogger(pLogger);
