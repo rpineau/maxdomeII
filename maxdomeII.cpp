@@ -955,13 +955,14 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
     if(err)
         return err;
     
-    if((tmpHomePosition == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
-    {
+    if((tmpAz == 1) && (tmpAzimuthStatus == As_IDLE2)) {
         complete = true;
         mHomed = true;
     }
-    else
+    else {
         complete = false;
+        mHomed = false;
+    }
     
     return err;
     
