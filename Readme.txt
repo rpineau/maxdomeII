@@ -4,7 +4,7 @@ Ferran Casarramona ( https://sourceforge.net/p/indi/code/HEAD/tree/trunk/3rdpart
 
 This is beta code..
 The dome rotation part was tested (connect/disconnect, find home, park/unpark and goto) but not the shutter code.
-Due to the way the controller work it is recommended to set the pulling rate in TheSkyX Pro to 300 ms (Dome update inteerval in imaging setup -> dome).
+Due to the way the controller work it is recommended to set the pulling rate in TheSkyX Pro to 300 ms (Dome update interval in imaging setup -> dome).
 
 
 Rodolphe
