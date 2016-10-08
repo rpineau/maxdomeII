@@ -546,10 +546,14 @@ int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, double dAz)
 int CMaxDome::Sync_Dome(double dAz)
 {
     int err = 0;
-    int dir;
-    
+
+    if(bDebugLog) {
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Sync_Dome] dAz = %3.2f",dAz);
+        mLogger->out(mLogBuffer);
+        printf("%s\n",mLogBuffer);
+    }
+
     mCurrentAzPosition = dAz;
-    AzToTicks(dAz, dir, (int &)mCurrentAzPositionInTicks);
     return err;
 }
 
@@ -568,8 +572,6 @@ int CMaxDome::Unpark(void)
 {
     mParked = false;
     mCurrentAzPosition = mParkAz;
-    Sync_Dome(mCurrentAzPosition);
-
     return 0;
 }
 
