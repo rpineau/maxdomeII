@@ -1049,8 +1049,9 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
     
     if((tmpAz == 1) && (tmpAzimuthStatus == As_IDLE2)) {
         if (mCalibrating) {
-            if( tmpAz < tmpHomePosition) // we've crossed the home position.
-                mNbTicksPerRev = tmpHomePosition +1;
+            if( tmpAz < tmpHomePosition) {// we've crossed the home position.
+                setNbTicksPerRev(tmpHomePosition +1);
+            }
             mCalibrating = false;
         }
         // goto mHomeAz to be clean as the find home pass home by 1 click (at least)
