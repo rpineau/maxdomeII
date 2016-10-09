@@ -139,6 +139,7 @@ public:
     
     double getCurrentAz();
     void setCurrentAz(double dAz);
+    void setCalibrating(bool bCal);
     
     void setDebugLog(bool enable);
 protected:
@@ -151,6 +152,7 @@ protected:
     bool            mParked;
     bool            mCloseShutterBeforePark;
     bool            mShutterOpened;
+    bool            mCalibrating;
     
     unsigned        mNbTicksPerRev;
     

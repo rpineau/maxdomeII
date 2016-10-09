@@ -301,6 +301,7 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 
                 if(complete) {
                     mCalibratingDome = true;
+                    maxDome.setCalibrating(mCalibratingDome);
                     mInitCalibration = false;
                     maxDome.Home_Azimuth_MaxDomeII();
                 }
@@ -325,6 +326,7 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
                 if(complete) {
                     mHomingDome = false;
                     mCalibratingDome = false;
+                    maxDome.setCalibrating(mCalibratingDome);
                     mInitCalibration = false;
                     // enable "ok" and "calibrate"
                     uiex->setEnabled("pushButton",true);

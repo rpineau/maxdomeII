@@ -59,6 +59,8 @@ CMaxDome::CMaxDome()
     
     mParked = true;
     mHomed = false;
+    mCalibrating = false;
+    
 }
 
 CMaxDome::~CMaxDome()
@@ -1046,10 +1048,13 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
         return err;
     
     if((tmpAz == 1) && (tmpAzimuthStatus == As_IDLE2)) {
-        if( tmpAz < tmpHomePosition) // we've crossed the home position.
-            mNbTicksPerRev = tmpHomePosition +1;
+        if (mCalibrating) {
+            if( tmpAz < tmpHomePosition) // we've crossed the home position.
+                mNbTicksPerRev = tmpHomePosition +1;
+            mCalibrating = false;
+        }
         // goto mHomeAz to be clean as the find home pass home by 1 click (at least)
-        Goto_Azimuth_MaxDomeII(mHomeAz);\
+        Goto_Azimuth_MaxDomeII(mHomeAz);
         complete = true;
         mHomed = true;
     }
@@ -1135,6 +1140,12 @@ double CMaxDome::getCurrentAz()
 void CMaxDome::setCurrentAz(double dAz)
 {
     mCurrentAzPosition = dAz;
+}
+
+
+void CMaxDome::setCalibrating(bool bCal)
+{
+    mCalibrating = bCal;
 }
 
 void CMaxDome::setDebugLog(bool enable)
