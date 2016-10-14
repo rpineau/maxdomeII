@@ -98,8 +98,8 @@ public:
     int Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition);
     int Goto_Azimuth_MaxDomeII(double newAz);
     int Ack_MaxDomeII(void);
-    int SetPark_MaxDomeII(int nParkOnShutter, int nTicks);
-    int SetPark_MaxDomeII(int nParkOnShutter, double dAz);
+    int SetPark_MaxDomeII(unsigned nParkOnShutter, unsigned nTicks);
+    int SetPark_MaxDomeII(unsigned nParkOnShutter, double dAz);
     int SetTicksPerCount_MaxDomeII(int nTicks);
     int Park_MaxDomeII(void);
     int Unpark(void);
@@ -113,8 +113,8 @@ public:
     int Exit_Shutter_MaxDomeII(void);
     
     // convertion functions
-    void AzToTicks(double pdAz, int &dir, int &ticks);
-    void TicksToAz(int ticks, double &pdAz);
+    void AzToTicks(double pdAz, unsigned &dir, unsigned &ticks);
+    void TicksToAz(unsigned ticks, double &pdAz);
     
     // command complete functions
     int IsGoToComplete(bool &complete);
@@ -126,7 +126,7 @@ public:
     
     // getter/setter
     int getNbTicksPerRev();
-    void setNbTicksPerRev(int nbTicksPerRev);
+    void setNbTicksPerRev(unsigned nbTicksPerRev);
     
     double getHomeAz();
     void setHomeAz(double dAz);

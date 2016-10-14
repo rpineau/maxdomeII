@@ -752,7 +752,7 @@ void X2Dome::portNameOnToCharPtr(char* pszPort, const int& nMaxSize) const
     if (NULL == pszPort)
         return;
 
-    sprintf(pszPort, DEF_PORT_NAME);
+    snprintf(pszPort, nMaxSize,  DEF_PORT_NAME);
 
     if (m_pIniUtil)
         m_pIniUtil->readString(PARENT_KEY, CHILD_KEY_PORTNAME, pszPort, pszPort, nMaxSize);

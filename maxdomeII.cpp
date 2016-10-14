@@ -31,9 +31,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <memory.h>
-// #ifdef SB_MAC_BUILD
+#ifdef SB_MAC_BUILD
 #include <unistd.h>
-// #endif
+#endif
 
 CMaxDome::CMaxDome()
 {
@@ -401,8 +401,8 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
  */
 int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
 {
-    int dir;
-    int ticks;
+    unsigned dir;
+    unsigned ticks;
     int err=0;
     
     AzToTicks(newAz, dir, ticks);
@@ -519,7 +519,7 @@ int CMaxDome::Ack_MaxDomeII(void)
 	@param nTicks Ticks from home position in E to W direction.
 	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
-int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
+int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, unsigned nTicks)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
     unsigned char cHexMessage[LOG_BUFFER_SIZE];
@@ -565,16 +565,16 @@ int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, int nTicks)
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
-int CMaxDome::SetPark_MaxDomeII(int nParkOnShutter, double dAz)
+int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, double dAz)
 
 {
     int err;
-    int nTicks;
-    int dir;
+    unsigned nTicks;
+    unsigned dir;
 
     mParkAz = dAz;
 
-    AzToTicks(dAz, dir, (int &)nTicks);
+    AzToTicks(dAz, dir, (unsigned &)nTicks);
     err = SetPark_MaxDomeII(nParkOnShutter, nTicks);
     return err;
 }
@@ -890,7 +890,7 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
 	Convert pdAz to number of ticks from home and direction.
  
  */
-void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
+void CMaxDome::AzToTicks(double pdAz, unsigned &dir, unsigned &ticks)
 {
     dir = MAXDOMEII_EW_DIR;
     
@@ -921,7 +921,7 @@ void CMaxDome::AzToTicks(double pdAz, int &dir, int &ticks)
  
  */
 
-void CMaxDome::TicksToAz(int ticks, double &pdAz)
+void CMaxDome::TicksToAz(unsigned ticks, double &pdAz)
 {
     
     pdAz = mHomeAz + (ticks * 360.0 / mNbTicksPerRev);
@@ -1075,7 +1075,7 @@ int CMaxDome::getNbTicksPerRev()
     return mNbTicksPerRev;
 }
 
-void CMaxDome::setNbTicksPerRev(int nbTicksPerRev)
+void CMaxDome::setNbTicksPerRev(unsigned nbTicksPerRev)
 {
     int err = 0;
     mNbTicksPerRev = nbTicksPerRev;
@@ -1108,11 +1108,11 @@ double CMaxDome::getParkAz()
 
 void CMaxDome::setParkAz(double dAz)
 {
-    int dir;
+    unsigned dir;
     int err = 0;
     mParkAz = dAz;
     if(bIsConnected) {
-        AzToTicks(dAz, dir, (int &)mParkAzInTicks);
+        AzToTicks(dAz, dir, (unsigned &)mParkAzInTicks);
         err = SetPark_MaxDomeII(mCloseShutterBeforePark, dAz);
         if(err) {
             snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::setParkAz -> SetPark_MaxDomeII] err = %d",err);
