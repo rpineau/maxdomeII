@@ -144,7 +144,8 @@ int CMaxDome::Init_Communication(void)
     }
 
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
-    
+    pSerx->flushTx();
+
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;
     
@@ -264,7 +265,8 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
     }
 
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
-    
+    pSerx->flushTx();
+
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;
     
@@ -315,7 +317,8 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
     }
     
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
-    
+    pSerx->flushTx();
+
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;
     
@@ -367,7 +370,8 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
     }
     
     nErrorType = pSerx->writeFile(cMessage, 7, nBytesWrite);
-    
+    pSerx->flushTx();
+
     if (nBytesWrite != 7)
         return MD2_CANT_CONNECT;
     
@@ -439,7 +443,8 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     }
 
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
-    
+    pSerx->flushTx();
+
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;
     
@@ -492,7 +497,8 @@ int CMaxDome::Ack_MaxDomeII(void)
         mLogger->out(mLogBuffer);
     }
     nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
-    
+    pSerx->flushTx();
+
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;
     
@@ -542,7 +548,8 @@ int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, unsigned nTicks)
         mLogger->out(mLogBuffer);
     }
     nErrorType = pSerx->writeFile(cMessage, 7, nBytesWrite);
-    
+    pSerx->flushTx();
+
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;
     
@@ -640,6 +647,8 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
         mLogger->out(mLogBuffer);
     }
     nErrorType = pSerx->writeFile(cMessage, 6, nBytesWrite);
+    pSerx->flushTx();
+
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;
     
@@ -691,7 +700,8 @@ int CMaxDome::Open_Shutter_MaxDomeII()
         mLogger->out(mLogBuffer);
     }
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
-    
+    pSerx->flushTx();
+
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;
     
@@ -735,7 +745,8 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
         mLogger->out(mLogBuffer);
     }
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
-    
+    pSerx->flushTx();
+
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;
     
@@ -779,7 +790,8 @@ int CMaxDome::Close_Shutter_MaxDomeII()
         mLogger->out(mLogBuffer);
     }
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
-    
+    pSerx->flushTx();
+
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;
     
@@ -823,7 +835,8 @@ int CMaxDome::Abort_Shutter_MaxDomeII()
         mLogger->out(mLogBuffer);
     }
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
-    
+    pSerx->flushTx();
+
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;
     
@@ -867,6 +880,7 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
         mLogger->out(mLogBuffer);
     }
     nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
+    pSerx->flushTx();
     
     if (nErrorType != MD2_OK)
         return MD2_CANT_CONNECT;
