@@ -2,7 +2,6 @@
 
 mkdir -p ROOT/tmp/maxdomeII_X2/
 cp "../maxdomeII.ui" ROOT/tmp/maxdomeII_X2/
-cp "../maxdomeII.png" ROOT/tmp/maxdomeII_X2/
 cp "../domelist MaxDomeII.txt" ROOT/tmp/maxdomeII_X2/
 cp "../build/Release/libmaxdomeII.dylib" ROOT/tmp/maxdomeII_X2/
 
