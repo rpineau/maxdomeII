@@ -1,4 +1,4 @@
-#include "maxdomeii.h"
+#include "maxdomeII.h"
 #include "../../licensedinterfaces/domedriverinterface.h"
 #include "../../licensedinterfaces/serialportparams2interface.h"
 #include "../../licensedinterfaces/modalsettingsdialoginterface.h"
