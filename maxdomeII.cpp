@@ -908,7 +908,7 @@ void CMaxDome::AzToTicks(double pdAz, unsigned &dir, unsigned &ticks)
 {
     dir = MAXDOMEII_EW_DIR;
     
-    ticks = floor(0.5 + (pdAz - mHomeAz) * mNbTicksPerRev / 360.0);
+    ticks = (int) floor(0.5 + (pdAz - mHomeAz) * mNbTicksPerRev / 360.0);
     while (ticks > mNbTicksPerRev) ticks -= mNbTicksPerRev;
     while (ticks < 0) ticks += mNbTicksPerRev;
     
