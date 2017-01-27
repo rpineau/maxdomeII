@@ -1,0 +1,312 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		9379BF3F1CE1235F00E4BAC0 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9379BF391CE1235F00E4BAC0 /* main.cpp */; };
+		9379BF401CE1235F00E4BAC0 /* main.h in Headers */ = {isa = PBXBuildFile; fileRef = 9379BF3A1CE1235F00E4BAC0 /* main.h */; };
+		9379BF411CE1235F00E4BAC0 /* maxdomeII.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9379BF3B1CE1235F00E4BAC0 /* maxdomeII.cpp */; };
+		9379BF421CE1235F00E4BAC0 /* maxdomeII.h in Headers */ = {isa = PBXBuildFile; fileRef = 9379BF3C1CE1235F00E4BAC0 /* maxdomeII.h */; };
+		9379BF431CE1235F00E4BAC0 /* x2dome.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9379BF3D1CE1235F00E4BAC0 /* x2dome.cpp */; };
+		9379BF441CE1235F00E4BAC0 /* x2dome.h in Headers */ = {isa = PBXBuildFile; fileRef = 9379BF3E1CE1235F00E4BAC0 /* x2dome.h */; };
+		9379BF461CE1259100E4BAC0 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9379BF451CE1259100E4BAC0 /* CoreFoundation.framework */; };
+		9379BF481CE1259600E4BAC0 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9379BF471CE1259600E4BAC0 /* IOKit.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		9379BF2F1CE122E000E4BAC0 /* libmaxdomeII.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libmaxdomeII.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		9379BF391CE1235F00E4BAC0 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		9379BF3A1CE1235F00E4BAC0 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
+		9379BF3B1CE1235F00E4BAC0 /* maxdomeII.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = maxdomeII.cpp; sourceTree = "<group>"; };
+		9379BF3C1CE1235F00E4BAC0 /* maxdomeII.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = maxdomeII.h; sourceTree = "<group>"; };
+		9379BF3D1CE1235F00E4BAC0 /* x2dome.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = x2dome.cpp; sourceTree = "<group>"; };
+		9379BF3E1CE1235F00E4BAC0 /* x2dome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x2dome.h; sourceTree = "<group>"; };
+		9379BF451CE1259100E4BAC0 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		9379BF471CE1259600E4BAC0 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9379BF2C1CE122E000E4BAC0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9379BF481CE1259600E4BAC0 /* IOKit.framework in Frameworks */,
+				9379BF461CE1259100E4BAC0 /* CoreFoundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		9379BF261CE122E000E4BAC0 = {
+			isa = PBXGroup;
+			children = (
+				9379BF381CE1233A00E4BAC0 /* Frameworks */,
+				9379BF371CE1233100E4BAC0 /* Sources */,
+				9379BF301CE122E000E4BAC0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9379BF301CE122E000E4BAC0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9379BF2F1CE122E000E4BAC0 /* libmaxdomeII.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9379BF371CE1233100E4BAC0 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				9379BF391CE1235F00E4BAC0 /* main.cpp */,
+				9379BF3A1CE1235F00E4BAC0 /* main.h */,
+				9379BF3B1CE1235F00E4BAC0 /* maxdomeII.cpp */,
+				9379BF3C1CE1235F00E4BAC0 /* maxdomeII.h */,
+				9379BF3D1CE1235F00E4BAC0 /* x2dome.cpp */,
+				9379BF3E1CE1235F00E4BAC0 /* x2dome.h */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		9379BF381CE1233A00E4BAC0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9379BF471CE1259600E4BAC0 /* IOKit.framework */,
+				9379BF451CE1259100E4BAC0 /* CoreFoundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		9379BF2D1CE122E000E4BAC0 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9379BF421CE1235F00E4BAC0 /* maxdomeII.h in Headers */,
+				9379BF401CE1235F00E4BAC0 /* main.h in Headers */,
+				9379BF441CE1235F00E4BAC0 /* x2dome.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		9379BF2E1CE122E000E4BAC0 /* maxdomeII */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9379BF331CE122E000E4BAC0 /* Build configuration list for PBXNativeTarget "maxdomeII" */;
+			buildPhases = (
+				9379BF2B1CE122E000E4BAC0 /* Sources */,
+				9379BF2C1CE122E000E4BAC0 /* Frameworks */,
+				9379BF2D1CE122E000E4BAC0 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = maxdomeII;
+			productName = maxdomeII;
+			productReference = 9379BF2F1CE122E000E4BAC0 /* libmaxdomeII.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9379BF271CE122E000E4BAC0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0800;
+				ORGANIZATIONNAME = "RTI-Zone";
+				TargetAttributes = {
+					9379BF2E1CE122E000E4BAC0 = {
+						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = PB97QXVYQC;
+					};
+				};
+			};
+			buildConfigurationList = 9379BF2A1CE122E000E4BAC0 /* Build configuration list for PBXProject "maxdomeII" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 9379BF261CE122E000E4BAC0;
+			productRefGroup = 9379BF301CE122E000E4BAC0 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9379BF2E1CE122E000E4BAC0 /* maxdomeII */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9379BF2B1CE122E000E4BAC0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9379BF431CE1235F00E4BAC0 /* x2dome.cpp in Sources */,
+				9379BF3F1CE1235F00E4BAC0 /* main.cpp in Sources */,
+				9379BF411CE1235F00E4BAC0 /* maxdomeII.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		9379BF311CE122E000E4BAC0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = PB97QXVYQC;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		9379BF321CE122E000E4BAC0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = PB97QXVYQC;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		9379BF341CE122E000E4BAC0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CODE_SIGN_IDENTITY = "";
+				DEVELOPMENT_TEAM = PB97QXVYQC;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_PREFIX = lib;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = SB_MAC_BUILD;
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/\"",
+					"\"$(SRCROOT)/../..\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		9379BF351CE122E000E4BAC0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CODE_SIGN_IDENTITY = "";
+				DEVELOPMENT_TEAM = PB97QXVYQC;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_PREFIX = lib;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = SB_MAC_BUILD;
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/\"",
+					"\"$(SRCROOT)/../..\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9379BF2A1CE122E000E4BAC0 /* Build configuration list for PBXProject "maxdomeII" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9379BF311CE122E000E4BAC0 /* Debug */,
+				9379BF321CE122E000E4BAC0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9379BF331CE122E000E4BAC0 /* Build configuration list for PBXNativeTarget "maxdomeII" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9379BF341CE122E000E4BAC0 /* Debug */,
+				9379BF351CE122E000E4BAC0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9379BF271CE122E000E4BAC0 /* Project object */;
+}
