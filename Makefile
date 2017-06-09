@@ -5,6 +5,7 @@ CFLAGS = -fPIC -Wall -Wextra -O2 -g -DSB_LINUX_BUILD -I. -I./../../
 CPPFLAGS = -fPIC -Wall -Wextra -O2 -g -DSB_LINUX_BUILD -I. -I./../../
 LDFLAGS = -shared -lstdc++
 RM = rm -f
+STRIP = strip
 TARGET_LIB = libmaxdomeII.so
 
 SRCS = main.cpp maxdomeII.cpp x2dome.cpp
@@ -15,6 +16,7 @@ all: ${TARGET_LIB}
 
 $(TARGET_LIB): $(OBJS)
 	$(CC) ${LDFLAGS} -o $@ $^
+	$(STRIP) $@ 2>&1 >/dev/null || true
 
 $(SRCS:.cpp=.d):%.d:%.cpp
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $< >$@
