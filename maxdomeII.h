@@ -53,6 +53,7 @@
 #define GOTO_CMD    0x05		// Go to azimuth position
 #define SHUTTER_CMD 0x06		// Send a command to Shutter
 #define STATUS_CMD  0x07		// Retrieve status
+#define SYMC_CMD    0x08
 #define TICKS_CMD   0x09		// Set the number of tick per revolution of the dome
 #define ACK_CMD     0x0A		// ACK (?)
 #define SETPARK_CMD 0x0B		// Set park coordinates and if need to park before to operating shutter
@@ -98,6 +99,7 @@ public:
     int Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition);
     int Goto_Azimuth_MaxDomeII(double newAz);
     int Ack_MaxDomeII(void);
+    int SyncMode_MaxDomeII(void);
     int SetPark_MaxDomeII(unsigned nParkOnShutter, unsigned nTicks);
     int SetPark_MaxDomeII(unsigned nParkOnShutter, double dAz);
     int SetTicksPerCount_MaxDomeII(int nTicks);
