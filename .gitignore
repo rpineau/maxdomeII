@@ -1,3 +1,9 @@
 *.xcuserdatad
 .DS_Store
 build
+*.opensdf
+*.sdf
+.vs
+Release
+*.pkg
+*.so

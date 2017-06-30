@@ -368,7 +368,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Goto_Azimuth_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    
+
     nErrorType = pSerx->writeFile(cMessage, 7, nBytesWrite);
     pSerx->flushTx();
 
@@ -408,7 +408,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
     unsigned dir;
     unsigned ticks;
     int err=0;
-    
+
     AzToTicks(newAz, dir, ticks);
     err = Goto_Azimuth_MaxDomeII(dir, ticks);
     return err;
@@ -519,6 +519,51 @@ int CMaxDome::Ack_MaxDomeII(void)
 }
 
 /*
+    this switch the park command to a sync command
+	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
+ */
+int CMaxDome::SyncMode_MaxDomeII(void)
+{
+    unsigned char cMessage[MD_BUFFER_SIZE];
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
+    int nErrorType = MD2_OK;
+    unsigned long  nBytesWrite;;
+    int nReturn;
+
+    cMessage[0] = 0x01;
+    cMessage[1] = 0x02;		// Will follow 2 bytes more
+    cMessage[2] = SYMC_CMD;
+    cMessage[3] = checksum_MaxDomeII(cMessage, 3);
+
+    if(bDebugLog) {
+        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Ack_MaxDomeII] cMessage = %s",cHexMessage);
+        mLogger->out(mLogBuffer);
+    }
+    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
+    pSerx->flushTx();
+
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
+
+    nReturn = ReadResponse_MaxDomeII(cMessage);
+    if(bDebugLog) {
+        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Ack_MaxDomeII] response = %s\n",cHexMessage);
+        mLogger->out(mLogBuffer);
+    }
+
+    if (nReturn != 0)
+        return nReturn;
+
+    if (cMessage[2] == (unsigned char)(SYMC_CMD | TO_COMPUTER))
+        return 0;
+
+    return BAD_CMD_RESPONSE;	// Response don't match command
+}
+
+
+/*
 	Set park coordinates and if need to park before to operating shutter
  
 	@param nParkOnShutter 0 operate shutter at any azimuth. 1 go to park position before operating shutter
@@ -596,6 +641,15 @@ int CMaxDome::Sync_Dome(double dAz)
         mLogger->out(mLogBuffer);
         printf("%s\n",mLogBuffer);
     }
+    // this switch the park command to a sync command
+    err = SyncMode_MaxDomeII();
+    if (err)
+        return err;
+
+    // apparently it expect 360 - Az for the zync
+    err = SetPark_MaxDomeII(mCloseShutterBeforePark, 360.0 - dAz);
+    if (err)
+        return err;
 
     mCurrentAzPosition = dAz;
     return err;
@@ -1098,7 +1152,6 @@ void CMaxDome::setNbTicksPerRev(unsigned nbTicksPerRev)
         if(err) {
             snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::setNbTicksPerRev -> SetTicksPerCount_MaxDomeII] err = %d",err);
             mLogger->out(mLogBuffer);
-            printf("%s\n",mLogBuffer);
         }
     }
 }
@@ -1131,7 +1184,6 @@ void CMaxDome::setParkAz(double dAz)
         if(err) {
             snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::setParkAz -> SetPark_MaxDomeII] err = %d",err);
             mLogger->out(mLogBuffer);
-            printf("%s\n",mLogBuffer);
         }
 
     }
