@@ -96,11 +96,11 @@ public:
     int Abort_Azimuth_MaxDomeII(void);
     int Home_Azimuth_MaxDomeII(void);
     int Goto_Azimuth_MaxDomeII(int nDir, int nTicks);
-    int Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition);
+    int Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, int &nAzimuthPosition, int &nHomePosition);
     int Goto_Azimuth_MaxDomeII(double newAz);
     int Ack_MaxDomeII(void);
     int SyncMode_MaxDomeII(void);
-    int SetPark_MaxDomeII(unsigned nParkOnShutter, unsigned nTicks);
+    int SetPark_MaxDomeII(unsigned nParkOnShutter, int nTicks);
     int SetPark_MaxDomeII(unsigned nParkOnShutter, double dAz);
     int SetTicksPerCount_MaxDomeII(int nTicks);
     int Park_MaxDomeII(void);
@@ -115,8 +115,8 @@ public:
     int Exit_Shutter_MaxDomeII(void);
     
     // convertion functions
-    void AzToTicks(double pdAz, unsigned &dir, unsigned &ticks);
-    void TicksToAz(unsigned ticks, double &pdAz);
+    void AzToTicks(double pdAz, unsigned &dir, int &ticks);
+    void TicksToAz(int ticks, double &pdAz);
     
     // command complete functions
     int IsGoToComplete(bool &complete);
@@ -156,18 +156,18 @@ protected:
     bool            mShutterOpened;
     bool            mCalibrating;
     
-    unsigned        mNbTicksPerRev;
+    int        mNbTicksPerRev;
     
-    unsigned        mHomeAzInTicks;
+    int        mHomeAzInTicks;
     double          mHomeAz;
     
-    unsigned        mParkAzInTicks;
+    int        mParkAzInTicks;
     double          mParkAz;
     
-    unsigned        mCurrentAzPositionInTicks;
+    int        mCurrentAzPositionInTicks;
     double          mCurrentAzPosition;
     
-    unsigned        mGotoTicks;
+    int        mGotoTicks;
     SerXInterface   *pSerx;
     
     LoggerInterface *mLogger;
