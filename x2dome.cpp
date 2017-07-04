@@ -402,9 +402,9 @@ int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
 {
     int err;
 
-    unsigned tmpAzInTicks;
+    int tmpAzInTicks;
     double tmpAz;
-    unsigned tmpHomePosition;
+    int tmpHomePosition;
     enum SH_Status tmpShutterStatus;
     enum AZ_Status tmpAzimuthStatus;
 
