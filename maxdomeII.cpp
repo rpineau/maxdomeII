@@ -635,7 +635,8 @@ int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, double dAz)
 int CMaxDome::Sync_Dome(double dAz)
 {
     int err = 0;
-
+    unsigned nTicks;
+    unsigned nDir;
     if(bDebugLog) {
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Sync_Dome] dAz = %3.2f",dAz);
         mLogger->out(mLogBuffer);
@@ -645,9 +646,9 @@ int CMaxDome::Sync_Dome(double dAz)
     err = SyncMode_MaxDomeII();
     if (err)
         return err;
-
-    // apparently it expect 360 - Az for the zync
-    err = SetPark_MaxDomeII(mCloseShutterBeforePark, 360.0 - dAz);
+    // apparently it expect 360 - Az for the zync, so mNbTicksPerRev - nTicks
+    AzToTicks(dAz, nDir, nTicks);
+    err = SetPark_MaxDomeII(mCloseShutterBeforePark, mNbTicksPerRev - nTicks);
     if (err)
         return err;
 
