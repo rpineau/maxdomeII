@@ -236,7 +236,6 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 {
     bool complete = false;
     int err;
-    char tmpBuf[20];
     char errorMessage[LOG_BUFFER_SIZE];
 
     if (!strcmp(pszEvent, "on_pushButtonCancel_clicked")) {
@@ -280,8 +279,8 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
                     mHomingDome = false;
                     mCalibratingDome = false;
                     mInitCalibration = true;
-                    // move 10 ticks forward to the right from inside the dome (hopefully) :)
-                    maxDome.Goto_Azimuth_MaxDomeII(MAXDOMEII_EW_DIR, 10);
+                    // move 50 ticks forward to the right from inside the dome to clear the home sensor.
+                    maxDome.Goto_Azimuth_MaxDomeII(MAXDOMEII_EW_DIR, 50);
                     return;
                 }
             }
@@ -332,8 +331,7 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
                     uiex->setEnabled("pushButton",true);
                     uiex->setEnabled("pushButtonOK",true);
                     // read step per rev from dome
-                    snprintf(tmpBuf,16,"%d",maxDome.getNbTicksPerRev());
-                    uiex->setPropertyString("ticksPerRev","text", tmpBuf);
+                    uiex->setPropertyInt("ticksPerRev","value", maxDome.getNbTicksPerRev());
                     return;
                 }
             }
@@ -404,9 +402,9 @@ int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
 {
     int err;
 
-    unsigned tmpAzInTicks;
+    int tmpAzInTicks;
     double tmpAz;
-    unsigned tmpHomePosition;
+    int tmpHomePosition;
     enum SH_Status tmpShutterStatus;
     enum AZ_Status tmpAzimuthStatus;
 
@@ -462,6 +460,7 @@ int X2Dome::dapiGotoAzEl(double dAz, double dEl)
 int X2Dome::dapiAbort(void)
 {
 
+    X2MutexLocker ml(GetMutex());
     if(!m_bLinked)
         return ERR_NOLINK;
 

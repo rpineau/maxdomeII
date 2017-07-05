@@ -60,6 +60,8 @@ CMaxDome::CMaxDome()
     mParked = true;
     mHomed = false;
     mCalibrating = false;
+	m_bSyncing = false;
+
     
 }
 
@@ -71,8 +73,8 @@ CMaxDome::~CMaxDome()
 bool CMaxDome::Connect(const char *szPort)
 {
     int err;
-    unsigned tmpAz;
-    unsigned tmpHomePosition;
+    int tmpAz;
+    int tmpHomePosition;
     enum SH_Status tmpShutterStatus;
     enum AZ_Status tmpAzimuthStatus;
 
@@ -368,7 +370,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Goto_Azimuth_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    
+
     nErrorType = pSerx->writeFile(cMessage, 7, nBytesWrite);
     pSerx->flushTx();
 
@@ -406,9 +408,9 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
 int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
 {
     unsigned dir;
-    unsigned ticks;
+    int ticks;
     int err=0;
-    
+
     AzToTicks(newAz, dir, ticks);
     err = Goto_Azimuth_MaxDomeII(dir, ticks);
     return err;
@@ -423,7 +425,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
 	@param nHomePosition Returns last position where home was detected
 	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
-int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition)
+int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, int &nAzimuthPosition, int &nHomePosition)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
     unsigned char cHexMessage[LOG_BUFFER_SIZE];
@@ -519,13 +521,58 @@ int CMaxDome::Ack_MaxDomeII(void)
 }
 
 /*
+    this switch the park command to a sync command
+	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
+ */
+int CMaxDome::SyncMode_MaxDomeII(void)
+{
+    unsigned char cMessage[MD_BUFFER_SIZE];
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
+    int nErrorType = MD2_OK;
+    unsigned long  nBytesWrite;;
+    int nReturn;
+
+    cMessage[0] = 0x01;
+    cMessage[1] = 0x02;		// Will follow 2 bytes more
+    cMessage[2] = SYMC_CMD;
+    cMessage[3] = checksum_MaxDomeII(cMessage, 3);
+
+    if(bDebugLog) {
+        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Ack_MaxDomeII] cMessage = %s",cHexMessage);
+        mLogger->out(mLogBuffer);
+    }
+    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
+    pSerx->flushTx();
+
+    if (nErrorType != MD2_OK)
+        return MD2_CANT_CONNECT;
+
+    nReturn = ReadResponse_MaxDomeII(cMessage);
+    if(bDebugLog) {
+        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Ack_MaxDomeII] response = %s\n",cHexMessage);
+        mLogger->out(mLogBuffer);
+    }
+
+    if (nReturn != 0)
+        return nReturn;
+
+    if (cMessage[2] == (unsigned char)(SYMC_CMD | TO_COMPUTER))
+        return 0;
+
+    return BAD_CMD_RESPONSE;	// Response don't match command
+}
+
+
+/*
 	Set park coordinates and if need to park before to operating shutter
  
 	@param nParkOnShutter 0 operate shutter at any azimuth. 1 go to park position before operating shutter
 	@param nTicks Ticks from home position in E to W direction.
 	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
-int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, unsigned nTicks)
+int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, int nTicks)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
     unsigned char cHexMessage[LOG_BUFFER_SIZE];
@@ -561,14 +608,15 @@ int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, unsigned nTicks)
     }
     if (nReturn != MD2_OK)
         return nReturn;
-    
     if (cMessage[2] == (unsigned char)(SETPARK_CMD | TO_COMPUTER))
     {
-        mParkAzInTicks = mHomeAzInTicks + nTicks;
-        mCloseShutterBeforePark = nParkOnShutter;
-        TicksToAz(mParkAzInTicks, mParkAz);
-        return MD2_OK;
-    }
+		mCloseShutterBeforePark = nParkOnShutter;
+		if(!m_bSyncing) {
+			mParkAzInTicks = mHomeAzInTicks + nTicks;
+			TicksToAz(mParkAzInTicks, mParkAz);
+		}
+		return MD2_OK;
+	}
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
@@ -576,12 +624,12 @@ int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, double dAz)
 
 {
     int err;
-    unsigned nTicks;
+    int nTicks;
     unsigned dir;
 
     mParkAz = dAz;
 
-    AzToTicks(dAz, dir, (unsigned &)nTicks);
+    AzToTicks(dAz, dir, nTicks);
     err = SetPark_MaxDomeII(nParkOnShutter, nTicks);
     return err;
 }
@@ -590,12 +638,26 @@ int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, double dAz)
 int CMaxDome::Sync_Dome(double dAz)
 {
     int err = 0;
-
+    int nTicks;
+    unsigned nDir;
     if(bDebugLog) {
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Sync_Dome] dAz = %3.2f",dAz);
         mLogger->out(mLogBuffer);
         printf("%s\n",mLogBuffer);
     }
+    // this switch the park command to a sync command
+    err = SyncMode_MaxDomeII();
+    if (err)
+        return err;
+	m_bSyncing = true;
+	
+    // apparently it expect 360 - Az for the zync, so mNbTicksPerRev - nTicks
+    AzToTicks(dAz, nDir, nTicks);
+    err = SetPark_MaxDomeII(mCloseShutterBeforePark, mNbTicksPerRev - nTicks);
+    if (err)
+        return err;
+
+	m_bSyncing = false;
 
     mCurrentAzPosition = dAz;
     return err;
@@ -904,7 +966,7 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
 	Convert pdAz to number of ticks from home and direction.
  
  */
-void CMaxDome::AzToTicks(double pdAz, unsigned &dir, unsigned &ticks)
+void CMaxDome::AzToTicks(double pdAz, unsigned &dir, int &ticks)
 {
     dir = MAXDOMEII_EW_DIR;
     
@@ -935,7 +997,7 @@ void CMaxDome::AzToTicks(double pdAz, unsigned &dir, unsigned &ticks)
  
  */
 
-void CMaxDome::TicksToAz(unsigned ticks, double &pdAz)
+void CMaxDome::TicksToAz(int ticks, double &pdAz)
 {
     
     pdAz = mHomeAz + (ticks * 360.0 / mNbTicksPerRev);
@@ -947,8 +1009,8 @@ void CMaxDome::TicksToAz(unsigned ticks, double &pdAz)
 int CMaxDome::IsGoToComplete(bool &complete)
 {
     int err = 0;
-    unsigned tmpAz;
-    unsigned tmpHomePosition;
+    int tmpAz;
+    int tmpHomePosition;
     enum SH_Status tmpShutterStatus;
     enum AZ_Status tmpAzimuthStatus;
     
@@ -967,8 +1029,8 @@ int CMaxDome::IsGoToComplete(bool &complete)
 int CMaxDome::IsOpenComplete(bool &complete)
 {
     int err=0;
-    unsigned tmpAz;
-    unsigned tmpHomePosition;
+    int tmpAz;
+    int tmpHomePosition;
     enum SH_Status tmpShutterStatus;
     enum AZ_Status tmpAzimuthStatus;
     
@@ -991,8 +1053,8 @@ int CMaxDome::IsOpenComplete(bool &complete)
 int CMaxDome::IsCloseComplete(bool &complete)
 {
     int err=0;
-    unsigned tmpAz;
-    unsigned tmpHomePosition;
+    int tmpAz;
+    int tmpHomePosition;
     enum SH_Status tmpShutterStatus;
     enum AZ_Status tmpAzimuthStatus;
     
@@ -1015,8 +1077,8 @@ int CMaxDome::IsCloseComplete(bool &complete)
 int CMaxDome::IsParkComplete(bool &complete)
 {
     int err=0;
-    unsigned tmpAz;
-    unsigned tmpHomePosition;
+    int tmpAz;
+    int tmpHomePosition;
     enum SH_Status tmpShutterStatus;
     enum AZ_Status tmpAzimuthStatus;
     
@@ -1052,8 +1114,8 @@ int CMaxDome::IsUnparkComplete(bool &complete)
 int CMaxDome::IsFindHomeComplete(bool &complete)
 {
     int err=0;
-    unsigned tmpAz;
-    unsigned tmpHomePosition;
+    int tmpAz;
+    int tmpHomePosition;
     enum SH_Status tmpShutterStatus;
     enum AZ_Status tmpAzimuthStatus;
     
@@ -1098,7 +1160,6 @@ void CMaxDome::setNbTicksPerRev(unsigned nbTicksPerRev)
         if(err) {
             snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::setNbTicksPerRev -> SetTicksPerCount_MaxDomeII] err = %d",err);
             mLogger->out(mLogBuffer);
-            printf("%s\n",mLogBuffer);
         }
     }
 }
@@ -1126,12 +1187,11 @@ void CMaxDome::setParkAz(double dAz)
     int err = 0;
     mParkAz = dAz;
     if(bIsConnected) {
-        AzToTicks(dAz, dir, (unsigned &)mParkAzInTicks);
+        AzToTicks(dAz, dir, mParkAzInTicks);
         err = SetPark_MaxDomeII(mCloseShutterBeforePark, dAz);
         if(err) {
             snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::setParkAz -> SetPark_MaxDomeII] err = %d",err);
             mLogger->out(mLogBuffer);
-            printf("%s\n",mLogBuffer);
         }
 
     }

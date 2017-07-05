@@ -53,6 +53,7 @@
 #define GOTO_CMD    0x05		// Go to azimuth position
 #define SHUTTER_CMD 0x06		// Send a command to Shutter
 #define STATUS_CMD  0x07		// Retrieve status
+#define SYMC_CMD    0x08
 #define TICKS_CMD   0x09		// Set the number of tick per revolution of the dome
 #define ACK_CMD     0x0A		// ACK (?)
 #define SETPARK_CMD 0x0B		// Set park coordinates and if need to park before to operating shutter
@@ -95,10 +96,11 @@ public:
     int Abort_Azimuth_MaxDomeII(void);
     int Home_Azimuth_MaxDomeII(void);
     int Goto_Azimuth_MaxDomeII(int nDir, int nTicks);
-    int Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, unsigned &nAzimuthPosition, unsigned &nHomePosition);
+    int Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, int &nAzimuthPosition, int &nHomePosition);
     int Goto_Azimuth_MaxDomeII(double newAz);
     int Ack_MaxDomeII(void);
-    int SetPark_MaxDomeII(unsigned nParkOnShutter, unsigned nTicks);
+    int SyncMode_MaxDomeII(void);
+    int SetPark_MaxDomeII(unsigned nParkOnShutter, int nTicks);
     int SetPark_MaxDomeII(unsigned nParkOnShutter, double dAz);
     int SetTicksPerCount_MaxDomeII(int nTicks);
     int Park_MaxDomeII(void);
@@ -113,8 +115,8 @@ public:
     int Exit_Shutter_MaxDomeII(void);
     
     // convertion functions
-    void AzToTicks(double pdAz, unsigned &dir, unsigned &ticks);
-    void TicksToAz(unsigned ticks, double &pdAz);
+    void AzToTicks(double pdAz, unsigned &dir, int &ticks);
+    void TicksToAz(int ticks, double &pdAz);
     
     // command complete functions
     int IsGoToComplete(bool &complete);
@@ -153,19 +155,20 @@ protected:
     bool            mCloseShutterBeforePark;
     bool            mShutterOpened;
     bool            mCalibrating;
+	bool			m_bSyncing;
+	
+    int        mNbTicksPerRev;
     
-    unsigned        mNbTicksPerRev;
-    
-    unsigned        mHomeAzInTicks;
+    int        mHomeAzInTicks;
     double          mHomeAz;
     
-    unsigned        mParkAzInTicks;
+    int        mParkAzInTicks;
     double          mParkAz;
     
-    unsigned        mCurrentAzPositionInTicks;
+    int        mCurrentAzPositionInTicks;
     double          mCurrentAzPosition;
     
-    unsigned        mGotoTicks;
+    int        mGotoTicks;
     SerXInterface   *pSerx;
     
     LoggerInterface *mLogger;
