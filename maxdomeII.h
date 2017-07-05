@@ -155,7 +155,8 @@ protected:
     bool            mCloseShutterBeforePark;
     bool            mShutterOpened;
     bool            mCalibrating;
-    
+	bool			m_bSyncing;
+	
     int        mNbTicksPerRev;
     
     int        mHomeAzInTicks;

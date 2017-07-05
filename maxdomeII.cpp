@@ -60,6 +60,8 @@ CMaxDome::CMaxDome()
     mParked = true;
     mHomed = false;
     mCalibrating = false;
+	m_bSyncing = false;
+
     
 }
 
@@ -606,14 +608,15 @@ int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, int nTicks)
     }
     if (nReturn != MD2_OK)
         return nReturn;
-    
     if (cMessage[2] == (unsigned char)(SETPARK_CMD | TO_COMPUTER))
     {
-        mParkAzInTicks = mHomeAzInTicks + nTicks;
-        mCloseShutterBeforePark = nParkOnShutter;
-        TicksToAz(mParkAzInTicks, mParkAz);
-        return MD2_OK;
-    }
+		mCloseShutterBeforePark = nParkOnShutter;
+		if(!m_bSyncing) {
+			mParkAzInTicks = mHomeAzInTicks + nTicks;
+			TicksToAz(mParkAzInTicks, mParkAz);
+		}
+		return MD2_OK;
+	}
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
@@ -646,11 +649,15 @@ int CMaxDome::Sync_Dome(double dAz)
     err = SyncMode_MaxDomeII();
     if (err)
         return err;
+	m_bSyncing = true;
+	
     // apparently it expect 360 - Az for the zync, so mNbTicksPerRev - nTicks
     AzToTicks(dAz, nDir, nTicks);
     err = SetPark_MaxDomeII(mCloseShutterBeforePark, mNbTicksPerRev - nTicks);
     if (err)
         return err;
+
+	m_bSyncing = false;
 
     mCurrentAzPosition = dAz;
     return err;
