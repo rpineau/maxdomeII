@@ -1115,6 +1115,7 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
             SyncMode_MaxDomeII();
             SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, 32767);
             Goto_Azimuth_MaxDomeII(MAXDOMEII_WE_DIR, 1);
+            TicksToAz(1, mCurrentAzPosition);
             mCalibrating = false;
         }
         complete = true;
