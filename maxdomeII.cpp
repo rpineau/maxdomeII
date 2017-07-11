@@ -572,7 +572,7 @@ int CMaxDome::SyncMode_MaxDomeII(void)
 	@param nTicks Ticks from home position in E to W direction.
 	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
  */
-int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, int nTicks)
+int CMaxDome::SetPark_MaxDomeII_Ticks(unsigned nParkOnShutter, int nTicks)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
     unsigned char cHexMessage[LOG_BUFFER_SIZE];
@@ -591,7 +591,7 @@ int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, int nTicks)
     
     if(bDebugLog) {
         hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
-        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::SetPark_MaxDomeII] cMessage = %s",cHexMessage);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::SetPark_MaxDomeII_Ticks] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
     nErrorType = pSerx->writeFile(cMessage, 7, nBytesWrite);
@@ -603,7 +603,7 @@ int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, int nTicks)
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if(bDebugLog) {
         hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
-        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::SetPark_MaxDomeII] response = %s\n",cHexMessage);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::SetPark_MaxDomeII_Ticks] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
     if (nReturn != MD2_OK)
@@ -611,29 +611,10 @@ int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, int nTicks)
     if (cMessage[2] == (unsigned char)(SETPARK_CMD | TO_COMPUTER))
     {
 		mCloseShutterBeforePark = nParkOnShutter;
-		if(!m_bSyncing) {
-			mParkAzInTicks = mHomeAzInTicks + nTicks;
-			TicksToAz(mParkAzInTicks, mParkAz);
-		}
 		return MD2_OK;
 	}
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
-
-int CMaxDome::SetPark_MaxDomeII(unsigned nParkOnShutter, double dAz)
-
-{
-    int err;
-    int nTicks;
-    unsigned dir;
-
-    mParkAz = dAz;
-
-    AzToTicks(dAz, dir, nTicks);
-    err = SetPark_MaxDomeII(nParkOnShutter, nTicks);
-    return err;
-}
-
 
 int CMaxDome::Sync_Dome(double dAz)
 {
@@ -653,7 +634,7 @@ int CMaxDome::Sync_Dome(double dAz)
 	
     // apparently it expect 360 - Az for the zync, so mNbTicksPerRev - nTicks
     AzToTicks(dAz, nDir, nTicks);
-    err = SetPark_MaxDomeII(mCloseShutterBeforePark, mNbTicksPerRev - nTicks);
+    err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, mNbTicksPerRev - nTicks);
     if (err)
         return err;
 
@@ -975,19 +956,17 @@ void CMaxDome::AzToTicks(double pdAz, unsigned &dir, int &ticks)
     while (ticks < 0) ticks += mNbTicksPerRev;
     
     // find the dirrection with the shortest path
-    if (pdAz > mCurrentAzPosition)
-    {
+    if (pdAz > mCurrentAzPosition) {
         if (pdAz - mCurrentAzPosition > 180.0)
             dir = MAXDOMEII_WE_DIR;
         else
-            dir = MAXDOMEII_EW_DIR;
-    }
-    else
-    {
-        if (mCurrentAzPosition - pdAz > 180.0)
-            dir = MAXDOMEII_EW_DIR;
-        else
             dir = MAXDOMEII_WE_DIR;
+    }
+    else {
+        if (mCurrentAzPosition - pdAz > 180.0)
+            dir = MAXDOMEII_WE_DIR;
+        else
+            dir = MAXDOMEII_EW_DIR;
     }
 }
 
@@ -1017,8 +996,10 @@ int CMaxDome::IsGoToComplete(bool &complete)
     err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
     if(err)
         return err;
-    
-    if((mGotoTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
+
+    // need to check +/- 1 ticks there
+    // if(((tmpAz <= mGotoTicks+1) && (tmpAz >= mGotoTicks-1)) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
+    if(tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2)
         complete = true;
     else
         complete = false;
@@ -1038,8 +1019,7 @@ int CMaxDome::IsOpenComplete(bool &complete)
     if(err)
         return err;
     
-    if( tmpShutterStatus == Ss_OPEN)
-    {
+    if( tmpShutterStatus == Ss_OPEN) {
         complete = true;
         mShutterOpened = true;
     }
@@ -1062,8 +1042,7 @@ int CMaxDome::IsCloseComplete(bool &complete)
     if(err)
         return err;
     
-    if( tmpShutterStatus == Ss_CLOSED)
-    {
+    if( tmpShutterStatus == Ss_CLOSED) {
         complete = true;
         mShutterOpened = false;
     }
@@ -1085,9 +1064,9 @@ int CMaxDome::IsParkComplete(bool &complete)
     err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
     if(err)
         return err;
-    
-    if((mParkAzInTicks == tmpAz) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
-    {
+
+    // if(((tmpAz <= mParkAzInTicks+1) && (tmpAz >= mParkAzInTicks-1)) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2)) {
+    if(tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2) {
         complete = true;
         mParked = true;
     }
@@ -1122,16 +1101,22 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
     err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
     if(err)
         return err;
-    
-    if((tmpAz == 1) && (tmpAzimuthStatus == As_IDLE2)) {
+
+#pragma mark TODO : Fix Home az check
+
+    // need to check +/- 1 ticks as we know it pass home by at least 1 ticks.
+    //if((tmpAz <= 2) && (tmpAz >= 0))
+    //   tmpAz = 1;
+
+    //if((tmpAz == 1) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2)) {
+    if(tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2) {
         if (mCalibrating) {
-            if( tmpAz < tmpHomePosition) {// we've crossed the home position.
-                setNbTicksPerRev(tmpHomePosition +1);
-            }
+            setNbTicksPerRev(tmpHomePosition +1);
+            SyncMode_MaxDomeII();
+            SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, 32767);
+            Goto_Azimuth_MaxDomeII(MAXDOMEII_WE_DIR, 1);
             mCalibrating = false;
         }
-        // goto mHomeAz to be clean as the find home pass home by 1 click (at least)
-        Goto_Azimuth_MaxDomeII(mHomeAz);
         complete = true;
         mHomed = true;
     }
@@ -1181,19 +1166,20 @@ double CMaxDome::getParkAz()
     return mParkAz;
 }
 
-void CMaxDome::setParkAz(double dAz)
+void CMaxDome::setParkAz(unsigned nParkOnShutter, double dAz)
 {
     unsigned dir;
     int err = 0;
     mParkAz = dAz;
+    printf("mParkAz set to %f\n", mParkAz);
     if(bIsConnected) {
+        mCloseShutterBeforePark = nParkOnShutter;
         AzToTicks(dAz, dir, mParkAzInTicks);
-        err = SetPark_MaxDomeII(mCloseShutterBeforePark, dAz);
+        err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, mParkAzInTicks);
         if(err) {
             snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::setParkAz -> SetPark_MaxDomeII] err = %d",err);
             mLogger->out(mLogBuffer);
         }
-
     }
 }
 
