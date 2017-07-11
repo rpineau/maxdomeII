@@ -621,10 +621,10 @@ int CMaxDome::Sync_Dome(double dAz)
     int err = 0;
     int nTicks;
     unsigned nDir;
+
     if(bDebugLog) {
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Sync_Dome] dAz = %3.2f",dAz);
         mLogger->out(mLogBuffer);
-        printf("%s\n",mLogBuffer);
     }
     // this switch the park command to a sync command
     err = SyncMode_MaxDomeII();
@@ -1172,7 +1172,7 @@ void CMaxDome::setParkAz(unsigned nParkOnShutter, double dAz)
     unsigned dir;
     int err = 0;
     mParkAz = dAz;
-    printf("mParkAz set to %f\n", mParkAz);
+
     if(bIsConnected) {
         mCloseShutterBeforePark = nParkOnShutter;
         AzToTicks(dAz, dir, mParkAzInTicks);
