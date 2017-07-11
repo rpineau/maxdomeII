@@ -43,9 +43,9 @@ X2Dome::X2Dome(const char* pszSelection,
     {
         maxDome.setNbTicksPerRev( m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, 227) ); // default value for Sirius 2.3m dome.
         maxDome.setHomeAz( m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_HOME_AZ, 0) );
-        maxDome.setParkAz( m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, 0) );
-        mHasShutterControl = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, true);
         mOpenUpperShutterOnly = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPEN_UPPER_ONLY, false);
+        maxDome.setParkAz( mOpenUpperShutterOnly, m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, 0) );
+        mHasShutterControl = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, true);
         mIsRollOffRoof = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, false);
         maxDome.setCloseShutterBeforePark( ! m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, false)); // if we can operate at any Az then CloseShutterBeforePark is false
     }
@@ -188,6 +188,11 @@ int X2Dome::execModalSettingsDialog()
 
     X2MutexLocker ml(GetMutex());
 
+    mHomingDome = false;
+    mInitCalibration = false;
+    mCalibratingDome = false;
+    maxDome.setCalibrating(mCalibratingDome);
+
     //Display the user interface
     if ((nErr = ui->exec(bPressedOK)))
         return nErr;
@@ -214,7 +219,7 @@ int X2Dome::execModalSettingsDialog()
         if(m_bLinked)
         {
             maxDome.setHomeAz(dHomeAz);
-            maxDome.SetPark_MaxDomeII(!operateAnyAz, dParkAz);
+            maxDome.setParkAz(!operateAnyAz, dParkAz);
             maxDome.setNbTicksPerRev(nTicksPerRev);
         }
 
@@ -279,13 +284,15 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
                     mHomingDome = false;
                     mCalibratingDome = false;
                     mInitCalibration = true;
+                    maxDome.SyncMode_MaxDomeII();
+                    maxDome.SetPark_MaxDomeII_Ticks(mOpenUpperShutterOnly, 32767);
                     // move 50 ticks forward to the right from inside the dome to clear the home sensor.
                     maxDome.Goto_Azimuth_MaxDomeII(MAXDOMEII_EW_DIR, 50);
                     return;
                 }
             }
 
-            if(mInitCalibration) {
+            else if(mInitCalibration) {
                 err = maxDome.IsGoToComplete(complete);
                 if (err) {
                     uiex->setEnabled("pushButton",true);
@@ -310,7 +317,7 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 
             }
 
-            if(mCalibratingDome) {
+            else if(mCalibratingDome) {
                 err = maxDome.IsFindHomeComplete(complete);
                 if (err) {
                     uiex->setEnabled("pushButton",true);
@@ -335,6 +342,11 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
                     return;
                 }
             }
+            else {
+                mHomingDome = false;
+                mInitCalibration = false;
+                mCalibratingDome = false;
+            }
 
         }
 
@@ -345,6 +357,7 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
             // disable "ok" and "calibrate"
             uiex->setEnabled("pushButton",false);
             uiex->setEnabled("pushButtonOK",false);
+            maxDome.setNbTicksPerRev(32767);
             maxDome.Home_Azimuth_MaxDomeII();
             mHomingDome = true;
         }

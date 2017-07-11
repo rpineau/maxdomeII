@@ -100,8 +100,7 @@ public:
     int Goto_Azimuth_MaxDomeII(double newAz);
     int Ack_MaxDomeII(void);
     int SyncMode_MaxDomeII(void);
-    int SetPark_MaxDomeII(unsigned nParkOnShutter, int nTicks);
-    int SetPark_MaxDomeII(unsigned nParkOnShutter, double dAz);
+    int SetPark_MaxDomeII_Ticks(unsigned nParkOnShutter, int nTicks);
     int SetTicksPerCount_MaxDomeII(int nTicks);
     int Park_MaxDomeII(void);
     int Unpark(void);
@@ -134,7 +133,7 @@ public:
     void setHomeAz(double dAz);
     
     double getParkAz();
-    void setParkAz(double dAz);
+    void setParkAz(unsigned nParkOnShutter, double dAz);
     
     bool getCloseShutterBeforePark();
     void setCloseShutterBeforePark(bool close);
