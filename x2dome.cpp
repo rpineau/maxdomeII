@@ -231,7 +231,6 @@ int X2Dome::execModalSettingsDialog()
         nErr |= m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPEN_UPPER_ONLY, mOpenUpperShutterOnly);
         nErr |= m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, mIsRollOffRoof);
         nErr |= m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, operateAnyAz);
-        
     }
     return nErr;
 
@@ -242,6 +241,7 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
     bool complete = false;
     int err;
     char errorMessage[LOG_BUFFER_SIZE];
+    double  dHomeAz;
 
     if (!strcmp(pszEvent, "on_pushButtonCancel_clicked")) {
         maxDome.Abort_Azimuth_MaxDomeII();
@@ -339,6 +339,8 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
                     uiex->setEnabled("pushButtonOK",true);
                     // read step per rev from dome
                     uiex->setPropertyInt("ticksPerRev","value", maxDome.getNbTicksPerRev());
+                    uiex->propertyDouble("homePosition", "value", dHomeAz);
+                    maxDome.Sync_Dome(dHomeAz);
                     return;
                 }
             }
