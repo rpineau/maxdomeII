@@ -91,8 +91,9 @@ int X2Dome::establishLink(void)
 int X2Dome::terminateLink(void)					
 {
     X2MutexLocker ml(GetMutex());
-	m_bLinked = false;
-	return SB_OK;
+    maxDome.Disconnect();
+    m_bLinked = false;
+    return SB_OK;
 }
 
  bool X2Dome::isLinked(void) const				

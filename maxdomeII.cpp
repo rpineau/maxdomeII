@@ -120,6 +120,7 @@ void CMaxDome::Disconnect(void)
     if(bIsConnected)
     {
         Exit_Shutter_MaxDomeII();
+        pSerx->purgeTxRx();
         pSerx->close();
     }
     bIsConnected = false;
