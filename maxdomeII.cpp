@@ -43,8 +43,8 @@ CMaxDome::CMaxDome()
     pSerx = NULL;
     bIsConnected = false;
     
-    mNbTicksPerRev = 227; // default value for Sirius 2.3m dome.
-    
+    mNbTicksPerRev = 0;
+
     mCurrentAzPosition = 0;
     mCurrentAzPositionInTicks = 0;
     
@@ -60,7 +60,6 @@ CMaxDome::CMaxDome()
     mParked = true;
     mHomed = false;
     mCalibrating = false;
-	m_bSyncing = false;
 
     
 }
@@ -103,6 +102,24 @@ bool CMaxDome::Connect(const char *szPort)
         return bIsConnected;
     }
 
+    if(mNbTicksPerRev) {
+        err = SetTicksPerCount_MaxDomeII(mNbTicksPerRev);
+        if(err) {
+            snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::setNbTicksPerRev -> SetTicksPerCount_MaxDomeII] err = %d",err);
+            mLogger->out(mLogBuffer);
+            bIsConnected = false;
+
+            return false;
+        }
+    }
+
+    if(mParkAz) {
+        err = setParkAz(mCloseShutterBeforePark, mParkAz);
+        if(err) {
+            bIsConnected = false;
+            return false;
+        }
+    }
     // get the device status to make sure we're properly connected.
     err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
     if(err)
@@ -631,15 +648,12 @@ int CMaxDome::Sync_Dome(double dAz)
     err = SyncMode_MaxDomeII();
     if (err)
         return err;
-	m_bSyncing = true;
-	
+
     // apparently it expect 360 - Az for the zync, so mNbTicksPerRev - nTicks
     AzToTicks(dAz, nDir, nTicks);
     err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, mNbTicksPerRev - nTicks);
     if (err)
         return err;
-
-	m_bSyncing = false;
 
     mCurrentAzPosition = dAz;
     return err;
@@ -1168,10 +1182,11 @@ double CMaxDome::getParkAz()
     return mParkAz;
 }
 
-void CMaxDome::setParkAz(unsigned nParkOnShutter, double dAz)
+int CMaxDome::setParkAz(unsigned nParkOnShutter, double dAz)
 {
     unsigned dir;
     int err = 0;
+
     mParkAz = dAz;
 
     if(bIsConnected) {
@@ -1181,8 +1196,10 @@ void CMaxDome::setParkAz(unsigned nParkOnShutter, double dAz)
         if(err) {
             snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::setParkAz -> SetPark_MaxDomeII] err = %d",err);
             mLogger->out(mLogBuffer);
+            return err;
         }
     }
+    return err;
 }
 
 bool CMaxDome::getCloseShutterBeforePark()

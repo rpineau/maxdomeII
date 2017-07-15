@@ -133,7 +133,7 @@ public:
     void setHomeAz(double dAz);
     
     double getParkAz();
-    void setParkAz(unsigned nParkOnShutter, double dAz);
+    int setParkAz(unsigned nParkOnShutter, double dAz);
     
     bool getCloseShutterBeforePark();
     void setCloseShutterBeforePark(bool close);
@@ -154,7 +154,6 @@ protected:
     bool            mCloseShutterBeforePark;
     bool            mShutterOpened;
     bool            mCalibrating;
-	bool			m_bSyncing;
 	
     int        mNbTicksPerRev;
     
