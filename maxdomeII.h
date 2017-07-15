@@ -32,9 +32,34 @@
 #ifndef __MAXDOMEII__
 #define __MAXDOMEII__
 #include <math.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <memory.h>
+#include <string.h>
+#include <time.h>
+#ifdef SB_MAC_BUILD
+#include <unistd.h>
+#endif
+
 #include "../../licensedinterfaces/sberrorx.h"
 #include "../../licensedinterfaces/serxinterface.h"
 #include "../../licensedinterfaces/loggerinterface.h"
+
+
+#define MAXDOME_DEBUG
+
+#ifdef MAXDOME_DEBUG
+#if defined(SB_WIN_BUILD)
+#define MAXDOME_LOGFILENAME "C:\\MaxdomeLog.txt"
+#elif defined(SB_LINUX_BUILD)
+#define MAXDOME_LOGFILENAME "/tmp/MaxdomeLog.txt"
+#elif defined(SB_MAC_BUILD)
+#define MAXDOME_LOGFILENAME "/tmp/MaxdomeLog.txt"
+#endif
+#endif
+
 
 #define LOG_BUFFER_SIZE 256
 
@@ -84,7 +109,7 @@ public:
     CMaxDome();
     ~CMaxDome();
     
-    bool        Connect(const char *szPort);
+    int         Connect(const char *szPort);
     void        Disconnect(void);
     bool        IsConnected(void) { return bIsConnected; }
     
@@ -155,12 +180,12 @@ protected:
     bool            mShutterOpened;
     bool            mCalibrating;
 	
-    int        mNbTicksPerRev;
+    int             mNbTicksPerRev;
     
-    int        mHomeAzInTicks;
+    int             mHomeAzInTicks;
     double          mHomeAz;
     
-    int        mParkAzInTicks;
+    int             mParkAzInTicks;
     double          mParkAz;
     
     int        mCurrentAzPositionInTicks;
@@ -174,7 +199,13 @@ protected:
     char            mLogBuffer[LOG_BUFFER_SIZE];
     void            hexdump(unsigned char* inputData, unsigned char *outBuffer, int size);
     
-    
+#ifdef MAXDOME_DEBUG
+    // timestamp for logs
+    char *timestamp;
+    time_t ltime;
+    FILE *Logfile;	  // LogFile
+#endif
+
 };
 
 #endif
