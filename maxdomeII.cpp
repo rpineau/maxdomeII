@@ -185,13 +185,13 @@ int CMaxDome::Init_Communication(void)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::Init_Communication sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Init_Communication] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -209,7 +209,7 @@ int CMaxDome::Init_Communication(void)
     nReturn = ReadResponse_MaxDomeII(cMessage);
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Init_Communication] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -289,7 +289,7 @@ int CMaxDome::ReadResponse_MaxDomeII(unsigned char *cMessage)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::ReadResponse_MaxDomeII got :\n%s\n\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
@@ -342,7 +342,7 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::Abort_Azimuth_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
@@ -365,7 +365,7 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Abort_Azimuth_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -403,13 +403,13 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::Home_Azimuth_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Home_Azimuth_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -423,7 +423,7 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
     nReturn = ReadResponse_MaxDomeII(cMessage);
     
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Home_Azimuth_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -465,13 +465,13 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::Goto_Azimuth_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Goto_Azimuth_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -487,7 +487,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
         return nReturn;
     
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Goto_Azimuth_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -547,13 +547,13 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::Status_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Status_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -566,7 +566,7 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Status_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -611,13 +611,13 @@ int CMaxDome::Ack_MaxDomeII(void)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::Ack_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Ack_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -629,7 +629,7 @@ int CMaxDome::Ack_MaxDomeII(void)
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Ack_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -664,13 +664,13 @@ int CMaxDome::SyncMode_MaxDomeII(void)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::SyncMode_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Ack_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -682,7 +682,7 @@ int CMaxDome::SyncMode_MaxDomeII(void)
 
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Ack_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -725,13 +725,13 @@ int CMaxDome::SetPark_MaxDomeII_Ticks(unsigned nParkOnShutter, int nTicks)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::SetPark_MaxDomeII_Ticks sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::SetPark_MaxDomeII_Ticks] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -743,7 +743,7 @@ int CMaxDome::SetPark_MaxDomeII_Ticks(unsigned nParkOnShutter, int nTicks)
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::SetPark_MaxDomeII_Ticks] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -826,13 +826,13 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::SetTicksPerCount_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::SetTicksPerCount_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -844,7 +844,7 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::SetTicksPerCount_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -888,13 +888,13 @@ int CMaxDome::Open_Shutter_MaxDomeII()
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::Open_Shutter_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Open_Shutter_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -906,7 +906,7 @@ int CMaxDome::Open_Shutter_MaxDomeII()
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Open_Shutter_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -942,13 +942,13 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::Open_Upper_Shutter_Only_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Open_Upper_Shutter_Only_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -960,7 +960,7 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Open_Upper_Shutter_Only_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -996,13 +996,13 @@ int CMaxDome::Close_Shutter_MaxDomeII()
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::Close_Shutter_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Close_Shutter_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -1014,7 +1014,7 @@ int CMaxDome::Close_Shutter_MaxDomeII()
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Close_Shutter_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -1050,13 +1050,13 @@ int CMaxDome::Abort_Shutter_MaxDomeII()
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::Abort_Shutter_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Abort_Shutter_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -1068,7 +1068,7 @@ int CMaxDome::Abort_Shutter_MaxDomeII()
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Abort_Shutter_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -1104,13 +1104,13 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+    hexdump(cMessage,cHexMessage,cMessage[1]+2);
     fprintf(Logfile, "[%s] CMaxDome::Exit_Shutter_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Exit_Shutter_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
@@ -1122,7 +1122,7 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
     if(bDebugLog) {
-        hexdump(cMessage,cHexMessage,MD_BUFFER_SIZE);
+        hexdump(cMessage,cHexMessage,cMessage[1]+2);
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Exit_Shutter_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }

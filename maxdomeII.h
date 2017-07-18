@@ -48,7 +48,7 @@
 #include "../../licensedinterfaces/loggerinterface.h"
 
 
-// #define MAXDOME_DEBUG
+#define MAXDOME_DEBUG
 
 #ifdef MAXDOME_DEBUG
 #if defined(SB_WIN_BUILD)
