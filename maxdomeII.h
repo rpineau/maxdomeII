@@ -197,7 +197,7 @@ protected:
     LoggerInterface *mLogger;
     bool            bDebugLog;
     char            mLogBuffer[LOG_BUFFER_SIZE];
-    void            hexdump(unsigned char* inputData, unsigned char *outBuffer, int size);
+    void            hexdump(unsigned char* pszInputBuffer, unsigned char *pszOutputBuffer, int nInputBufferSize, int nOutpuBufferSize);
     
 #ifdef MAXDOME_DEBUG
     // timestamp for logs
