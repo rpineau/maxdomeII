@@ -112,10 +112,6 @@ int CMaxDome::Connect(const char *pszPort)
     fflush(Logfile);
 #endif
 
-    // Check to see if we can't even connect to the device
-    if(!bIsConnected)
-        return false;
-
     pSerx->purgeTxRx();
 
     // init the comms
@@ -774,7 +770,7 @@ int CMaxDome::Sync_Dome(double dAz)
 
     // apparently it expect 360 - Az for the zync, so mNbTicksPerRev - nTicks
     AzToTicks(dAz, nDir, nTicks);
-    err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, mNbTicksPerRev - nTicks);
+	err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, mNbTicksPerRev - nTicks);
     if (err)
         return err;
 
@@ -1313,6 +1309,11 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
         complete = true;
         mHomed = true;
     }
+	else if (tmpAzimuthStatus == As_ERROR) {
+		complete = false;
+		mHomed = false;
+		return ERR_CMDFAILED;
+	}
     else {
         complete = false;
         mHomed = false;
