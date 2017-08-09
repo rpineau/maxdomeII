@@ -96,7 +96,6 @@ int CMaxDome::Connect(const char *pszPort)
 #endif
 
     // 19200 8N1
-    //if(pSerx->open(szPort, 19200, SerXInterface::B_NOPARITY, "-DTR_CONTROL 1") == 0)
     nErr = pSerx->open(pszPort, 19200, SerXInterface::B_NOPARITY);
     if(nErr) {
         bIsConnected = false;
@@ -1148,13 +1147,13 @@ void CMaxDome::AzToTicks(double pdAz, unsigned &dir, int &ticks)
         if (pdAz - mCurrentAzPosition > 180.0)
             dir = MAXDOMEII_WE_DIR;
         else
-            dir = MAXDOMEII_WE_DIR;
+            dir = MAXDOMEII_EW_DIR;
     }
     else {
         if (mCurrentAzPosition - pdAz > 180.0)
-            dir = MAXDOMEII_WE_DIR;
-        else
             dir = MAXDOMEII_EW_DIR;
+        else
+            dir = MAXDOMEII_WE_DIR;
     }
 }
 
@@ -1289,6 +1288,15 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
     err = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
     if(err)
         return err;
+
+
+#ifdef MAXDOME_DEBUG
+    ltime = time(NULL);
+    timestamp = asctime(localtime(&ltime));
+    timestamp[strlen(timestamp) - 1] = 0;
+    fprintf(Logfile, "[%s] CMaxDome::IsFindHomeComplete :\tmpAzimuthStatus = %d\ntmpAz = %d\ntmpHomePosition = %d\n", timestamp, tmpAzimuthStatus, tmpAz, tmpHomePosition);
+    fflush(Logfile);
+#endif
 
 #pragma mark TODO : Fix Home az check
 

@@ -48,7 +48,7 @@
 #include "../../licensedinterfaces/loggerinterface.h"
 
 
-#define MAXDOME_DEBUG
+// #define MAXDOME_DEBUG
 
 #ifdef MAXDOME_DEBUG
 #if defined(SB_WIN_BUILD)
@@ -95,6 +95,7 @@
 #define MAXDOMEII_WE_DIR 0x02
 
 // Azimuth motor status. When motor is idle, sometimes returns 0, sometimes 4. After connect, it returns 5
+// 5 might not be an error at all !!!
 enum AZ_Status {As_IDLE = 1, As_MOVING_WE, As_MOVING_EW, As_IDLE2, As_ERROR};
 
 // Shutter status
@@ -173,7 +174,9 @@ protected:
     signed char     checksum_MaxDomeII(unsigned char *cMessage, int nLen);
     int             ReadResponse_MaxDomeII(unsigned char *cMessage);
     bool            bIsConnected;
-    
+
+    char            m_szFirmwareVersion[LOG_BUFFER_SIZE];
+
     bool            mHomed;
     bool            mParked;
     bool            mCloseShutterBeforePark;
@@ -188,7 +191,7 @@ protected:
     int             mParkAzInTicks;
     double          mParkAz;
     
-    int        mCurrentAzPositionInTicks;
+    int             mCurrentAzPositionInTicks;
     double          mCurrentAzPosition;
     
     int        mGotoTicks;
