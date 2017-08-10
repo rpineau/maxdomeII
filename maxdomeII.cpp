@@ -591,11 +591,9 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
         nShutterStatus = (enum SH_Status)cMessage[3];
         nAzimuthStatus = (enum AZ_Status)cMessage[4];
         nAzimuthPosition = (unsigned)(((unsigned)cMessage[5]) * 256 + ((unsigned)cMessage[6]));
-        printf("nAzimuthPosition = %d\n", nAzimuthPosition);
         nHomePosition = ((unsigned)cMessage[7]) * 256 + ((unsigned)cMessage[8]);
         mCurrentAzPositionInTicks = nAzimuthPosition;
         TicksToAz(mCurrentAzPositionInTicks, mCurrentAzPosition);
-        printf("nAzimuthPosition = %d -> %3.2f\n", mCurrentAzPositionInTicks,mCurrentAzPosition );
         mHomeAzInTicks = nHomePosition;
         return 0;
     }
@@ -721,7 +719,6 @@ int CMaxDome::Sync_Dome(double dAz)
 {
     int err = 0;
     int nTicks;
-    unsigned nDir;
 
     if(bDebugLog) {
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Sync_Dome] dAz = %3.2f",dAz);
@@ -738,14 +735,9 @@ int CMaxDome::Sync_Dome(double dAz)
     while (dAz < 0) dAz += 360;
     while (dAz >= 360) dAz -= 360;
 
-    // S = tr - Az/(360.0/tr)
-    printf("dAz = %3.2f\n", dAz);
-    printf("dAz/(360/mNbTicksPerRev) = %f\n", dAz/(360.0f/mNbTicksPerRev));
     nTicks = int(round(mNbTicksPerRev - dAz/(360.0f/mNbTicksPerRev))) % mNbTicksPerRev;
-    printf("[Sync_Dome] nTicks (S) = %d ( %02X )\n\n", nTicks, nTicks);
 
     err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, nTicks);
-    // err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, mNbTicksPerRev - nTicks);
     if (err)
         return err;
 

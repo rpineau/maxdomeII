@@ -146,8 +146,6 @@ int X2Dome::execModalSettingsDialog()
     if (NULL == (dx = uiutil.X2DX()))
         return ERR_POINTER;
 
-    printf("[X2Dome::execModalSettingsDialog] maxDome.getDebounceTime() = %d\n", maxDome.getDebounceTime());
-
     nDebouceIndex = (maxDome.getDebounceTime() - 20)/10;
 
     // set controls state depending on the connection state
@@ -270,6 +268,7 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
     int err;
     char errorMessage[LOG_BUFFER_SIZE];
     double  dHomeAz;
+    int nDebounceTime;
 
     if (!strcmp(pszEvent, "on_pushButtonCancel_clicked")) {
         maxDome.Abort_Azimuth_MaxDomeII();
@@ -390,6 +389,25 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
             maxDome.setNbTicksPerRev(32767);
             maxDome.Home_Azimuth_MaxDomeII();
             mHomingDome = true;
+        }
+    }
+
+    if (!strcmp(pszEvent, "on_pushButton_2_clicked")) {
+        if(m_bLinked) {
+            nDebounceTime = (uiex->currentIndex("comboBox") * 10) + 20;
+            err = maxDome.setDebounceTime(nDebounceTime);
+            if(err == FIRMWARE_NOT_SUPPORTED) {
+                snprintf(errorMessage, LOG_BUFFER_SIZE, "This is not supported by this version of the firmware");
+                uiex->messageBox("MaxDome II debounce time change", errorMessage);
+
+            }
+            else if (err) {
+                snprintf(errorMessage, LOG_BUFFER_SIZE, "Error setting the new debounce time : %d", err);
+                uiex->messageBox("MaxDome II debounce time change", errorMessage);
+            }
+            else {
+                m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_DEBOUNCE_TIME, nDebounceTime);
+            }
         }
     }
 
