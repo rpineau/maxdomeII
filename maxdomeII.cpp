@@ -55,6 +55,10 @@ CMaxDome::CMaxDome()
     mHomed = false;
     mCalibrating = false;
 
+    m_nDebounceTime = 120;
+    
+    memset(m_szFirmwareVersion,0,LOG_BUFFER_SIZE);
+
 #ifdef	MAXDOME_DEBUG
     Logfile = fopen(MAXDOME_LOGFILENAME, "w");
     ltime = time(NULL);
@@ -140,6 +144,9 @@ int CMaxDome::Connect(const char *pszPort)
             return false;
         }
     }
+
+    setDebounceTime(m_nDebounceTime);
+
     // get the device status to make sure we're properly connected.
     nErr = Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAz, tmpHomePosition);
     if(nErr)
@@ -163,6 +170,13 @@ void CMaxDome::Disconnect(void)
     bIsConnected = false;
 }
 
+void CMaxDome::getFirmwareVersion(char *version, int strMaxLen)
+{
+    strncpy(version,m_szFirmwareVersion, strMaxLen);
+
+}
+
+// This actaully returns the firmware version
 int CMaxDome::Init_Communication(void)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
@@ -191,7 +205,7 @@ int CMaxDome::Init_Communication(void)
         mLogger->out(mLogBuffer);
     }
 
-    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
     pSerx->flushTx();
 
     if (nErrorType != MD2_OK)
@@ -214,7 +228,10 @@ int CMaxDome::Init_Communication(void)
     
     if (cMessage[2] == (unsigned char)(ACK_CMD | TO_COMPUTER))
         return 0;
-    
+
+    m_nFirmwareVersion = (int)cMessage[3];
+    snprintf(m_szFirmwareVersion, LOG_BUFFER_SIZE, "2.%1d", m_nFirmwareVersion);
+
     return BAD_CMD_RESPONSE;	// Response don't match command
     
 }
@@ -348,7 +365,7 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
         mLogger->out(mLogBuffer);
     }
 
-    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
     pSerx->flushTx();
 
     if (nErrorType != MD2_OK)
@@ -409,7 +426,7 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
         mLogger->out(mLogBuffer);
     }
     
-    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
     pSerx->flushTx();
 
     if (nErrorType != MD2_OK)
@@ -471,7 +488,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
         mLogger->out(mLogBuffer);
     }
 
-    nErrorType = pSerx->writeFile(cMessage, 7, nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
     pSerx->flushTx();
 
     if (nBytesWrite != 7)
@@ -553,7 +570,7 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
         mLogger->out(mLogBuffer);
     }
 
-    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
     pSerx->flushTx();
 
     if (nErrorType != MD2_OK)
@@ -574,66 +591,14 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
         nShutterStatus = (enum SH_Status)cMessage[3];
         nAzimuthStatus = (enum AZ_Status)cMessage[4];
         nAzimuthPosition = (unsigned)(((unsigned)cMessage[5]) * 256 + ((unsigned)cMessage[6]));
+        printf("nAzimuthPosition = %d\n", nAzimuthPosition);
         nHomePosition = ((unsigned)cMessage[7]) * 256 + ((unsigned)cMessage[8]);
         mCurrentAzPositionInTicks = nAzimuthPosition;
         TicksToAz(mCurrentAzPositionInTicks, mCurrentAzPosition);
+        printf("nAzimuthPosition = %d -> %3.2f\n", mCurrentAzPositionInTicks,mCurrentAzPosition );
         mHomeAzInTicks = nHomePosition;
         return 0;
     }
-    
-    return BAD_CMD_RESPONSE;	// Response don't match command
-}
-
-/*
-	Ack comunication
- 
-	@return 0 command received by MAX DOME. MD2_CANT_CONNECT Couldn't send command. BAD_CMD_RESPONSE Response don't match command. See ReadResponse() return
- */
-int CMaxDome::Ack_MaxDomeII(void)
-{
-    unsigned char cMessage[MD_BUFFER_SIZE];
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
-    int nErrorType = MD2_OK;
-    unsigned long  nBytesWrite;;
-    int nReturn;
-    
-    cMessage[0] = 0x01;
-    cMessage[1] = 0x02;		// Will follow 2 bytes more
-    cMessage[2] = ACK_CMD;
-    cMessage[3] = checksum_MaxDomeII(cMessage, 3);
-    
-#ifdef MAXDOME_DEBUG
-    ltime = time(NULL);
-    timestamp = asctime(localtime(&ltime));
-    timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::Ack_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
-    fflush(Logfile);
-#endif
-
-    if(bDebugLog) {
-        hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Ack_MaxDomeII] cMessage = %s",cHexMessage);
-        mLogger->out(mLogBuffer);
-    }
-    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
-    pSerx->flushTx();
-
-    if (nErrorType != MD2_OK)
-        return MD2_CANT_CONNECT;
-    
-    nReturn = ReadResponse_MaxDomeII(cMessage);
-    if(bDebugLog) {
-        hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Ack_MaxDomeII] response = %s\n",cHexMessage);
-        mLogger->out(mLogBuffer);
-    }
-
-    if (nReturn != 0)
-        return nReturn;
-    
-    if (cMessage[2] == (unsigned char)(ACK_CMD | TO_COMPUTER))
-        return 0;
     
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
@@ -669,7 +634,7 @@ int CMaxDome::SyncMode_MaxDomeII(void)
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Ack_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    nErrorType = pSerx->writeFile(cMessage, 4, nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
     pSerx->flushTx();
 
     if (nErrorType != MD2_OK)
@@ -730,7 +695,7 @@ int CMaxDome::SetPark_MaxDomeII_Ticks(unsigned nParkOnShutter, int nTicks)
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::SetPark_MaxDomeII_Ticks] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    nErrorType = pSerx->writeFile(cMessage, 7, nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
     pSerx->flushTx();
 
     if (nErrorType != MD2_OK)
@@ -762,14 +727,25 @@ int CMaxDome::Sync_Dome(double dAz)
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Sync_Dome] dAz = %3.2f",dAz);
         mLogger->out(mLogBuffer);
     }
+
     // this switch the park command to a sync command
     err = SyncMode_MaxDomeII();
     if (err)
         return err;
 
-    // apparently it expect 360 - Az for the zync, so mNbTicksPerRev - nTicks
-    AzToTicks(dAz, nDir, nTicks);
-	err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, mNbTicksPerRev - nTicks);
+    // remove home offset
+    dAz = dAz - mHomeAz;
+    while (dAz < 0) dAz += 360;
+    while (dAz >= 360) dAz -= 360;
+
+    // S = tr - Az/(360.0/tr)
+    printf("dAz = %3.2f\n", dAz);
+    printf("dAz/(360/mNbTicksPerRev) = %f\n", dAz/(360.0f/mNbTicksPerRev));
+    nTicks = int(round(mNbTicksPerRev - dAz/(360.0f/mNbTicksPerRev))) % mNbTicksPerRev;
+    printf("[Sync_Dome] nTicks (S) = %d ( %02X )\n\n", nTicks, nTicks);
+
+    err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, nTicks);
+    // err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, mNbTicksPerRev - nTicks);
     if (err)
         return err;
 
@@ -792,6 +768,7 @@ int CMaxDome::Unpark(void)
 {
     mParked = false;
     mCurrentAzPosition = mParkAz;
+    Sync_Dome(mParkAz);
     return 0;
 }
 
@@ -831,7 +808,7 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::SetTicksPerCount_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    nErrorType = pSerx->writeFile(cMessage, 6, nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
     pSerx->flushTx();
 
     if (nErrorType != MD2_OK)
@@ -893,7 +870,7 @@ int CMaxDome::Open_Shutter_MaxDomeII()
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Open_Shutter_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
     pSerx->flushTx();
 
     if (nErrorType != MD2_OK)
@@ -947,7 +924,7 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Open_Upper_Shutter_Only_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
     pSerx->flushTx();
 
     if (nErrorType != MD2_OK)
@@ -1001,7 +978,7 @@ int CMaxDome::Close_Shutter_MaxDomeII()
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Close_Shutter_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
     pSerx->flushTx();
 
     if (nErrorType != MD2_OK)
@@ -1055,7 +1032,7 @@ int CMaxDome::Abort_Shutter_MaxDomeII()
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Abort_Shutter_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
     pSerx->flushTx();
 
     if (nErrorType != MD2_OK)
@@ -1109,7 +1086,7 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Exit_Shutter_MaxDomeII] cMessage = %s",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    nErrorType = pSerx->writeFile(cMessage, 5, nBytesWrite);
+    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
     pSerx->flushTx();
     
     if (nErrorType != MD2_OK)
@@ -1333,6 +1310,11 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
 
 #pragma mark - Getter / Setter
 
+int CMaxDome::getFirmwareIntValue()
+{
+    return m_nFirmwareVersion;
+}
+
 int CMaxDome::getNbTicksPerRev()
 {
     return mNbTicksPerRev;
@@ -1419,7 +1401,7 @@ void CMaxDome::setDebugLog(bool enable)
     bDebugLog = enable;
 }
 
-void  CMaxDome::hexdump(unsigned char* pszInputBuffer, unsigned char *pszOutputBuffer, int nInputBufferSize, int nOutpuBufferSize)
+void CMaxDome::hexdump(unsigned char* pszInputBuffer, unsigned char *pszOutputBuffer, int nInputBufferSize, int nOutpuBufferSize)
 {
     unsigned char *pszBuf = pszOutputBuffer;
     int nIdx=0;
@@ -1430,3 +1412,73 @@ void  CMaxDome::hexdump(unsigned char* pszInputBuffer, unsigned char *pszOutputB
         pszBuf+=3;
     }
 }
+
+
+int CMaxDome::setDebounceTime(int nDebounceTime)
+{
+    int nErr = MD2_OK;
+
+    if(!bIsConnected) {
+        m_nDebounceTime = nDebounceTime;
+        return nErr;
+    }
+
+    if(m_nFirmwareVersion<4) {
+        return FIRMWARE_NOT_SUPPORTED;
+    }
+
+    unsigned char cMessage[MD_BUFFER_SIZE];
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
+    unsigned long  nBytesWrite;;
+    int nReturn;
+
+    cMessage[0] = 0x01;
+    cMessage[1] = 0x03;		// Will follow 4 bytes more
+    cMessage[2] = SETDEBOUNCE_CMD;
+    // Note: we do not use nTicks >> 8 in order to remain compatible with both little-endian and big-endian procesors
+    cMessage[3] = (char)(nDebounceTime / 10);
+    cMessage[4] = checksum_MaxDomeII(cMessage, 4);
+
+#ifdef MAXDOME_DEBUG
+    ltime = time(NULL);
+    timestamp = asctime(localtime(&ltime));
+    timestamp[strlen(timestamp) - 1] = 0;
+    hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
+    fprintf(Logfile, "[%s] CMaxDome::setDebounceTime sending :\n%s\n", timestamp, cHexMessage);
+    fflush(Logfile);
+#endif
+
+    if(bDebugLog) {
+        hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::setDebounceTime] cMessage = %s",cHexMessage);
+        mLogger->out(mLogBuffer);
+    }
+    nErr = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
+    pSerx->flushTx();
+
+    if (nErr != MD2_OK)
+        return ERR_CMDFAILED;
+
+    nReturn = ReadResponse_MaxDomeII(cMessage);
+    if(bDebugLog) {
+        hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
+        snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::setDebounceTime] response = %s\n",cHexMessage);
+        mLogger->out(mLogBuffer);
+    }
+    if (nReturn != 0)
+        return nReturn;
+
+    if (cMessage[2] == (unsigned char)(SETDEBOUNCE_CMD | TO_COMPUTER))
+    {
+        m_nDebounceTime = nDebounceTime;
+        return 0;
+    }
+    return BAD_CMD_RESPONSE;	// Response don't match command
+}
+
+int CMaxDome::getDebounceTime()
+{
+    return m_nDebounceTime;
+}
+
+

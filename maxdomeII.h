@@ -48,7 +48,7 @@
 #include "../../licensedinterfaces/loggerinterface.h"
 
 
-// #define MAXDOME_DEBUG
+#define MAXDOME_DEBUG
 
 #ifdef MAXDOME_DEBUG
 #if defined(SB_WIN_BUILD)
@@ -83,6 +83,8 @@
 #define ACK_CMD     0x0A		// ACK (?)
 #define SETPARK_CMD 0x0B		// Set park coordinates and if need to park before to operating shutter
 
+#define SETDEBOUNCE_CMD 0x0C		// Set park coordinates and if need to park before to operating shutter
+
 // Shutter commands
 #define OPEN_SHUTTER            0x01
 #define OPEN_UPPER_ONLY_SHUTTER 0x02
@@ -116,7 +118,10 @@ public:
     
     void        SetSerxPointer(SerXInterface *p) { pSerx = p; }
     void        setLogger(LoggerInterface *pLogger) { mLogger = pLogger; };
-    
+
+    // controller info
+    void getFirmwareVersion(char *version, int strMaxLen);
+
     // Dome commands
     int Init_Communication(void);
     int Abort_Azimuth_MaxDomeII(void);
@@ -124,7 +129,6 @@ public:
     int Goto_Azimuth_MaxDomeII(int nDir, int nTicks);
     int Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, int &nAzimuthPosition, int &nHomePosition);
     int Goto_Azimuth_MaxDomeII(double newAz);
-    int Ack_MaxDomeII(void);
     int SyncMode_MaxDomeII(void);
     int SetPark_MaxDomeII_Ticks(unsigned nParkOnShutter, int nTicks);
     int SetTicksPerCount_MaxDomeII(int nTicks);
@@ -152,6 +156,8 @@ public:
     int IsFindHomeComplete(bool &complete);
     
     // getter/setter
+    int getFirmwareIntValue();
+
     int getNbTicksPerRev();
     void setNbTicksPerRev(unsigned nbTicksPerRev);
     
@@ -167,6 +173,10 @@ public:
     double getCurrentAz();
     void setCurrentAz(double dAz);
     void setCalibrating(bool bCal);
+
+    int setDebounceTime(int nDebounceTime);
+    int getDebounceTime();
+
     
     void setDebugLog(bool enable);
 protected:
@@ -176,6 +186,7 @@ protected:
     bool            bIsConnected;
 
     char            m_szFirmwareVersion[LOG_BUFFER_SIZE];
+    int             m_nFirmwareVersion;
 
     bool            mHomed;
     bool            mParked;
@@ -184,7 +195,8 @@ protected:
     bool            mCalibrating;
 	
     int             mNbTicksPerRev;
-    
+    int             m_nDebounceTime;
+
     int             mHomeAzInTicks;
     double          mHomeAz;
     
@@ -194,7 +206,7 @@ protected:
     int             mCurrentAzPositionInTicks;
     double          mCurrentAzPosition;
     
-    int        mGotoTicks;
+    int             mGotoTicks;
     SerXInterface   *pSerx;
     
     LoggerInterface *mLogger;

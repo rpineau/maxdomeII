@@ -48,6 +48,8 @@ X2Dome::X2Dome(const char* pszSelection,
         mHasShutterControl = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, true);
         mIsRollOffRoof = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, false);
         maxDome.setCloseShutterBeforePark( ! m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, false)); // if we can operate at any Az then CloseShutterBeforePark is false
+        maxDome.setDebounceTime(m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_DEBOUNCE_TIME, 120));
+
     }
 }
 
@@ -128,6 +130,7 @@ int X2Dome::execModalSettingsDialog()
     X2GUIInterface*					ui = uiutil.X2UI();
     X2GUIExchangeInterface*			dx = NULL;//Comes after ui is loaded
     bool bPressedOK = false;
+    int nDebouceIndex;
 
     double dHomeAz;
     double dParkAz;
@@ -143,6 +146,10 @@ int X2Dome::execModalSettingsDialog()
     if (NULL == (dx = uiutil.X2DX()))
         return ERR_POINTER;
 
+    printf("[X2Dome::execModalSettingsDialog] maxDome.getDebounceTime() = %d\n", maxDome.getDebounceTime());
+
+    nDebouceIndex = (maxDome.getDebounceTime() - 20)/10;
+
     // set controls state depending on the connection state
     if(mHasShutterControl)
     {
@@ -151,6 +158,7 @@ int X2Dome::execModalSettingsDialog()
         dx->setEnabled("isRoolOffRoof", true);
         dx->setEnabled("radioButtonShutterAnyAz", true);
         dx->setEnabled("groupBoxShutter", true);
+
 
         if(mOpenUpperShutterOnly)
             dx->setChecked("openUpperShutterOnly", true);
@@ -180,9 +188,27 @@ int X2Dome::execModalSettingsDialog()
         dx->setEnabled("radioButtonShutterAnyAz", false);
         
     }
-    
-    // disable Auto Calibrate for now
-    dx->setEnabled("pushButton",true);
+
+    if(m_bLinked) {
+        dx->setEnabled("pushButton", true);
+        dx->setEnabled("comboBox", true);
+        dx->setCurrentIndex("comboBox", nDebouceIndex);
+        dx->setEnabled("pushButton_2", true);
+    }
+    else {
+        dx->setEnabled("pushButton", false);
+        dx->setEnabled("comboBox", false);
+        dx->setCurrentIndex("comboBox", nDebouceIndex);
+        dx->setEnabled("pushButton_2", false);
+        dx->setChecked("hasShutterCtrl",false);
+        dx->setChecked("radioButtonShutterAnyAz",false);
+        dx->setChecked("openUpperShutterOnly",false);
+        dx->setChecked("isRoolOffRoof",false);
+        dx->setEnabled("openUpperShutterOnly", false);
+        dx->setEnabled("isRoolOffRoof", false);
+        dx->setEnabled("groupBoxShutter", false);
+        dx->setEnabled("radioButtonShutterAnyAz", false);
+    }
 
     dx->setPropertyInt("ticksPerRev","value", maxDome.getNbTicksPerRev());
     dx->setPropertyDouble("homePosition","value", maxDome.getHomeAz());
@@ -288,8 +314,8 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
                     mInitCalibration = true;
                     maxDome.SyncMode_MaxDomeII();
                     maxDome.SetPark_MaxDomeII_Ticks(mOpenUpperShutterOnly, 32767);
-                    // move 50 ticks forward to the right from inside the dome to clear the home sensor.
-                    maxDome.Goto_Azimuth_MaxDomeII(MAXDOMEII_EW_DIR, 50);
+                    // move 10 ticks forward to the right from inside the dome to clear the home sensor.
+                    maxDome.Goto_Azimuth_MaxDomeII(MAXDOMEII_EW_DIR, 10);
                     return;
                 }
             }
@@ -388,7 +414,14 @@ void X2Dome::deviceInfoDetailedDescription(BasicStringInterface& str) const
 }
  void X2Dome::deviceInfoFirmwareVersion(BasicStringInterface& str)					
 {
-    str = "Not available.";
+    if(!m_bLinked) {
+        str = "Not available.";
+    }
+    else {
+        char cFirmware[LOG_BUFFER_SIZE];
+        maxDome.getFirmwareVersion(cFirmware, LOG_BUFFER_SIZE);
+        str = cFirmware;
+    }
 }
 void X2Dome::deviceInfoModel(BasicStringInterface& str)
 {

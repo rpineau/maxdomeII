@@ -6,9 +6,27 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>522</width>
-    <height>387</height>
+    <width>356</width>
+    <height>504</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>356</width>
+    <height>504</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>356</width>
+    <height>504</height>
+   </size>
+  </property>
+  <property name="sizeIncrement">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Maxdome II settings</string>
@@ -25,11 +43,287 @@
      <property name="SerialPortName" stdset="0">
       <string/>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <widget class="QGroupBox" name="MaxDomeIIParams">
+      <property name="geometry">
+       <rect>
+        <x>13</x>
+        <y>1</y>
+        <width>305</width>
+        <height>424</height>
+       </rect>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="title">
+       <string>MaxDome  II Params</string>
+      </property>
+      <widget class="QCheckBox" name="isRoolOffRoof">
+       <property name="geometry">
+        <rect>
+         <x>13</x>
+         <y>304</y>
+         <width>97</width>
+         <height>18</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Roll off Roof</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="hasShutterCtrl">
+       <property name="geometry">
+        <rect>
+         <x>13</x>
+         <y>256</y>
+         <width>134</width>
+         <height>18</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Has shutter control</string>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="groupBoxShutter">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>328</y>
+         <width>266</width>
+         <height>80</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Shutter Operation</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <spacer name="horizontalSpacer_4">
+         <widget class="QRadioButton" name="radioButtonShutterAnyAz">
+          <property name="text">
+           <string>Operate Shutter At Any Azimuth</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="radioButtonShutterPark">
+          <property name="text">
+           <string>Park Dome Before Operating Shutter</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QPushButton" name="pushButton">
+       <property name="geometry">
+        <rect>
+         <x>8</x>
+         <y>32</y>
+         <width>128</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Auto Calibrate</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="openUpperShutterOnly">
+       <property name="geometry">
+        <rect>
+         <x>13</x>
+         <y>280</y>
+         <width>172</width>
+         <height>18</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Open Upper Shutter Only</string>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="geometry">
+        <rect>
+         <x>16</x>
+         <y>176</y>
+         <width>264</width>
+         <height>72</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Rotation Sensor debounce time</string>
+       </property>
+       <widget class="QComboBox" name="comboBox">
+        <property name="geometry">
+         <rect>
+          <x>96</x>
+          <y>32</y>
+          <width>64</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="currentIndex">
+         <number>10</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>20</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>30</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>40</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>50</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>60</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>70</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>80</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>90</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>100</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>110</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>120</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>130</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>140</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>150</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>160</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>170</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>180</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>190</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>200</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>210</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>220</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>230</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>240</string>
+         </property>
+        </item>
+       </widget>
+       <widget class="QPushButton" name="pushButton_2">
+        <property name="geometry">
+         <rect>
+          <x>168</x>
+          <y>32</y>
+          <width>56</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Set</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_4">
+        <property name="geometry">
+         <rect>
+          <x>16</x>
+          <y>32</y>
+          <width>80</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Value in ms :</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>104</y>
+         <width>272</width>
+         <height>26</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <spacer name="horizontalSpacer_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -42,186 +336,138 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButtonCancel">
+         <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>Cancel</string>
+           <string>Home Position (Deg.) :</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButtonOK">
-          <property name="text">
-           <string>OK</string>
-          </property>
-          <property name="default">
-           <bool>true</bool>
+         <widget class="QDoubleSpinBox" name="homePosition">
+          <property name="maximum">
+           <double>359.990000000000009</double>
           </property>
          </widget>
         </item>
        </layout>
-      </item>
-      <item row="0" column="0">
-       <widget class="QGroupBox" name="MaxDomeIIParams">
-        <property name="title">
-         <string>MaxDome  II Params</string>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="11" column="0">
-          <widget class="QCheckBox" name="isRoolOffRoof">
-           <property name="text">
-            <string>Roll off Roof</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0" rowspan="2">
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
-            <spacer name="horizontalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>Home Position (Deg.) :</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QDoubleSpinBox" name="homePosition">
-             <property name="maximum">
-              <double>359.990000000000009</double>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="9" column="0">
-          <widget class="QCheckBox" name="hasShutterCtrl">
-           <property name="text">
-            <string>Has shutter control</string>
-           </property>
-          </widget>
-         </item>
-         <item row="12" column="0">
-          <widget class="QGroupBox" name="groupBoxShutter">
-           <property name="title">
-            <string>Shutter Operation</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_2">
-            <item>
-             <widget class="QRadioButton" name="radioButtonShutterAnyAz">
-              <property name="text">
-               <string>Operate Shutter At Any Azimuth</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="radioButtonShutterPark">
-              <property name="text">
-               <string>Park Dome Before Operating Shutter</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QPushButton" name="pushButton">
-           <property name="text">
-            <string>Auto Calibrate</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <item>
-            <spacer name="horizontalSpacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Number of Ticks per revolution :</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="ticksPerRev">
-             <property name="maximum">
-              <number>65535</number>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="8" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
-           <item>
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>Park Postition (Deg.) :</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QDoubleSpinBox" name="parkPosition">
-             <property name="maximum">
-              <double>359.990000000000009</double>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="10" column="0">
-          <widget class="QCheckBox" name="openUpperShutterOnly">
-           <property name="text">
-            <string>Open Upper Shutter Only</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-        <zorder>groupBoxShutter</zorder>
-        <zorder>hasShutterCtrl</zorder>
-        <zorder>pushButton</zorder>
-        <zorder>isRoolOffRoof</zorder>
-        <zorder>openUpperShutterOnly</zorder>
-       </widget>
-      </item>
-     </layout>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>64</y>
+         <width>272</width>
+         <height>26</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Number of Ticks per revolution :</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="ticksPerRev">
+          <property name="maximum">
+           <number>65535</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>144</y>
+         <width>272</width>
+         <height>26</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Park Postition (Deg.) :</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="parkPosition">
+          <property name="maximum">
+           <double>359.990000000000009</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <zorder>layoutWidget</zorder>
+      <zorder>layoutWidget</zorder>
+      <zorder>layoutWidget</zorder>
+      <zorder>groupBoxShutter</zorder>
+      <zorder>hasShutterCtrl</zorder>
+      <zorder>pushButton</zorder>
+      <zorder>isRoolOffRoof</zorder>
+      <zorder>openUpperShutterOnly</zorder>
+      <zorder>groupBox</zorder>
+     </widget>
+     <widget class="QPushButton" name="pushButtonOK">
+      <property name="geometry">
+       <rect>
+        <x>240</x>
+        <y>440</y>
+        <width>81</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>OK</string>
+      </property>
+      <property name="default">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonCancel">
+      <property name="geometry">
+       <rect>
+        <x>152</x>
+        <y>440</y>
+        <width>81</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Cancel</string>
+      </property>
+     </widget>
     </widget>
    </item>
   </layout>
