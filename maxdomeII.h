@@ -78,7 +78,7 @@
 #define GOTO_CMD    0x05		// Go to azimuth position
 #define SHUTTER_CMD 0x06		// Send a command to Shutter
 #define STATUS_CMD  0x07		// Retrieve status
-#define SYMC_CMD    0x08
+#define SYMC_CMD    0x08        // swicth patk to sync mode
 #define TICKS_CMD   0x09		// Set the number of tick per revolution of the dome
 #define ACK_CMD     0x0A		// ACK (?)
 #define SETPARK_CMD 0x0B		// Set park coordinates and if need to park before to operating shutter

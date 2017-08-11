@@ -590,10 +590,12 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     {
         nShutterStatus = (enum SH_Status)cMessage[3];
         nAzimuthStatus = (enum AZ_Status)cMessage[4];
+
         nAzimuthPosition = (unsigned)(((unsigned)cMessage[5]) * 256 + ((unsigned)cMessage[6]));
-        nHomePosition = ((unsigned)cMessage[7]) * 256 + ((unsigned)cMessage[8]);
         mCurrentAzPositionInTicks = nAzimuthPosition;
         TicksToAz(mCurrentAzPositionInTicks, mCurrentAzPosition);
+
+        nHomePosition = ((unsigned)cMessage[7]) * 256 + ((unsigned)cMessage[8]);
         mHomeAzInTicks = nHomePosition;
         return 0;
     }
@@ -719,29 +721,46 @@ int CMaxDome::Sync_Dome(double dAz)
 {
     int err = 0;
     int nTicks;
+    double dTmpAz;
 
     if(bDebugLog) {
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Sync_Dome] dAz = %3.2f",dAz);
         mLogger->out(mLogBuffer);
     }
 
+#ifdef MAXDOME_DEBUG
+    ltime = time(NULL);
+    timestamp = asctime(localtime(&ltime));
+    timestamp[strlen(timestamp) - 1] = 0;
+    fprintf(Logfile, "[%s] [CMaxDome::Sync_Dome] dAz = %3.2f\n", timestamp, dAz);
+    fflush(Logfile);
+#endif
+
     // this switch the park command to a sync command
     err = SyncMode_MaxDomeII();
     if (err)
         return err;
-
+    dTmpAz = dAz;
     // remove home offset
     dAz = dAz - mHomeAz;
     while (dAz < 0) dAz += 360;
     while (dAz >= 360) dAz -= 360;
 
-    nTicks = int(round(mNbTicksPerRev - dAz/(360.0f/mNbTicksPerRev))) % mNbTicksPerRev;
+    nTicks = int(round((360-dAz)/(360.0f/mNbTicksPerRev)));
+
+#ifdef MAXDOME_DEBUG
+    ltime = time(NULL);
+    timestamp = asctime(localtime(&ltime));
+    timestamp[strlen(timestamp) - 1] = 0;
+    fprintf(Logfile, "[%s] [CMaxDome::Sync_Dome] nTicks = %d ( %02X )\n", timestamp, nTicks, nTicks);
+    fflush(Logfile);
+#endif
 
     err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, nTicks);
     if (err)
         return err;
-
-    mCurrentAzPosition = dAz;
+    // sync seems to change the home Az and reset the tick counter to 0.
+    mHomeAz = dTmpAz;
     return err;
 }
 
