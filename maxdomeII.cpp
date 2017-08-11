@@ -778,9 +778,7 @@ int CMaxDome::Park_MaxDomeII(void)
 int CMaxDome::Unpark(void)
 {
     mParked = false;
-    mCurrentAzPosition = mParkAz;
-    Sync_Dome(mParkAz);
-    return 0;
+    return MD2_OK;
 }
 
 /*
@@ -1259,9 +1257,8 @@ int CMaxDome::IsUnparkComplete(bool &complete)
     if(!bIsConnected)
         return MD2_NOT_CONNECTED;
 
-    mParked = false;
-    complete = true;
-
+    if(!mParked)
+        complete = true;
     return err;
 }
 
