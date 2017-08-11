@@ -532,20 +532,8 @@ int X2Dome::dapiAbort(void)
     if(!m_bLinked)
         return ERR_NOLINK;
 
-
-    switch(mlastCommand)
-    {
-        case AzGoto:
-            if(mIsRollOffRoof)
-                break;
-            maxDome.Abort_Azimuth_MaxDomeII();
-            break;
-        
-        case ShutterOpen:
-        case ShutterClose:
-            maxDome.Abort_Shutter_MaxDomeII();
-            break;
-    }
+    maxDome.Abort_Azimuth_MaxDomeII();
+    maxDome.Abort_Shutter_MaxDomeII();
 	return SB_OK;
 }
 
