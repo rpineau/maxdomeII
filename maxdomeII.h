@@ -32,9 +32,34 @@
 #ifndef __MAXDOMEII__
 #define __MAXDOMEII__
 #include <math.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <memory.h>
+#include <string.h>
+#include <time.h>
+#ifdef SB_MAC_BUILD
+#include <unistd.h>
+#endif
+
 #include "../../licensedinterfaces/sberrorx.h"
 #include "../../licensedinterfaces/serxinterface.h"
 #include "../../licensedinterfaces/loggerinterface.h"
+
+
+// #define MAXDOME_DEBUG
+
+#ifdef MAXDOME_DEBUG
+#if defined(SB_WIN_BUILD)
+#define MAXDOME_LOGFILENAME "C:\\MaxdomeLog.txt"
+#elif defined(SB_LINUX_BUILD)
+#define MAXDOME_LOGFILENAME "/tmp/MaxdomeLog.txt"
+#elif defined(SB_MAC_BUILD)
+#define MAXDOME_LOGFILENAME "/tmp/MaxdomeLog.txt"
+#endif
+#endif
+
 
 #define LOG_BUFFER_SIZE 256
 
@@ -53,10 +78,12 @@
 #define GOTO_CMD    0x05		// Go to azimuth position
 #define SHUTTER_CMD 0x06		// Send a command to Shutter
 #define STATUS_CMD  0x07		// Retrieve status
-#define SYMC_CMD    0x08
+#define SYMC_CMD    0x08        // swicth patk to sync mode
 #define TICKS_CMD   0x09		// Set the number of tick per revolution of the dome
 #define ACK_CMD     0x0A		// ACK (?)
 #define SETPARK_CMD 0x0B		// Set park coordinates and if need to park before to operating shutter
+
+#define SETDEBOUNCE_CMD 0x0C		// Set park coordinates and if need to park before to operating shutter
 
 // Shutter commands
 #define OPEN_SHUTTER            0x01
@@ -70,6 +97,7 @@
 #define MAXDOMEII_WE_DIR 0x02
 
 // Azimuth motor status. When motor is idle, sometimes returns 0, sometimes 4. After connect, it returns 5
+// 5 might not be an error at all !!!
 enum AZ_Status {As_IDLE = 1, As_MOVING_WE, As_MOVING_EW, As_IDLE2, As_ERROR};
 
 // Shutter status
@@ -84,13 +112,16 @@ public:
     CMaxDome();
     ~CMaxDome();
     
-    bool        Connect(const char *szPort);
+    int         Connect(const char *szPort);
     void        Disconnect(void);
     bool        IsConnected(void) { return bIsConnected; }
     
     void        SetSerxPointer(SerXInterface *p) { pSerx = p; }
     void        setLogger(LoggerInterface *pLogger) { mLogger = pLogger; };
-    
+
+    // controller info
+    void getFirmwareVersion(char *version, int strMaxLen);
+
     // Dome commands
     int Init_Communication(void);
     int Abort_Azimuth_MaxDomeII(void);
@@ -98,7 +129,6 @@ public:
     int Goto_Azimuth_MaxDomeII(int nDir, int nTicks);
     int Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, int &nAzimuthPosition, int &nHomePosition);
     int Goto_Azimuth_MaxDomeII(double newAz);
-    int Ack_MaxDomeII(void);
     int SyncMode_MaxDomeII(void);
     int SetPark_MaxDomeII_Ticks(unsigned nParkOnShutter, int nTicks);
     int SetTicksPerCount_MaxDomeII(int nTicks);
@@ -126,6 +156,8 @@ public:
     int IsFindHomeComplete(bool &complete);
     
     // getter/setter
+    int getFirmwareIntValue();
+
     int getNbTicksPerRev();
     void setNbTicksPerRev(unsigned nbTicksPerRev);
     
@@ -133,7 +165,7 @@ public:
     void setHomeAz(double dAz);
     
     double getParkAz();
-    void setParkAz(unsigned nParkOnShutter, double dAz);
+    int setParkAz(unsigned nParkOnShutter, double dAz);
     
     bool getCloseShutterBeforePark();
     void setCloseShutterBeforePark(bool close);
@@ -141,6 +173,10 @@ public:
     double getCurrentAz();
     void setCurrentAz(double dAz);
     void setCalibrating(bool bCal);
+
+    int setDebounceTime(int nDebounceTime);
+    int getDebounceTime();
+
     
     void setDebugLog(bool enable);
 protected:
@@ -148,34 +184,43 @@ protected:
     signed char     checksum_MaxDomeII(unsigned char *cMessage, int nLen);
     int             ReadResponse_MaxDomeII(unsigned char *cMessage);
     bool            bIsConnected;
-    
+
+    char            m_szFirmwareVersion[LOG_BUFFER_SIZE];
+    int             m_nFirmwareVersion;
+
     bool            mHomed;
     bool            mParked;
     bool            mCloseShutterBeforePark;
     bool            mShutterOpened;
     bool            mCalibrating;
-	bool			m_bSyncing;
 	
-    int        mNbTicksPerRev;
-    
-    int        mHomeAzInTicks;
+    int             mNbTicksPerRev;
+    int             m_nDebounceTime;
+
+    int             mHomeAzInTicks;
     double          mHomeAz;
     
-    int        mParkAzInTicks;
+    int             mParkAzInTicks;
     double          mParkAz;
     
-    int        mCurrentAzPositionInTicks;
+    int             mCurrentAzPositionInTicks;
     double          mCurrentAzPosition;
     
-    int        mGotoTicks;
+    int             mGotoTicks;
     SerXInterface   *pSerx;
     
     LoggerInterface *mLogger;
     bool            bDebugLog;
     char            mLogBuffer[LOG_BUFFER_SIZE];
-    void            hexdump(unsigned char* inputData, unsigned char *outBuffer, int size);
+    void            hexdump(unsigned char* pszInputBuffer, unsigned char *pszOutputBuffer, int nInputBufferSize, int nOutpuBufferSize);
     
-    
+#ifdef MAXDOME_DEBUG
+    // timestamp for logs
+    char *timestamp;
+    time_t ltime;
+    FILE *Logfile;	  // LogFile
+#endif
+
 };
 
 #endif

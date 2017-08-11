@@ -14,7 +14,7 @@ class MutexInterface;
 class BasicIniUtilInterface;
 class TickCountInterface;
 
-#define DRIVER_VERSION      1.2
+#define DRIVER_VERSION      1.3
 
 #define PARENT_KEY			"MadomeII"
 #define CHILD_KEY_PORTNAME	"PortName"
@@ -25,6 +25,7 @@ class TickCountInterface;
 #define CHILD_KEY_SHUTTER_OPEN_UPPER_ONLY "ShutterOpenUpperOnly"
 #define CHILD_KEY_ROOL_OFF_ROOF "RollOffRoof"
 #define CHILD_KEY_SHUTTER_OPER_ANY_Az "ShutterOperAnyAz"
+#define CHILD_KEY_DEBOUNCE_TIME "DebounceTime"
 
 #if defined(SB_WIN_BUILD)
 #define DEF_PORT_NAME					"COM1"

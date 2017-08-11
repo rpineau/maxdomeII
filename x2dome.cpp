@@ -41,13 +41,15 @@ X2Dome::X2Dome(const char* pszSelection,
 
     if (m_pIniUtil)
     {
-        maxDome.setNbTicksPerRev( m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, 227) ); // default value for Sirius 2.3m dome.
+        maxDome.setNbTicksPerRev( m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, 0) );
         maxDome.setHomeAz( m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_HOME_AZ, 0) );
         mOpenUpperShutterOnly = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPEN_UPPER_ONLY, false);
         maxDome.setParkAz( mOpenUpperShutterOnly, m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, 0) );
         mHasShutterControl = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, true);
         mIsRollOffRoof = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, false);
         maxDome.setCloseShutterBeforePark( ! m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, false)); // if we can operate at any Az then CloseShutterBeforePark is false
+        maxDome.setDebounceTime(m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_DEBOUNCE_TIME, 120));
+
     }
 }
 
@@ -74,25 +76,27 @@ X2Dome::~X2Dome()
 
 int X2Dome::establishLink(void)					
 {
-    bool connected;
+
+    int nErr;
     char szPort[DRIVER_MAX_STRING];
 
     X2MutexLocker ml(GetMutex());
     // get serial port device name
     portNameOnToCharPtr(szPort,DRIVER_MAX_STRING);
-    connected = maxDome.Connect(szPort);
-    if(!connected)
-        return ERR_COMMNOLINK;
+    nErr = maxDome.Connect(szPort);
+    if(nErr)
+        return nErr;
 
     m_bLinked = true;
-	return SB_OK;
+	return nErr;
 }
 
 int X2Dome::terminateLink(void)					
 {
     X2MutexLocker ml(GetMutex());
-	m_bLinked = false;
-	return SB_OK;
+    maxDome.Disconnect();
+    m_bLinked = false;
+    return SB_OK;
 }
 
  bool X2Dome::isLinked(void) const				
@@ -126,6 +130,7 @@ int X2Dome::execModalSettingsDialog()
     X2GUIInterface*					ui = uiutil.X2UI();
     X2GUIExchangeInterface*			dx = NULL;//Comes after ui is loaded
     bool bPressedOK = false;
+    int nDebouceIndex;
 
     double dHomeAz;
     double dParkAz;
@@ -141,6 +146,8 @@ int X2Dome::execModalSettingsDialog()
     if (NULL == (dx = uiutil.X2DX()))
         return ERR_POINTER;
 
+    nDebouceIndex = (maxDome.getDebounceTime() - 20)/10;
+
     // set controls state depending on the connection state
     if(mHasShutterControl)
     {
@@ -149,6 +156,7 @@ int X2Dome::execModalSettingsDialog()
         dx->setEnabled("isRoolOffRoof", true);
         dx->setEnabled("radioButtonShutterAnyAz", true);
         dx->setEnabled("groupBoxShutter", true);
+
 
         if(mOpenUpperShutterOnly)
             dx->setChecked("openUpperShutterOnly", true);
@@ -178,9 +186,27 @@ int X2Dome::execModalSettingsDialog()
         dx->setEnabled("radioButtonShutterAnyAz", false);
         
     }
-    
-    // disable Auto Calibrate for now
-    dx->setEnabled("pushButton",true);
+
+    if(m_bLinked) {
+        dx->setEnabled("pushButton", true);
+        dx->setEnabled("comboBox", true);
+        dx->setCurrentIndex("comboBox", nDebouceIndex);
+        dx->setEnabled("pushButton_2", true);
+    }
+    else {
+        dx->setEnabled("pushButton", false);
+        dx->setEnabled("comboBox", false);
+        dx->setCurrentIndex("comboBox", nDebouceIndex);
+        dx->setEnabled("pushButton_2", false);
+        dx->setChecked("hasShutterCtrl",false);
+        dx->setChecked("radioButtonShutterAnyAz",false);
+        dx->setChecked("openUpperShutterOnly",false);
+        dx->setChecked("isRoolOffRoof",false);
+        dx->setEnabled("openUpperShutterOnly", false);
+        dx->setEnabled("isRoolOffRoof", false);
+        dx->setEnabled("groupBoxShutter", false);
+        dx->setEnabled("radioButtonShutterAnyAz", false);
+    }
 
     dx->setPropertyInt("ticksPerRev","value", maxDome.getNbTicksPerRev());
     dx->setPropertyDouble("homePosition","value", maxDome.getHomeAz());
@@ -242,6 +268,7 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
     int err;
     char errorMessage[LOG_BUFFER_SIZE];
     double  dHomeAz;
+    int nDebounceTime;
 
     if (!strcmp(pszEvent, "on_pushButtonCancel_clicked")) {
         maxDome.Abort_Azimuth_MaxDomeII();
@@ -286,8 +313,8 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
                     mInitCalibration = true;
                     maxDome.SyncMode_MaxDomeII();
                     maxDome.SetPark_MaxDomeII_Ticks(mOpenUpperShutterOnly, 32767);
-                    // move 50 ticks forward to the right from inside the dome to clear the home sensor.
-                    maxDome.Goto_Azimuth_MaxDomeII(MAXDOMEII_EW_DIR, 50);
+                    // move 10 ticks forward to the right from inside the dome to clear the home sensor.
+                    maxDome.Goto_Azimuth_MaxDomeII(MAXDOMEII_EW_DIR, 10);
                     return;
                 }
             }
@@ -365,6 +392,25 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
         }
     }
 
+    if (!strcmp(pszEvent, "on_pushButton_2_clicked")) {
+        if(m_bLinked) {
+            nDebounceTime = (uiex->currentIndex("comboBox") * 10) + 20;
+            err = maxDome.setDebounceTime(nDebounceTime);
+            if(err == FIRMWARE_NOT_SUPPORTED) {
+                snprintf(errorMessage, LOG_BUFFER_SIZE, "This is not supported by this version of the firmware");
+                uiex->messageBox("MaxDome II debounce time change", errorMessage);
+
+            }
+            else if (err) {
+                snprintf(errorMessage, LOG_BUFFER_SIZE, "Error setting the new debounce time : %d", err);
+                uiex->messageBox("MaxDome II debounce time change", errorMessage);
+            }
+            else {
+                m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_DEBOUNCE_TIME, nDebounceTime);
+            }
+        }
+    }
+
 }
 
 //
@@ -386,7 +432,14 @@ void X2Dome::deviceInfoDetailedDescription(BasicStringInterface& str) const
 }
  void X2Dome::deviceInfoFirmwareVersion(BasicStringInterface& str)					
 {
-    str = "Not available.";
+    if(!m_bLinked) {
+        str = "Not available.";
+    }
+    else {
+        char cFirmware[LOG_BUFFER_SIZE];
+        maxDome.getFirmwareVersion(cFirmware, LOG_BUFFER_SIZE);
+        str = cFirmware;
+    }
 }
 void X2Dome::deviceInfoModel(BasicStringInterface& str)
 {
