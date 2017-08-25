@@ -43,7 +43,8 @@ CMaxDome::CMaxDome()
     mCurrentAzPositionInTicks = 0;
     
     mHomeAz = 0;
-    mHomeAzInTicks = 0;
+
+    m_dSyncOffset = 0;
 
     mParkAzInTicks = 0;
     mParkAz = -1;
@@ -223,17 +224,16 @@ int CMaxDome::Init_Communication(void)
         mLogger->out(mLogBuffer);
     }
 
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
     
-    if (cMessage[2] == (unsigned char)(ACK_CMD | TO_COMPUTER))
-        return 0;
-
-    m_nFirmwareVersion = (int)cMessage[3];
-    snprintf(m_szFirmwareVersion, LOG_BUFFER_SIZE, "2.%1d", m_nFirmwareVersion);
+    if (cMessage[2] == (unsigned char)(ACK_CMD | TO_COMPUTER)) {
+        m_nFirmwareVersion = (int)cMessage[3];
+        snprintf(m_szFirmwareVersion, LOG_BUFFER_SIZE, "2.%1d", m_nFirmwareVersion);
+        return MD2_OK;
+    }
 
     return BAD_CMD_RESPONSE;	// Response don't match command
-    
 }
 
 
@@ -382,12 +382,13 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
         mLogger->out(mLogBuffer);
     }
 
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
     
-    if (cMessage[2] == (unsigned char)(ABORT_CMD | TO_COMPUTER))
-        return 0;
-    
+    if (cMessage[2] == (unsigned char)(ABORT_CMD | TO_COMPUTER)) {
+        return MD2_OK;
+    }
+
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
@@ -440,12 +441,13 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
         mLogger->out(mLogBuffer);
     }
     
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
     
-    if (cMessage[2] == (unsigned char)(HOME_CMD | TO_COMPUTER))
-        return 0;
-    
+    if (cMessage[2] == (unsigned char)(HOME_CMD | TO_COMPUTER)) {
+        m_dSyncOffset = 0;
+        return MD2_OK;
+    }
     return BAD_CMD_RESPONSE;	// Response doesn't match command
 }
 
@@ -495,7 +497,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
         return MD2_CANT_CONNECT;
     
     nReturn = ReadResponse_MaxDomeII(cMessage);
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
     
     if(bDebugLog) {
@@ -509,7 +511,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
         mGotoTicks = nTicks;
         mHomed = false;
         mParked = false;
-        return 0;
+        return MD2_OK;
     }
     
     return BAD_CMD_RESPONSE;	// Response don't match command
@@ -583,7 +585,7 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
         mLogger->out(mLogBuffer);
     }
 
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
     
     if (cMessage[2] == (unsigned char)(STATUS_CMD | TO_COMPUTER))
@@ -594,10 +596,8 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
         nAzimuthPosition = (unsigned)(((unsigned)cMessage[5]) * 256 + ((unsigned)cMessage[6]));
         mCurrentAzPositionInTicks = nAzimuthPosition;
         TicksToAz(mCurrentAzPositionInTicks, mCurrentAzPosition);
-
         nHomePosition = ((unsigned)cMessage[7]) * 256 + ((unsigned)cMessage[8]);
-        mHomeAzInTicks = nHomePosition;
-        return 0;
+        return MD2_OK;
     }
     
     return BAD_CMD_RESPONSE;	// Response don't match command
@@ -647,11 +647,12 @@ int CMaxDome::SyncMode_MaxDomeII(void)
         mLogger->out(mLogBuffer);
     }
 
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
 
-    if (cMessage[2] == (unsigned char)(SYMC_CMD | TO_COMPUTER))
-        return 0;
+    if (cMessage[2] == (unsigned char)(SYMC_CMD | TO_COMPUTER)) {
+        return MD2_OK;
+    }
 
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
@@ -714,6 +715,7 @@ int CMaxDome::SetPark_MaxDomeII_Ticks(unsigned nParkOnShutter, int nTicks)
 		mCloseShutterBeforePark = nParkOnShutter;
 		return MD2_OK;
 	}
+
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
@@ -759,8 +761,16 @@ int CMaxDome::Sync_Dome(double dAz)
     err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, nTicks);
     if (err)
         return err;
-    // sync seems to change the home Az and reset the tick counter to 0.
-    mHomeAz = dTmpAz;
+
+    // sync reset the tick counter to 0.
+    // so we need to compute the sync offset.
+    m_dSyncOffset = dTmpAz - mHomeAz;
+    while (m_dSyncOffset < 0) m_dSyncOffset += 360;
+    while (m_dSyncOffset >= 360) m_dSyncOffset -= 360;
+    printf("m_dSyncOffset = %3.2f\n", m_dSyncOffset);
+
+    // temp fix until the m_dSyncOffset is done
+    // mHomeAz = dTmpAz;
     return err;
 }
 
@@ -829,13 +839,13 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::SetTicksPerCount_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
     
     if (cMessage[2] == (unsigned char)(TICKS_CMD | TO_COMPUTER))
     {
         mNbTicksPerRev = nTicks;
-        return 0;
+        return MD2_OK;
     }
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
@@ -891,12 +901,12 @@ int CMaxDome::Open_Shutter_MaxDomeII()
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Open_Shutter_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
     
-    if (cMessage[2] == (unsigned char)(SHUTTER_CMD | TO_COMPUTER))
-        return 0;
-    
+    if (cMessage[2] == (unsigned char)(SHUTTER_CMD | TO_COMPUTER)) {
+        return MD2_OK;
+    }
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
@@ -945,12 +955,13 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Open_Upper_Shutter_Only_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
     
-    if (cMessage[2] == (unsigned char)(SHUTTER_CMD | TO_COMPUTER))
-        return 0;
-    
+    if (cMessage[2] == (unsigned char)(SHUTTER_CMD | TO_COMPUTER)) {
+        return MD2_OK;
+    }
+
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
@@ -999,12 +1010,13 @@ int CMaxDome::Close_Shutter_MaxDomeII()
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Close_Shutter_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
     
-    if (cMessage[2] == (unsigned char)(SHUTTER_CMD | TO_COMPUTER))
-        return 0;
-    
+    if (cMessage[2] == (unsigned char)(SHUTTER_CMD | TO_COMPUTER)) {
+        return MD2_OK;
+    }
+
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
@@ -1053,12 +1065,13 @@ int CMaxDome::Abort_Shutter_MaxDomeII()
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Abort_Shutter_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
     
-    if (cMessage[2] == (unsigned char)(SHUTTER_CMD | TO_COMPUTER))
-        return 0;
-    
+    if (cMessage[2] == (unsigned char)(SHUTTER_CMD | TO_COMPUTER)) {
+        return MD2_OK;
+    }
+
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
@@ -1107,12 +1120,13 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::Exit_Shutter_MaxDomeII] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
     
-    if (cMessage[2] == (unsigned char)(SHUTTER_CMD | TO_COMPUTER))
-        return 0;
-    
+    if (cMessage[2] == (unsigned char)(SHUTTER_CMD | TO_COMPUTER)) {
+        return MD2_OK;
+    }
+
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
@@ -1124,7 +1138,7 @@ void CMaxDome::AzToTicks(double pdAz, unsigned &dir, int &ticks)
 {
     dir = MAXDOMEII_EW_DIR;
     
-    ticks = (int) floor(0.5 + (pdAz - mHomeAz) * mNbTicksPerRev / 360.0);
+    ticks = (int) floor(0.5 + (pdAz - mHomeAz - m_dSyncOffset) * mNbTicksPerRev / 360.0);
     while (ticks > mNbTicksPerRev) ticks -= mNbTicksPerRev;
     while (ticks < 0) ticks += mNbTicksPerRev;
     
@@ -1152,7 +1166,7 @@ void CMaxDome::AzToTicks(double pdAz, unsigned &dir, int &ticks)
 void CMaxDome::TicksToAz(int ticks, double &pdAz)
 {
     
-    pdAz = mHomeAz + (ticks * 360.0 / mNbTicksPerRev);
+    pdAz = mHomeAz + (ticks * 360.0 / mNbTicksPerRev) + m_dSyncOffset;
     while (pdAz < 0) pdAz += 360;
     while (pdAz >= 360) pdAz -= 360;
 }
@@ -1170,8 +1184,6 @@ int CMaxDome::IsGoToComplete(bool &complete)
     if(err)
         return err;
 
-    // need to check +/- 1 ticks there
-    // if(((tmpAz <= mGotoTicks+1) && (tmpAz >= mGotoTicks-1)) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2))
     if(tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2)
         complete = true;
     else
@@ -1283,13 +1295,6 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
     fflush(Logfile);
 #endif
 
-#pragma mark TODO : Fix Home az check
-
-    // need to check +/- 1 ticks as we know it pass home by at least 1 ticks.
-    //if((tmpAz <= 2) && (tmpAz >= 0))
-    //   tmpAz = 1;
-
-    //if((tmpAz == 1) && (tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2)) {
     if(tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2) {
         if (mCalibrating) {
             setNbTicksPerRev(tmpHomePosition +1);
@@ -1473,14 +1478,15 @@ int CMaxDome::setDebounceTime(int nDebounceTime)
         snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::setDebounceTime] response = %s\n",cHexMessage);
         mLogger->out(mLogBuffer);
     }
-    if (nReturn != 0)
+    if (nReturn != MD2_OK)
         return nReturn;
 
     if (cMessage[2] == (unsigned char)(SETDEBOUNCE_CMD | TO_COMPUTER))
     {
         m_nDebounceTime = nDebounceTime;
-        return 0;
+        return MD2_OK;
     }
+
     return BAD_CMD_RESPONSE;	// Response don't match command
 }
 
