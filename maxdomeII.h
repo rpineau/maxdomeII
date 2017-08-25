@@ -197,9 +197,10 @@ protected:
     int             mNbTicksPerRev;
     int             m_nDebounceTime;
 
-    int             mHomeAzInTicks;
     double          mHomeAz;
-    
+
+    double          m_dSyncOffset;
+
     int             mParkAzInTicks;
     double          mParkAz;
     

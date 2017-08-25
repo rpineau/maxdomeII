@@ -14,7 +14,7 @@ class MutexInterface;
 class BasicIniUtilInterface;
 class TickCountInterface;
 
-#define DRIVER_VERSION      1.3
+#define DRIVER_VERSION      1.31
 
 #define PARENT_KEY			"MadomeII"
 #define CHILD_KEY_PORTNAME	"PortName"
