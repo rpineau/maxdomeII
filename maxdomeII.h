@@ -5,8 +5,6 @@
 //  Created by Rodolphe Pineau on 4/9/2016.
 //  MaxDome II X2 plugin
 //
-//  Created by Rodolphe Pineau on 4/9/2016.
-//
 // most of the code comes from the INDI driver.
 // The following is the original header.
 /*
@@ -168,7 +166,7 @@ public:
     int setParkAz(unsigned nParkOnShutter, double dAz);
     
     bool getCloseShutterBeforePark();
-    void setCloseShutterBeforePark(bool close);
+    void setParkBeforeCloseShutter(bool close);
     
     double getCurrentAz();
     void setCurrentAz(double dAz);
@@ -190,7 +188,7 @@ protected:
 
     bool            mHomed;
     bool            mParked;
-    bool            mCloseShutterBeforePark;
+    bool            mParkBeforeCloseShutter;
     bool            mShutterOpened;
     bool            mCalibrating;
 	

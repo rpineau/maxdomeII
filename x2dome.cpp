@@ -47,7 +47,7 @@ X2Dome::X2Dome(const char* pszSelection,
         maxDome.setParkAz( mOpenUpperShutterOnly, m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, 0) );
         mHasShutterControl = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_CONTROL, true);
         mIsRollOffRoof = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, false);
-        maxDome.setCloseShutterBeforePark( ! m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, false)); // if we can operate at any Az then CloseShutterBeforePark is false
+        maxDome.setParkBeforeCloseShutter( ! m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, false)); // if we can operate at any Az then CloseShutterBeforePark is false
         maxDome.setDebounceTime(m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_DEBOUNCE_TIME, 120));
 
     }

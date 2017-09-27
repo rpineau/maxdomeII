@@ -49,7 +49,7 @@ CMaxDome::CMaxDome()
     mParkAzInTicks = 0;
     mParkAz = -1;
 
-    mCloseShutterBeforePark = true;
+    mParkBeforeCloseShutter = true;
     mShutterOpened = false;
     
     mParked = true;
@@ -139,7 +139,7 @@ int CMaxDome::Connect(const char *pszPort)
     }
 
     if(mParkAz != -1) {
-        nErr = setParkAz(mCloseShutterBeforePark, mParkAz);
+        nErr = setParkAz(mParkBeforeCloseShutter, mParkAz);
         if(nErr) {
             bIsConnected = false;
             return false;
@@ -712,7 +712,7 @@ int CMaxDome::SetPark_MaxDomeII_Ticks(unsigned nParkOnShutter, int nTicks)
         return nReturn;
     if (cMessage[2] == (unsigned char)(SETPARK_CMD | TO_COMPUTER))
     {
-		mCloseShutterBeforePark = nParkOnShutter;
+		mParkBeforeCloseShutter = nParkOnShutter;
 		return MD2_OK;
 	}
 
@@ -758,7 +758,7 @@ int CMaxDome::Sync_Dome(double dAz)
     fflush(Logfile);
 #endif
 
-    err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, nTicks);
+    err = SetPark_MaxDomeII_Ticks(mParkBeforeCloseShutter, nTicks);
     if (err)
         return err;
 
@@ -767,10 +767,15 @@ int CMaxDome::Sync_Dome(double dAz)
     m_dSyncOffset = dTmpAz - mHomeAz;
     while (m_dSyncOffset < 0) m_dSyncOffset += 360;
     while (m_dSyncOffset >= 360) m_dSyncOffset -= 360;
-    printf("m_dSyncOffset = %3.2f\n", m_dSyncOffset);
 
-    // temp fix until the m_dSyncOffset is done
-    // mHomeAz = dTmpAz;
+#ifdef MAXDOME_DEBUG
+    ltime = time(NULL);
+    timestamp = asctime(localtime(&ltime));
+    timestamp[strlen(timestamp) - 1] = 0;
+    fprintf(Logfile, "[%s] [CMaxDome::Sync_Dome] m_dSyncOffset = %3.2f\n", timestamp, m_dSyncOffset);
+    fflush(Logfile);
+#endif
+
     return err;
 }
 
@@ -1299,7 +1304,7 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
         if (mCalibrating) {
             setNbTicksPerRev(tmpHomePosition +1);
             SyncMode_MaxDomeII();
-            SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, 32767);
+            SetPark_MaxDomeII_Ticks(mParkBeforeCloseShutter, 32767);
             Goto_Azimuth_MaxDomeII(MAXDOMEII_WE_DIR, 1);
             TicksToAz(1, mCurrentAzPosition);
             mCalibrating = false;
@@ -1371,9 +1376,9 @@ int CMaxDome::setParkAz(unsigned nParkOnShutter, double dAz)
     mParkAz = dAz;
 
     if(bIsConnected) {
-        mCloseShutterBeforePark = nParkOnShutter;
+        mParkBeforeCloseShutter = nParkOnShutter;
         AzToTicks(dAz, dir, mParkAzInTicks);
-        err = SetPark_MaxDomeII_Ticks(mCloseShutterBeforePark, mParkAzInTicks);
+        err = SetPark_MaxDomeII_Ticks(mParkBeforeCloseShutter, mParkAzInTicks);
         if(err) {
             snprintf(mLogBuffer,LOG_BUFFER_SIZE,"[CMaxDome::setParkAz -> SetPark_MaxDomeII] err = %d",err);
             mLogger->out(mLogBuffer);
@@ -1385,12 +1390,12 @@ int CMaxDome::setParkAz(unsigned nParkOnShutter, double dAz)
 
 bool CMaxDome::getCloseShutterBeforePark()
 {
-    return mCloseShutterBeforePark;
+    return mParkBeforeCloseShutter;
 }
 
-void CMaxDome::setCloseShutterBeforePark(bool close)
+void CMaxDome::setParkBeforeCloseShutter(bool close)
 {
-    mCloseShutterBeforePark = close;
+    mParkBeforeCloseShutter = close;
 }
 
 double CMaxDome::getCurrentAz()
