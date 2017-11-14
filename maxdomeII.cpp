@@ -1341,6 +1341,10 @@ int CMaxDome::getNbTicksPerRev()
 void CMaxDome::setNbTicksPerRev(unsigned nbTicksPerRev)
 {
     int err = 0;
+
+    if(nbTicksPerRev == 0)
+        nbTicksPerRev = 360;
+    
     mNbTicksPerRev = nbTicksPerRev;
     if(bIsConnected) {
         err = SetTicksPerCount_MaxDomeII(mNbTicksPerRev);
