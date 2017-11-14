@@ -41,7 +41,7 @@ X2Dome::X2Dome(const char* pszSelection,
 
     if (m_pIniUtil)
     {
-        maxDome.setNbTicksPerRev( m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, 0) );
+        maxDome.setNbTicksPerRev( m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, 360) );
         maxDome.setHomeAz( m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_HOME_AZ, 0) );
         mOpenUpperShutterOnly = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPEN_UPPER_ONLY, false);
         maxDome.setParkAz( mOpenUpperShutterOnly, m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_PARK_AZ, 0) );

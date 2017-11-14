@@ -37,7 +37,7 @@ CMaxDome::CMaxDome()
     pSerx = NULL;
     bIsConnected = false;
     
-    mNbTicksPerRev = 0;
+    mNbTicksPerRev = 360;
 
     mCurrentAzPosition = 0;
     mCurrentAzPositionInTicks = 0;
