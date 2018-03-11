@@ -25,7 +25,7 @@ DefaultGroupName={#MyAppName}
 ; First is where you want the installer to end up
 OutputDir=installer
 ; Next is the name of the installer
-OutputBaseFilename=maxdomeX2Installer
+OutputBaseFilename=maxdomeII_X2_Installer
 ; Final one is the icon you would like on the installer. Comment out if not needed.
 SetupIconFile=rti_zone_logo.ico
 Compression=lzma
