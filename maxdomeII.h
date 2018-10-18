@@ -46,10 +46,8 @@
 
 #include "../../licensedinterfaces/sberrorx.h"
 #include "../../licensedinterfaces/serxinterface.h"
-#include "../../licensedinterfaces/loggerinterface.h"
 
-
-#define MAXDOME_DEBUG 1
+#define MAXDOME_DEBUG 2
 
 #define LOG_BUFFER_SIZE 256
 
@@ -107,7 +105,6 @@ public:
     bool        IsConnected(void) { return bIsConnected; }
     
     void        SetSerxPointer(SerXInterface *p) { pSerx = p; }
-    void        setLogger(LoggerInterface *pLogger) { m_pLogger = pLogger; };
 
     // controller info
     void getFirmwareVersion(char *version, int strMaxLen);
@@ -197,10 +194,7 @@ protected:
     
     int             mGotoTicks;
     SerXInterface   *pSerx;
-    
-    LoggerInterface *m_pLogger;
-    bool            bDebugLog;
-    char            mLogBuffer[LOG_BUFFER_SIZE];
+
     void            hexdump(unsigned char* pszInputBuffer, unsigned char *pszOutputBuffer, int nInputBufferSize, int nOutpuBufferSize);
     
 #ifdef MAXDOME_DEBUG

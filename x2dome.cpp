@@ -36,7 +36,6 @@ X2Dome::X2Dome(const char* pszSelection,
 
 	m_bLinked = false;
     maxDome.SetSerxPointer(pSerX);
-    maxDome.setLogger(pLogger);
 
 
     if (m_pIniUtil)
@@ -453,7 +452,7 @@ void X2Dome::deviceInfoModel(BasicStringInterface& str)
 
  void	X2Dome::driverInfoDetailedInfo(BasicStringInterface& str) const	
 {
-    str = "MaxDome II plugin v1.0 beta";
+    str = "MaxDome II plugin";
 }
 
 double	X2Dome::driverInfoVersion(void) const
