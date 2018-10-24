@@ -26,8 +26,6 @@ fi
 
 echo "Installing in $TheSkyX_Path/Resources/Common/$PLUGINS_DIR/DomePlugIns/"
 
-mkdir -p "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/DomePlugIns/"
-
 cp "/tmp/maxdomeII_X2/domelist MaxDomeII.txt" "$TheSkyX_Path/Resources/Common/Miscellaneous Files/"
 if [ "$?" -ne "0" ]; then exit 1; fi
 cp "/tmp/maxdomeII_X2/maxdomeII.ui" "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/DomePlugIns/"
