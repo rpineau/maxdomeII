@@ -162,8 +162,8 @@
          <rect>
           <x>96</x>
           <y>32</y>
-          <width>64</width>
-          <height>32</height>
+          <width>72</width>
+          <height>24</height>
          </rect>
         </property>
         <property name="currentIndex">
