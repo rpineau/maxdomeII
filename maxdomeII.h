@@ -47,7 +47,7 @@
 #include "../../licensedinterfaces/sberrorx.h"
 #include "../../licensedinterfaces/serxinterface.h"
 
-#define MAXDOME_DEBUG 2
+// #define MAXDOME_DEBUG 2
 
 #define LOG_BUFFER_SIZE 256
 
