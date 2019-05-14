@@ -331,14 +331,17 @@
       <widget class="QLabel" name="label">
        <property name="geometry">
         <rect>
-         <x>16</x>
+         <x>8</x>
          <y>64</y>
-         <width>197</width>
+         <width>208</width>
          <height>24</height>
         </rect>
        </property>
        <property name="text">
         <string>Number of Ticks per revolution :</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
       <widget class="QDoubleSpinBox" name="parkPosition">
@@ -369,6 +372,9 @@
        <property name="text">
         <string>Park Postition (Deg.) :</string>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
       </widget>
       <widget class="QDoubleSpinBox" name="homePosition">
        <property name="geometry">
@@ -391,12 +397,15 @@
         <rect>
          <x>72</x>
          <y>96</y>
-         <width>139</width>
+         <width>144</width>
          <height>24</height>
         </rect>
        </property>
        <property name="text">
         <string>Home Position (Deg.) :</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
       <zorder>groupBoxShutter</zorder>
