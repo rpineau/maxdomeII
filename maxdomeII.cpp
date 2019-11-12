@@ -199,7 +199,6 @@ void CMaxDome::getFirmwareVersion(char *version, int strMaxLen)
 int CMaxDome::Init_Communication(void)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     unsigned long  nBytesWrite;
     int nReturn;
     int nErrorType = MD2_OK;
@@ -210,6 +209,7 @@ int CMaxDome::Init_Communication(void)
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
     
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -347,10 +347,6 @@ int CMaxDome::ReadResponse_MaxDomeII(unsigned char *cMessage)
 int CMaxDome::Abort_Azimuth_MaxDomeII(void)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
-#endif
-    // int nErrorType;
     unsigned long  nBytesWrite;
     int nReturn;
     int nErrorType = MD2_OK;
@@ -361,6 +357,7 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
 
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -398,9 +395,6 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
 int CMaxDome::Home_Azimuth_MaxDomeII(void)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
-#endif
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -412,6 +406,7 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
     
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -448,7 +443,6 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
 int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     int nErrorType=0;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -463,6 +457,7 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
     cMessage[6] = checksum_MaxDomeII(cMessage, 6);
 
 #if defined MAXDOME_DEBUG  && MAXDOME_DEBUG >= 2
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -506,20 +501,8 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
 int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
 {
     unsigned dir;
-    unsigned char cMessage[MD_BUFFER_SIZE];
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     int ticks;
     int err=0;
-
-#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
-    ltime = time(NULL);
-    timestamp = asctime(localtime(&ltime));
-    timestamp[strlen(timestamp) - 1] = 0;
-    hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::Goto_Azimuth_MaxDomeII mCurrentAzPosition : %3.2f\n", timestamp, mCurrentAzPosition);
-    fprintf(Logfile, "[%s] CMaxDome::Goto_Azimuth_MaxDomeII newAz : %3.2f\n", timestamp, newAz);
-    fflush(Logfile);
-#endif
 
     AzToTicks(newAz, dir, ticks);
     err = Goto_Azimuth_MaxDomeII(dir, ticks);
@@ -538,9 +521,6 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
 int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &nAzimuthStatus, int &nAzimuthPosition, int &nHomePosition)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
-#endif
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -551,6 +531,7 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
     
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -591,9 +572,6 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
 int CMaxDome::SyncMode_MaxDomeII(void)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
-#endif
     int nErrorType = MD2_OK;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -604,6 +582,7 @@ int CMaxDome::SyncMode_MaxDomeII(void)
     cMessage[3] = checksum_MaxDomeII(cMessage, 3);
 
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -640,9 +619,6 @@ int CMaxDome::SyncMode_MaxDomeII(void)
 int CMaxDome::SetPark_MaxDomeII_Ticks(unsigned nParkOnShutter, int nTicks)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
-#endif
     int nErrorType;
     unsigned long  nBytesWrite;
     int nReturn;
@@ -657,6 +633,7 @@ int CMaxDome::SetPark_MaxDomeII_Ticks(unsigned nParkOnShutter, int nTicks)
     cMessage[6] = checksum_MaxDomeII(cMessage, 6);
     
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -764,9 +741,6 @@ int CMaxDome::Unpark(void)
 int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
-#endif
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -780,6 +754,7 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
     cMessage[5] = checksum_MaxDomeII(cMessage, 5);
     
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -820,9 +795,6 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
 int CMaxDome::Open_Shutter_MaxDomeII()
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
-#endif
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -834,6 +806,7 @@ int CMaxDome::Open_Shutter_MaxDomeII()
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
     
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -865,9 +838,6 @@ int CMaxDome::Open_Shutter_MaxDomeII()
 int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
-#endif
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -879,6 +849,7 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
     
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -912,7 +883,6 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
 int CMaxDome::Close_Shutter_MaxDomeII()
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -924,6 +894,7 @@ int CMaxDome::Close_Shutter_MaxDomeII()
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
     
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -957,9 +928,6 @@ int CMaxDome::Close_Shutter_MaxDomeII()
 int CMaxDome::Abort_Shutter_MaxDomeII()
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
-#endif
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -971,6 +939,7 @@ int CMaxDome::Abort_Shutter_MaxDomeII()
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
     
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -1003,9 +972,6 @@ int CMaxDome::Abort_Shutter_MaxDomeII()
 int CMaxDome::Exit_Shutter_MaxDomeII()
 {
     unsigned char cMessage[MD_BUFFER_SIZE];
-#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
-#endif
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
@@ -1017,6 +983,7 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
     
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -1374,6 +1341,8 @@ void CMaxDome::hexdump(unsigned char* pszInputBuffer, unsigned char *pszOutputBu
 int CMaxDome::setDebounceTime(int nDebounceTime)
 {
     int nErr = MD2_OK;
+    unsigned char cMessage[MD_BUFFER_SIZE];
+    unsigned long  nBytesWrite;;
 
     if(!bIsConnected) {
         m_nDebounceTime = nDebounceTime;
@@ -1384,12 +1353,6 @@ int CMaxDome::setDebounceTime(int nDebounceTime)
         return FIRMWARE_NOT_SUPPORTED;
     }
 
-    unsigned char cMessage[MD_BUFFER_SIZE];
-#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
-#endif
-    unsigned long  nBytesWrite;;
-    int nReturn;
 
     cMessage[0] = 0x01;
     cMessage[1] = 0x03;		// Will follow 4 bytes more
@@ -1399,6 +1362,7 @@ int CMaxDome::setDebounceTime(int nDebounceTime)
     cMessage[4] = checksum_MaxDomeII(cMessage, 4);
 
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
+    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -1412,9 +1376,9 @@ int CMaxDome::setDebounceTime(int nDebounceTime)
     if (nErr != MD2_OK)
         return ERR_CMDFAILED;
 
-    nReturn = ReadResponse_MaxDomeII(cMessage);
-    if (nReturn != MD2_OK)
-        return nReturn;
+    nErr = ReadResponse_MaxDomeII(cMessage);
+    if (nErr != MD2_OK)
+        return nErr;
 
     if (cMessage[2] == (unsigned char)(SETDEBOUNCE_CMD | TO_COMPUTER))
     {
