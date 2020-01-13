@@ -46,10 +46,10 @@
      <widget class="QGroupBox" name="MaxDomeIIParams">
       <property name="geometry">
        <rect>
-        <x>13</x>
-        <y>1</y>
-        <width>305</width>
-        <height>424</height>
+        <x>8</x>
+        <y>0</y>
+        <width>312</width>
+        <height>432</height>
        </rect>
       </property>
       <property name="maximumSize">
@@ -64,10 +64,10 @@
       <widget class="QCheckBox" name="isRoolOffRoof">
        <property name="geometry">
         <rect>
-         <x>13</x>
-         <y>304</y>
-         <width>97</width>
-         <height>18</height>
+         <x>16</x>
+         <y>288</y>
+         <width>216</width>
+         <height>24</height>
         </rect>
        </property>
        <property name="text">
@@ -77,10 +77,10 @@
       <widget class="QCheckBox" name="hasShutterCtrl">
        <property name="geometry">
         <rect>
-         <x>13</x>
-         <y>256</y>
-         <width>134</width>
-         <height>18</height>
+         <x>16</x>
+         <y>240</y>
+         <width>216</width>
+         <height>24</height>
         </rect>
        </property>
        <property name="text">
@@ -90,10 +90,10 @@
       <widget class="QGroupBox" name="groupBoxShutter">
        <property name="geometry">
         <rect>
-         <x>15</x>
-         <y>328</y>
-         <width>266</width>
-         <height>80</height>
+         <x>16</x>
+         <y>320</y>
+         <width>280</width>
+         <height>96</height>
         </rect>
        </property>
        <property name="title">
@@ -124,8 +124,8 @@
         <rect>
          <x>8</x>
          <y>32</y>
-         <width>128</width>
-         <height>32</height>
+         <width>136</width>
+         <height>24</height>
         </rect>
        </property>
        <property name="text">
@@ -135,10 +135,10 @@
       <widget class="QCheckBox" name="openUpperShutterOnly">
        <property name="geometry">
         <rect>
-         <x>13</x>
-         <y>280</y>
-         <width>172</width>
-         <height>18</height>
+         <x>16</x>
+         <y>264</y>
+         <width>216</width>
+         <height>24</height>
         </rect>
        </property>
        <property name="text">
@@ -149,8 +149,8 @@
        <property name="geometry">
         <rect>
          <x>16</x>
-         <y>176</y>
-         <width>264</width>
+         <y>160</y>
+         <width>280</width>
          <height>72</height>
         </rect>
        </property>
@@ -162,7 +162,7 @@
          <rect>
           <x>96</x>
           <y>32</y>
-          <width>64</width>
+          <width>72</width>
           <height>24</height>
          </rect>
         </property>
@@ -288,7 +288,7 @@
        <widget class="QPushButton" name="pushButton_2">
         <property name="geometry">
          <rect>
-          <x>168</x>
+          <x>176</x>
           <y>32</y>
           <width>56</width>
           <height>24</height>
@@ -312,132 +312,114 @@
         </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="layoutWidget">
+      <widget class="QSpinBox" name="ticksPerRev">
        <property name="geometry">
         <rect>
-         <x>15</x>
-         <y>104</y>
-         <width>272</width>
-         <height>26</height>
-        </rect>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Home Position (Deg.) :</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="homePosition">
-          <property name="maximum">
-           <double>359.990000000000009</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="layoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>15</x>
+         <x>224</x>
          <y>64</y>
-         <width>272</width>
-         <height>26</height>
+         <width>72</width>
+         <height>24</height>
         </rect>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Number of Ticks per revolution :</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="ticksPerRev">
-          <property name="maximum">
-           <number>65535</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="maximum">
+        <number>65535</number>
+       </property>
       </widget>
-      <widget class="QWidget" name="layoutWidget">
+      <widget class="QLabel" name="label">
        <property name="geometry">
         <rect>
-         <x>15</x>
-         <y>144</y>
-         <width>272</width>
-         <height>26</height>
+         <x>8</x>
+         <y>64</y>
+         <width>208</width>
+         <height>24</height>
         </rect>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <spacer name="horizontalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Park Postition (Deg.) :</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="parkPosition">
-          <property name="maximum">
-           <double>359.990000000000009</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <property name="text">
+        <string>Number of Ticks per revolution :</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
       </widget>
-      <zorder>layoutWidget</zorder>
-      <zorder>layoutWidget</zorder>
-      <zorder>layoutWidget</zorder>
+      <widget class="QDoubleSpinBox" name="parkPosition">
+       <property name="geometry">
+        <rect>
+         <x>224</x>
+         <y>128</y>
+         <width>72</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="maximum">
+        <double>359.990000000000009</double>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>128</y>
+         <width>135</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Park Postition (Deg.) :</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="homePosition">
+       <property name="geometry">
+        <rect>
+         <x>224</x>
+         <y>96</y>
+         <width>72</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="maximum">
+        <double>359.990000000000009</double>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>72</x>
+         <y>96</y>
+         <width>144</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Home Position (Deg.) :</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
       <zorder>groupBoxShutter</zorder>
       <zorder>hasShutterCtrl</zorder>
       <zorder>pushButton</zorder>
       <zorder>isRoolOffRoof</zorder>
       <zorder>openUpperShutterOnly</zorder>
       <zorder>groupBox</zorder>
+      <zorder>ticksPerRev</zorder>
+      <zorder>label</zorder>
+      <zorder>parkPosition</zorder>
+      <zorder>label_3</zorder>
+      <zorder>homePosition</zorder>
+      <zorder>label_2</zorder>
      </widget>
      <widget class="QPushButton" name="pushButtonOK">
       <property name="geometry">
@@ -445,7 +427,7 @@
         <x>240</x>
         <y>440</y>
         <width>81</width>
-        <height>32</height>
+        <height>24</height>
        </rect>
       </property>
       <property name="text">
@@ -461,7 +443,7 @@
         <x>152</x>
         <y>440</y>
         <width>81</width>
-        <height>32</height>
+        <height>24</height>
        </rect>
       </property>
       <property name="text">

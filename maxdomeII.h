@@ -41,23 +41,13 @@
 #include <unistd.h>
 #endif
 
+// C++ includes
+#include <string>
+
 #include "../../licensedinterfaces/sberrorx.h"
 #include "../../licensedinterfaces/serxinterface.h"
-#include "../../licensedinterfaces/loggerinterface.h"
 
-
-// #define MAXDOME_DEBUG
-
-#ifdef MAXDOME_DEBUG
-#if defined(SB_WIN_BUILD)
-#define MAXDOME_LOGFILENAME "C:\\MaxdomeLog.txt"
-#elif defined(SB_LINUX_BUILD)
-#define MAXDOME_LOGFILENAME "/tmp/MaxdomeLog.txt"
-#elif defined(SB_MAC_BUILD)
-#define MAXDOME_LOGFILENAME "/tmp/MaxdomeLog.txt"
-#endif
-#endif
-
+// #define MAXDOME_DEBUG 2
 
 #define LOG_BUFFER_SIZE 256
 
@@ -115,7 +105,6 @@ public:
     bool        IsConnected(void) { return bIsConnected; }
     
     void        SetSerxPointer(SerXInterface *p) { pSerx = p; }
-    void        setLogger(LoggerInterface *pLogger) { mLogger = pLogger; };
 
     // controller info
     void getFirmwareVersion(char *version, int strMaxLen);
@@ -142,7 +131,7 @@ public:
     int Exit_Shutter_MaxDomeII(void);
     
     // convertion functions
-    void AzToTicks(double pdAz, unsigned &dir, int &ticks);
+    void AzToTicks(double dAz, unsigned &dir, int &ticks);
     void TicksToAz(int ticks, double &pdAz);
     
     // command complete functions
@@ -175,8 +164,6 @@ public:
     int setDebounceTime(int nDebounceTime);
     int getDebounceTime();
 
-    
-    void setDebugLog(bool enable);
 protected:
     
     signed char     checksum_MaxDomeII(unsigned char *cMessage, int nLen);
@@ -207,13 +194,11 @@ protected:
     
     int             mGotoTicks;
     SerXInterface   *pSerx;
-    
-    LoggerInterface *mLogger;
-    bool            bDebugLog;
-    char            mLogBuffer[LOG_BUFFER_SIZE];
+
     void            hexdump(unsigned char* pszInputBuffer, unsigned char *pszOutputBuffer, int nInputBufferSize, int nOutpuBufferSize);
     
 #ifdef MAXDOME_DEBUG
+    std::string m_sLogfilePath;
     // timestamp for logs
     char *timestamp;
     time_t ltime;

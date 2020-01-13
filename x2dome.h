@@ -14,7 +14,7 @@ class MutexInterface;
 class BasicIniUtilInterface;
 class TickCountInterface;
 
-#define DRIVER_VERSION      1.32
+#define DRIVER_VERSION      1.33
 
 #define PARENT_KEY			"MadomeII"
 #define CHILD_KEY_PORTNAME	"PortName"
@@ -93,8 +93,8 @@ public:
 	/*!\name DriverInfoInterface Implementation
 	See DriverInfoInterface.*/
 	//@{ 
-	virtual void								driverInfoDetailedInfo(BasicStringInterface& str) const	;
-	virtual double								driverInfoVersion(void) const								;
+	virtual void								driverInfoDetailedInfo(BasicStringInterface& str) const;
+	virtual double								driverInfoVersion(void) const;
 	//@} 
 
 	//DomeDriverInterface
@@ -115,15 +115,15 @@ public:
 	virtual int dapiSync(double dAz, double dEl);
 
     //SerialPortParams2Interface
-    virtual void			portName(BasicStringInterface& str) const			;
-    virtual void			setPortName(const char* szPort)						;
+    virtual void			portName(BasicStringInterface& str) const;
+    virtual void			setPortName(const char* szPort);
     virtual unsigned int	baudRate() const			{return 9600;};
     virtual void			setBaudRate(unsigned int)	{};
-    virtual bool			isBaudRateFixed() const		{return true;}
+    virtual bool			isBaudRateFixed() const		{return true;};
 
-    virtual SerXInterface::Parity	parity() const				{return SerXInterface::B_NOPARITY;}
-    virtual void					setParity(const SerXInterface::Parity& parity){parity;};
-    virtual bool					isParityFixed() const		{return true;}
+    virtual SerXInterface::Parity	parity() const				{return SerXInterface::B_NOPARITY;};
+    virtual void					setParity(const SerXInterface::Parity& parity) {};
+    virtual bool					isParityFixed() const		{return true;};
 
 
 
