@@ -30,8 +30,12 @@ echo "Installing in $PLUGINS_DIR/DomePlugIns/"
 
 cp "/tmp/maxdomeII_X2/domelist MaxDomeII.txt" "$TheSkyX_Path/Resources/Common/Miscellaneous Files/"
 if [ "$?" -ne "0" ]; then exit 1; fi
+
+rm -f "$PLUGINS_DIR/DomePlugIns/maxdomeII.ui"
 cp "/tmp/maxdomeII_X2/maxdomeII.ui" "$PLUGINS_DIR/DomePlugIns/"
 if [ "$?" -ne "0" ]; then exit 1; fi
+
+rm -f "$PLUGINS_DIR/DomePlugIns/libmaxdomeII.dylib"
 cp "/tmp/maxdomeII_X2/libmaxdomeII.dylib" "$PLUGINS_DIR/DomePlugIns/"
 if [ "$?" -ne "0" ]; then exit 1; fi
 
