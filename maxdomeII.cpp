@@ -504,7 +504,19 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
     int ticks;
     int err=0;
 
+
     AzToTicks(newAz, dir, ticks);
+
+#if defined MAXDOME_DEBUG  && MAXDOME_DEBUG >= 2
+    ltime = time(NULL);
+    timestamp = asctime(localtime(&ltime));
+    timestamp[strlen(timestamp) - 1] = 0;
+    fprintf(Logfile, "[%s] CMaxDome::Goto_Azimuth_MaxDomeII newAz : %3.2f\n", timestamp, newAz);
+    fprintf(Logfile, "[%s] CMaxDome::Goto_Azimuth_MaxDomeII ticks : %d\n", timestamp, ticks);
+    fprintf(Logfile, "[%s] CMaxDome::Goto_Azimuth_MaxDomeII dir : %d\n", timestamp, dir);
+    fflush(Logfile);
+#endif
+
     err = Goto_Azimuth_MaxDomeII(dir, ticks);
     return err;
 }
