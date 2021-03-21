@@ -1,5 +1,0 @@
-Install :
-Copy the  'domelist MaxDomeII.txt' file to the "Common/Miscellaneous Files" directory inside of TheSkyX Pro.
-Copy libmaxdomeII.dll and maxdomeII.ui to the "Common/PlugIns/DomePlugIns" directory inside of TheSkyX Pro.
-
-

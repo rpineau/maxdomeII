@@ -32,13 +32,13 @@ else
 	PLUGINS_DIR="PlugIns"
 fi
 
-cp "./domelist MaxDomeII.txt" "$TheSkyX_Path/Resources/Common/Miscellaneous Files/"
-cp "./maxdomeII.ui" "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/DomePlugIns/"
-cp "./libmaxdomeII.so" "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/DomePlugIns/"
+cp -f "./domelist maxdomeII.txt" "$TheSkyX_Path/Resources/Common/Miscellaneous Files/"
+cp -f "./maxdomeII.ui" "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/DomePlugIns/"
+cp -f "./libmaxdomeII.so" "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/DomePlugIns/"
 
 app_owner=`/usr/bin/stat -c "%u" "$TheSkyX_Path" | xargs id -n -u`
 if [ ! -z "$app_owner" ]; then
-	chown $app_owner "$TheSkyX_Path/Resources/Common/Miscellaneous Files/domelist MaxDomeII.txt"
+	chown $app_owner "$TheSkyX_Path/Resources/Common/Miscellaneous Files/domelist maxdomeII.txt"
 	chown $app_owner "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/DomePlugIns/maxdomeII.ui"
 	chown $app_owner "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/DomePlugIns/libmaxdomeII.so"
 fi
