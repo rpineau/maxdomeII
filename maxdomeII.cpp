@@ -109,7 +109,7 @@ int CMaxDome::Connect(const char *pszPort)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    fprintf(Logfile, "[%s] CMaxDome::Connect Called %s\n", timestamp, pszPort);
+    fprintf(Logfile, "[%s] [Connect] Called %s\n", timestamp, pszPort);
     fflush(Logfile);
 #endif
 
@@ -125,7 +125,7 @@ int CMaxDome::Connect(const char *pszPort)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    fprintf(Logfile, "[%s] CMaxDome::Connect connected to %s\n", timestamp, pszPort);
+    fprintf(Logfile, "[%s] [Connect] connected to %s\n", timestamp, pszPort);
     fflush(Logfile);
 #endif
 
@@ -147,7 +147,7 @@ int CMaxDome::Connect(const char *pszPort)
             ltime = time(NULL);
             timestamp = asctime(localtime(&ltime));
             timestamp[strlen(timestamp) - 1] = 0;
-            fprintf(Logfile, "[%s] [CMaxDome::setNbTicksPerRev -> SetTicksPerCount_MaxDomeII] err = %d\n", timestamp, nErr);
+            fprintf(Logfile, "[%s] [setNbTicksPerRev] SetTicksPerCount_MaxDomeII] err = %d\n", timestamp, nErr);
             fflush(Logfile);
 #endif
             bIsConnected = false;
@@ -214,7 +214,7 @@ int CMaxDome::Init_Communication(void)
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::Init_Communication sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [Init_Communication] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
@@ -310,7 +310,7 @@ int CMaxDome::ReadResponse_MaxDomeII(unsigned char *cMessage)
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::ReadResponse_MaxDomeII got :\n%s\n\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [ReadResponse_MaxDomeII] got :\n%s\n\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
@@ -319,7 +319,7 @@ int CMaxDome::ReadResponse_MaxDomeII(unsigned char *cMessage)
         ltime = time(NULL);
         timestamp = asctime(localtime(&ltime));
         timestamp[strlen(timestamp) - 1] = 0;
-        fprintf(Logfile, "[%s] CMaxDome::ReadResponse_MaxDomeII error reading response\n", timestamp);
+        fprintf(Logfile, "[%s] [ReadResponse_MaxDomeII] error reading response\n", timestamp);
         fflush(Logfile);
 #endif
         return -3;
@@ -331,7 +331,7 @@ int CMaxDome::ReadResponse_MaxDomeII(unsigned char *cMessage)
         ltime = time(NULL);
         timestamp = asctime(localtime(&ltime));
         timestamp[strlen(timestamp) - 1] = 0;
-        fprintf(Logfile, "[%s] CMaxDome::ReadResponse_MaxDomeII checksum error in response\n", timestamp);
+        fprintf(Logfile, "[%s] [ReadResponse_MaxDomeII] checksum error in response\n", timestamp);
         fflush(Logfile);
 #endif
         return -4;
@@ -362,7 +362,7 @@ int CMaxDome::Abort_Azimuth_MaxDomeII(void)
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::Abort_Azimuth_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [Abort_Azimuth_MaxDomeII] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
@@ -411,7 +411,7 @@ int CMaxDome::Home_Azimuth_MaxDomeII(void)
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::Home_Azimuth_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [Home_Azimuth_MaxDomeII] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
@@ -462,10 +462,10 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(int nDir, int nTicks)
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::Goto_Azimuth_MaxDomeII ticks : %d\n", timestamp, nTicks);
-    fprintf(Logfile, "[%s] CMaxDome::Goto_Azimuth_MaxDomeII dir : %d\n", timestamp, nDir);
+    fprintf(Logfile, "[%s] [Goto_Azimuth_MaxDomeII] ticks : %d\n", timestamp, nTicks);
+    fprintf(Logfile, "[%s] [Goto_Azimuth_MaxDomeII] dir : %d\n", timestamp, nDir);
 #if MAXDOME_DEBUG >= 3
-    fprintf(Logfile, "[%s] CMaxDome::Goto_Azimuth_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [Goto_Azimuth_MaxDomeII] sending :\n%s\n", timestamp, cHexMessage);
 #endif
     fflush(Logfile);
 #endif
@@ -504,7 +504,19 @@ int CMaxDome::Goto_Azimuth_MaxDomeII(double newAz)
     int ticks;
     int err=0;
 
+
     AzToTicks(newAz, dir, ticks);
+
+#if defined MAXDOME_DEBUG  && MAXDOME_DEBUG >= 2
+    ltime = time(NULL);
+    timestamp = asctime(localtime(&ltime));
+    timestamp[strlen(timestamp) - 1] = 0;
+    fprintf(Logfile, "[%s] [Goto_Azimuth_MaxDomeII] newAz : %3.2f\n", timestamp, newAz);
+    fprintf(Logfile, "[%s] [Goto_Azimuth_MaxDomeII] ticks : %d\n", timestamp, ticks);
+    fprintf(Logfile, "[%s] [Goto_Azimuth_MaxDomeII] dir : %d\n", timestamp, dir);
+    fflush(Logfile);
+#endif
+
     err = Goto_Azimuth_MaxDomeII(dir, ticks);
     return err;
 }
@@ -536,7 +548,7 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::Status_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [Status_MaxDomeII] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
@@ -587,7 +599,7 @@ int CMaxDome::SyncMode_MaxDomeII(void)
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::SyncMode_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [SyncMode_MaxDomeII] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
@@ -638,7 +650,7 @@ int CMaxDome::SetPark_MaxDomeII_Ticks(unsigned nParkOnShutter, int nTicks)
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::SetPark_MaxDomeII_Ticks sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [SetPark_MaxDomeII_Ticks] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
     nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
@@ -670,7 +682,7 @@ int CMaxDome::Sync_Dome(double dAz)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    fprintf(Logfile, "[%s] [CMaxDome::Sync_Dome] dAz = %3.2f\n", timestamp, dAz);
+    fprintf(Logfile, "[%s] [Sync_Dome] dAz = %3.2f\n", timestamp, dAz);
     fflush(Logfile);
 #endif
 
@@ -690,7 +702,7 @@ int CMaxDome::Sync_Dome(double dAz)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    fprintf(Logfile, "[%s] [CMaxDome::Sync_Dome] nTicks = %d ( %02X )\n", timestamp, nTicks, nTicks);
+    fprintf(Logfile, "[%s] [Sync_Dome] nTicks = %d ( %02X )\n", timestamp, nTicks, nTicks);
     fflush(Logfile);
 #endif
 
@@ -708,7 +720,7 @@ int CMaxDome::Sync_Dome(double dAz)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    fprintf(Logfile, "[%s] [CMaxDome::Sync_Dome] m_dSyncOffset = %3.2f\n", timestamp, m_dSyncOffset);
+    fprintf(Logfile, "[%s] [Sync_Dome] m_dSyncOffset = %3.2f\n", timestamp, m_dSyncOffset);
     fflush(Logfile);
 #endif
 
@@ -759,7 +771,7 @@ int CMaxDome::SetTicksPerCount_MaxDomeII(int nTicks)
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::SetTicksPerCount_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [SetTicksPerCount_MaxDomeII] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
@@ -811,7 +823,7 @@ int CMaxDome::Open_Shutter_MaxDomeII()
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::Open_Shutter_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [Open_Shutter_MaxDomeII] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
     nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
@@ -854,7 +866,7 @@ int CMaxDome::Open_Upper_Shutter_Only_MaxDomeII()
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::Open_Upper_Shutter_Only_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [Open_Upper_Shutter_Only_MaxDomeII] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
@@ -899,7 +911,7 @@ int CMaxDome::Close_Shutter_MaxDomeII()
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::Close_Shutter_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [Close_Shutter_MaxDomeII] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
@@ -944,7 +956,7 @@ int CMaxDome::Abort_Shutter_MaxDomeII()
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::Abort_Shutter_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [Abort_Shutter_MaxDomeII] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
     nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
@@ -988,7 +1000,7 @@ int CMaxDome::Exit_Shutter_MaxDomeII()
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::Exit_Shutter_MaxDomeII sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [Exit_Shutter_MaxDomeII] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
 
@@ -1018,21 +1030,21 @@ void CMaxDome::AzToTicks(double dAz, unsigned &dir, int &ticks)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    fprintf(Logfile, "[%s] CMaxDome::AzToTicks pdAz : %3.2f\n", timestamp, dAz);
-    fprintf(Logfile, "[%s] CMaxDome::AzToTicks mCurrentAzPosition : %3.2f\n", timestamp, mCurrentAzPosition);
+    fprintf(Logfile, "[%s] [AzToTicks] pdAz : %3.2f\n", timestamp, dAz);
+    fprintf(Logfile, "[%s] [AzToTicks] mCurrentAzPosition : %3.2f\n", timestamp, mCurrentAzPosition);
 #endif
 
     ticks = (int) floor(0.5 + (dAz - mHomeAz - m_dSyncOffset) * mNbTicksPerRev / 360.0);
 #if defined MAXDOME_DEBUG  && MAXDOME_DEBUG >= 2
-    fprintf(Logfile, "[%s] CMaxDome::AzToTicks step 1 ticks : %d\n", timestamp, ticks);
+    fprintf(Logfile, "[%s] [AzToTicks] step 1 ticks : %d\n", timestamp, ticks);
 #endif
     while (ticks > mNbTicksPerRev) ticks -= mNbTicksPerRev;
 #if defined MAXDOME_DEBUG  && MAXDOME_DEBUG >= 2
-    fprintf(Logfile, "[%s] CMaxDome::AzToTicks step 2 ticks : %d\n", timestamp, ticks);
+    fprintf(Logfile, "[%s] [AzToTicks] step 2 ticks : %d\n", timestamp, ticks);
 #endif
     while (ticks < 0) ticks += mNbTicksPerRev;
 #if defined MAXDOME_DEBUG  && MAXDOME_DEBUG >= 2
-    fprintf(Logfile, "[%s] CMaxDome::AzToTicks step 3 ticks : %d\n", timestamp, ticks);
+    fprintf(Logfile, "[%s] [AzToTicks] step 3 ticks : %d\n", timestamp, ticks);
 #endif
     // find the direction with the shortest path
     if (dAz > mCurrentAzPosition) {
@@ -1048,7 +1060,7 @@ void CMaxDome::AzToTicks(double dAz, unsigned &dir, int &ticks)
             dir = MAXDOMEII_WE_DIR;
     }
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
-    fprintf(Logfile, "[%s] CMaxDome::AzToTicks dir : %s\n", timestamp, dir == MAXDOMEII_WE_DIR?"MAXDOMEII_WE_DIR":"MAXDOMEII_EW_DIR");
+    fprintf(Logfile, "[%s] [AzToTicks] dir : %s\n", timestamp, dir == MAXDOMEII_WE_DIR?"MAXDOMEII_WE_DIR":"MAXDOMEII_EW_DIR");
     fflush(Logfile);
 #endif
 
@@ -1084,7 +1096,7 @@ int CMaxDome::IsGoToComplete(bool &complete)
         ltime = time(NULL);
         timestamp = asctime(localtime(&ltime));
         timestamp[strlen(timestamp) - 1] = 0;
-        fprintf(Logfile, "[%s] CMaxDome::IsGoToComplete mCurrentAzPosition : %3.2f\n", timestamp, mCurrentAzPosition);
+        fprintf(Logfile, "[%s] [IsGoToComplete] mCurrentAzPosition : %3.2f\n", timestamp, mCurrentAzPosition);
         fflush(Logfile);
 #endif
     }
@@ -1193,7 +1205,7 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
-    fprintf(Logfile, "[%s] CMaxDome::` :\tmpAzimuthStatus = %d\ntmpAz = %d\ntmpHomePosition = %d\n", timestamp, tmpAzimuthStatus, tmpAz, tmpHomePosition);
+    fprintf(Logfile, "[%s] [IsFindHomeComplete] tmpAzimuthStatus = %d\ntmpAz = %d\ntmpHomePosition = %d\n", timestamp, tmpAzimuthStatus, tmpAz, tmpHomePosition);
     fflush(Logfile);
 #endif
 
@@ -1210,6 +1222,13 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
         mHomed = true;
     }
 	else if (tmpAzimuthStatus == As_ERROR) {
+#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
+        ltime = time(NULL);
+        timestamp = asctime(localtime(&ltime));
+        timestamp[strlen(timestamp) - 1] = 0;
+        fprintf(Logfile, "[%s] [IsFindHomeComplete] tmpAzimuthStatus reported As_ERROR\n", timestamp);
+        fflush(Logfile);
+#endif
 		complete = false;
 		mHomed = false;
 		return ERR_CMDFAILED;
@@ -1250,7 +1269,7 @@ void CMaxDome::setNbTicksPerRev(unsigned nbTicksPerRev)
             ltime = time(NULL);
             timestamp = asctime(localtime(&ltime));
             timestamp[strlen(timestamp) - 1] = 0;
-            fprintf(Logfile, "[%s] [CMaxDome::setNbTicksPerRev -> SetTicksPerCount_MaxDomeII] err = %d\n", timestamp, nErr);
+            fprintf(Logfile, "[%s] [setNbTicksPerRev] SetTicksPerCount_MaxDomeII] err = %d\n", timestamp, nErr);
             fflush(Logfile);
 #endif
         }
@@ -1290,7 +1309,7 @@ int CMaxDome::setParkAz(unsigned nParkOnShutter, double dAz)
             ltime = time(NULL);
             timestamp = asctime(localtime(&ltime));
             timestamp[strlen(timestamp) - 1] = 0;
-            fprintf(Logfile, "[%s] [CMaxDome::setParkAz -> SetPark_MaxDomeII] err = %d\n", timestamp, nErr);
+            fprintf(Logfile, "[%s] [setParkAz] SetPark_MaxDomeII] err = %d\n", timestamp, nErr);
             fflush(Logfile);
 #endif
             return nErr;
@@ -1367,7 +1386,7 @@ int CMaxDome::setDebounceTime(int nDebounceTime)
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
     hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-    fprintf(Logfile, "[%s] CMaxDome::setDebounceTime sending :\n%s\n", timestamp, cHexMessage);
+    fprintf(Logfile, "[%s] [setDebounceTime] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
     nErr = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);

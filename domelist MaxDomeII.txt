@@ -1,3 +1,0 @@
-//See hardwarelist.txt for details on this file format.
-//Version|Manufacturer|Model|Comment|MapsTo|PlugInDllName
-2|Diffraction Limited|MaxDome II|Diffraction Limited MaxDome II | |libmaxdomeII||1|1|1|

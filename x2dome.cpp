@@ -189,24 +189,15 @@ int X2Dome::execModalSettingsDialog()
     if(m_bLinked) {
         dx->setEnabled("pushButton", true);
         dx->setEnabled("comboBox", true);
-        dx->setCurrentIndex("comboBox", nDebouceIndex);
         dx->setEnabled("pushButton_2", true);
     }
     else {
         dx->setEnabled("pushButton", false);
         dx->setEnabled("comboBox", false);
-        dx->setCurrentIndex("comboBox", nDebouceIndex);
         dx->setEnabled("pushButton_2", false);
-        dx->setChecked("hasShutterCtrl",false);
-        dx->setChecked("radioButtonShutterAnyAz",false);
-        dx->setChecked("openUpperShutterOnly",false);
-        dx->setChecked("isRoolOffRoof",false);
-        dx->setEnabled("openUpperShutterOnly", false);
-        dx->setEnabled("isRoolOffRoof", false);
-        dx->setEnabled("groupBoxShutter", false);
-        dx->setEnabled("radioButtonShutterAnyAz", false);
     }
 
+    dx->setCurrentIndex("comboBox", nDebouceIndex);
     dx->setPropertyInt("ticksPerRev","value", maxDome.getNbTicksPerRev());
     dx->setPropertyDouble("homePosition","value", maxDome.getHomeAz());
     dx->setPropertyDouble("parkPosition","value", maxDome.getParkAz());
@@ -457,7 +448,7 @@ void X2Dome::deviceInfoModel(BasicStringInterface& str)
 
 double	X2Dome::driverInfoVersion(void) const
 {
-	return DRIVER_VERSION;
+	return PLUGIN_VERSION;
 }
 
 //
