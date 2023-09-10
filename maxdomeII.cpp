@@ -1211,7 +1211,7 @@ int CMaxDome::IsFindHomeComplete(bool &complete)
 
     if(tmpAzimuthStatus == As_IDLE || tmpAzimuthStatus == As_IDLE2) {
         if (mCalibrating) {
-            setNbTicksPerRev(tmpHomePosition +1);
+            setNbTicksPerRev(tmpHomePosition);
             SyncMode_MaxDomeII();
             SetPark_MaxDomeII_Ticks(mParkBeforeCloseShutter, 32767);
             Goto_Azimuth_MaxDomeII(MAXDOMEII_WE_DIR, 1);
