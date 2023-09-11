@@ -47,7 +47,7 @@
 #include "../../licensedinterfaces/sberrorx.h"
 #include "../../licensedinterfaces/serxinterface.h"
 
-#define PLUGIN_VERSION      1.36
+#define PLUGIN_VERSION      1.37
 
 #define MAXDOME_DEBUG 3
 
