@@ -232,12 +232,9 @@ int X2Dome::execModalSettingsDialog()
             mIsRollOffRoof = false;
         }
 
-        if(m_bLinked)
-        {
-            maxDome.setHomeAz(dHomeAz);
-            maxDome.setParkAz(!operateAnyAz, dParkAz);
-            maxDome.setNbTicksPerRev(nTicksPerRev);
-        }
+        maxDome.setHomeAz(dHomeAz);
+        maxDome.setParkAz(!operateAnyAz, dParkAz);
+        maxDome.setNbTicksPerRev(nTicksPerRev);
 
         // save the values to persistent storage
         nErr |= m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_TICKS_PER_REV, nTicksPerRev);
