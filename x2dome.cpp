@@ -76,7 +76,7 @@ X2Dome::~X2Dome()
 int X2Dome::establishLink(void)					
 {
 
-    int nErr;
+    int nErr = SB_OK;
     char szPort[DRIVER_MAX_STRING];
 
     X2MutexLocker ml(GetMutex());
@@ -84,10 +84,10 @@ int X2Dome::establishLink(void)
     portNameOnToCharPtr(szPort,DRIVER_MAX_STRING);
     nErr = maxDome.Connect(szPort);
     if(nErr)
-        return nErr;
+        return ERR_CMDFAILED;
 
     m_bLinked = true;
-	return nErr;
+	return SB_OK;
 }
 
 int X2Dome::terminateLink(void)					
@@ -252,7 +252,7 @@ int X2Dome::execModalSettingsDialog()
 void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 {
     bool complete = false;
-    int err;
+    int nErr = SB_OK;
     char errorMessage[LOG_BUFFER_SIZE];
     double  dHomeAz;
     int nDebounceTime;
@@ -283,11 +283,11 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
             if(mHomingDome) {
                 // are we home ?
                 complete = false;
-                err = maxDome.IsFindHomeComplete(complete);
-                if (err) {
+                nErr = maxDome.IsFindHomeComplete(complete);
+                if (nErr) {
                     uiex->setEnabled("pushButton",true);
                     uiex->setEnabled("pushButtonOK",true);
-                    snprintf(errorMessage, LOG_BUFFER_SIZE, "Error homing dome while calibrating : Error %d", err);
+                    snprintf(errorMessage, LOG_BUFFER_SIZE, "Error homing dome while calibrating : Error %d", nErr);
                     uiex->messageBox("MaxDome II Calibrate", errorMessage);
                     mHomingDome = false;
                     mInitCalibration = false;
@@ -307,11 +307,11 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
             }
 
             else if(mInitCalibration) {
-                err = maxDome.IsGoToComplete(complete);
-                if (err) {
+                nErr = maxDome.IsGoToComplete(complete);
+                if (nErr) {
                     uiex->setEnabled("pushButton",true);
                     uiex->setEnabled("pushButtonOK",true);
-                    snprintf(errorMessage, LOG_BUFFER_SIZE, "Error moving dome while calibrating : Error %d", err);
+                    snprintf(errorMessage, LOG_BUFFER_SIZE, "Error moving dome while calibrating : Error %d", nErr);
                     uiex->messageBox("MaxDome II Calibrate", errorMessage);
                     mHomingDome = false;
                     mInitCalibration = false;
@@ -332,11 +332,11 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
             }
 
             else if(mCalibratingDome) {
-                err = maxDome.IsFindHomeComplete(complete);
-                if (err) {
+                nErr = maxDome.IsFindHomeComplete(complete);
+                if (nErr) {
                     uiex->setEnabled("pushButton",true);
                     uiex->setEnabled("pushButtonOK",true);
-                    snprintf(errorMessage, LOG_BUFFER_SIZE, "Error on 2nd homing dome while calibrating : Error %d", err);
+                    snprintf(errorMessage, LOG_BUFFER_SIZE, "Error on 2nd homing dome while calibrating : Error %d", nErr);
                     uiex->messageBox("MaxDome II Calibrate", errorMessage);
                     mHomingDome = false;
                     mInitCalibration = false;
@@ -382,14 +382,14 @@ void X2Dome::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
     if (!strcmp(pszEvent, "on_pushButton_2_clicked")) {
         if(m_bLinked) {
             nDebounceTime = (uiex->currentIndex("comboBox") * 10) + 20;
-            err = maxDome.setDebounceTime(nDebounceTime);
-            if(err == FIRMWARE_NOT_SUPPORTED) {
+            nErr = maxDome.setDebounceTime(nDebounceTime);
+            if(nErr == FIRMWARE_NOT_SUPPORTED) {
                 snprintf(errorMessage, LOG_BUFFER_SIZE, "This is not supported by this version of the firmware");
                 uiex->messageBox("MaxDome II debounce time change", errorMessage);
 
             }
-            else if (err) {
-                snprintf(errorMessage, LOG_BUFFER_SIZE, "Error setting the new debounce time : %d", err);
+            else if (nErr) {
+                snprintf(errorMessage, LOG_BUFFER_SIZE, "Error setting the new debounce time : %d", nErr);
                 uiex->messageBox("MaxDome II debounce time change", errorMessage);
             }
             else {
@@ -455,7 +455,7 @@ double	X2Dome::driverInfoVersion(void) const
 
 int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
 {
-    int err;
+    int nErr = SB_OK;
 
     int tmpAzInTicks;
     double tmpAz;
@@ -477,8 +477,8 @@ int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
 
     *pdEl=0.0f;
     // returns number of ticks from home position for tmpAzInTicks
-    err = maxDome.Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAzInTicks, tmpHomePosition);
-    if(err)
+    nErr = maxDome.Status_MaxDomeII(tmpShutterStatus, tmpAzimuthStatus, tmpAzInTicks, tmpHomePosition);
+    if(nErr)
         return ERR_CMDFAILED;
     
     maxDome.TicksToAz(tmpAzInTicks, tmpAz);
@@ -488,7 +488,7 @@ int X2Dome::dapiGetAzEl(double* pdAz, double* pdEl)
 
 int X2Dome::dapiGotoAzEl(double dAz, double dEl)
 {
-    int err;
+    int nErr = SB_OK;
 
     X2MutexLocker ml(GetMutex());
 
@@ -501,15 +501,15 @@ int X2Dome::dapiGotoAzEl(double dAz, double dEl)
         return SB_OK;
     }
 
-    err = maxDome.Goto_Azimuth_MaxDomeII(dAz);
+    nErr = maxDome.Goto_Azimuth_MaxDomeII(dAz);
 
-    if(err)
+    if(nErr)
         return ERR_CMDFAILED;
     else
     {
         mlastCommand = AzGoto;
-        return SB_OK;
     }
+    return SB_OK;
 }
 
 int X2Dome::dapiAbort(void)
@@ -526,7 +526,7 @@ int X2Dome::dapiAbort(void)
 
 int X2Dome::dapiOpen(void)
 {
-    int err;
+    int nErr = SB_OK;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
@@ -536,10 +536,10 @@ int X2Dome::dapiOpen(void)
         return SB_OK;
 
     if(mOpenUpperShutterOnly)
-        err = maxDome.Open_Upper_Shutter_Only_MaxDomeII();
+        nErr = maxDome.Open_Upper_Shutter_Only_MaxDomeII();
     else
-        err = maxDome.Open_Shutter_MaxDomeII();
-    if(err)
+        nErr = maxDome.Open_Shutter_MaxDomeII();
+    if(nErr)
         return ERR_CMDFAILED;
 
     mlastCommand = ShutterOpen;
@@ -548,7 +548,7 @@ int X2Dome::dapiOpen(void)
 
 int X2Dome::dapiClose(void)
 {
-    int err;
+    int nErr = SB_OK;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
@@ -557,8 +557,8 @@ int X2Dome::dapiClose(void)
     if(!mHasShutterControl)
         return SB_OK;
 
-    err = maxDome.Close_Shutter_MaxDomeII();
-    if(err)
+    nErr = maxDome.Close_Shutter_MaxDomeII();
+    if(nErr)
         return ERR_CMDFAILED;
 
     mlastCommand = ShutterClose;
@@ -567,7 +567,7 @@ int X2Dome::dapiClose(void)
 
 int X2Dome::dapiPark(void)
 {
-    int err;
+    int nErr = SB_OK;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
@@ -575,15 +575,15 @@ int X2Dome::dapiPark(void)
 
     if(mIsRollOffRoof)
     {
-        err = maxDome.Close_Shutter_MaxDomeII();
-        if(err)
+        nErr = maxDome.Close_Shutter_MaxDomeII();
+        if(nErr)
             return ERR_CMDFAILED;
 
         return SB_OK;
     }
 
-    err = maxDome.Park_MaxDomeII();
-    if(err)
+    nErr = maxDome.Park_MaxDomeII();
+    if(nErr)
         return ERR_CMDFAILED;
 
 	return SB_OK;
@@ -591,14 +591,14 @@ int X2Dome::dapiPark(void)
 
 int X2Dome::dapiUnpark(void)
 {
-    int err;
+    int nErr = SB_OK;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
         return ERR_NOLINK;
 
-    err = maxDome.Unpark();
-    if(err)
+    nErr = maxDome.Unpark();
+    if(nErr)
         return ERR_CMDFAILED;
 
 	return SB_OK;
@@ -606,7 +606,7 @@ int X2Dome::dapiUnpark(void)
 
 int X2Dome::dapiFindHome(void)
 {
-    int err;
+    int nErr = SB_OK;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
@@ -615,8 +615,8 @@ int X2Dome::dapiFindHome(void)
     if(mIsRollOffRoof)
         return SB_OK;
 
-    err = maxDome.Home_Azimuth_MaxDomeII();
-    if(err)
+    nErr = maxDome.Home_Azimuth_MaxDomeII();
+    if(nErr)
         return ERR_CMDFAILED;
 
     return SB_OK;
@@ -624,7 +624,7 @@ int X2Dome::dapiFindHome(void)
 
 int X2Dome::dapiIsGotoComplete(bool* pbComplete)
 {
-    int err;
+    int nErr = SB_OK;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
@@ -637,15 +637,15 @@ int X2Dome::dapiIsGotoComplete(bool* pbComplete)
 
     }
 
-    err = maxDome.IsGoToComplete(*pbComplete);
-    if(err)
+    nErr = maxDome.IsGoToComplete(*pbComplete);
+    if(nErr)
         return ERR_CMDFAILED;
     return SB_OK;
 }
 
 int X2Dome::dapiIsOpenComplete(bool* pbComplete)
 {
-    int err;
+    int nErr = SB_OK;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
@@ -657,8 +657,8 @@ int X2Dome::dapiIsOpenComplete(bool* pbComplete)
         return SB_OK;
     }
 
-    err = maxDome.IsOpenComplete(*pbComplete);
-    if(err)
+    nErr = maxDome.IsOpenComplete(*pbComplete);
+    if(nErr)
         return ERR_CMDFAILED;
 
     return SB_OK;
@@ -666,7 +666,7 @@ int X2Dome::dapiIsOpenComplete(bool* pbComplete)
 
 int	X2Dome::dapiIsCloseComplete(bool* pbComplete)
 {
-    int err;
+    int nErr = SB_OK;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
@@ -678,8 +678,8 @@ int	X2Dome::dapiIsCloseComplete(bool* pbComplete)
         return SB_OK;
     }
 
-    err = maxDome.IsCloseComplete(*pbComplete);
-    if(err)
+    nErr = maxDome.IsCloseComplete(*pbComplete);
+    if(nErr)
         return ERR_CMDFAILED;
 
     return SB_OK;
@@ -687,7 +687,7 @@ int	X2Dome::dapiIsCloseComplete(bool* pbComplete)
 
 int X2Dome::dapiIsParkComplete(bool* pbComplete)
 {
-    int err;
+    int nErr = SB_OK;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
@@ -699,8 +699,8 @@ int X2Dome::dapiIsParkComplete(bool* pbComplete)
         return SB_OK;
     }
 
-    err = maxDome.IsParkComplete(*pbComplete);
-    if(err)
+    nErr = maxDome.IsParkComplete(*pbComplete);
+    if(nErr)
         return ERR_CMDFAILED;
 
     return SB_OK;
@@ -708,7 +708,7 @@ int X2Dome::dapiIsParkComplete(bool* pbComplete)
 
 int X2Dome::dapiIsUnparkComplete(bool* pbComplete)
 {
-    int err;
+    int nErr = SB_OK;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
@@ -720,8 +720,8 @@ int X2Dome::dapiIsUnparkComplete(bool* pbComplete)
         return SB_OK;
     }
 
-    err = maxDome.IsUnparkComplete(*pbComplete);
-    if(err)
+    nErr = maxDome.IsUnparkComplete(*pbComplete);
+    if(nErr)
         return ERR_CMDFAILED;
 
     return SB_OK;
@@ -729,7 +729,7 @@ int X2Dome::dapiIsUnparkComplete(bool* pbComplete)
 
 int X2Dome::dapiIsFindHomeComplete(bool* pbComplete)
 {
-    int err;
+    int nErr = SB_OK;
     X2MutexLocker ml(GetMutex());
 
     if(!m_bLinked)
@@ -741,8 +741,8 @@ int X2Dome::dapiIsFindHomeComplete(bool* pbComplete)
         return SB_OK;
     }
 
-    err = maxDome.IsFindHomeComplete(*pbComplete);
-    if(err)
+    nErr = maxDome.IsFindHomeComplete(*pbComplete);
+    if(nErr)
         return ERR_CMDFAILED;
 
     return SB_OK;
@@ -750,7 +750,7 @@ int X2Dome::dapiIsFindHomeComplete(bool* pbComplete)
 
 int X2Dome::dapiSync(double dAz, double dEl)
 {
-    int err;
+    int nErr = SB_OK;
 
     X2MutexLocker ml(GetMutex());
 
@@ -760,8 +760,8 @@ int X2Dome::dapiSync(double dAz, double dEl)
     if(mIsRollOffRoof)
         return SB_OK;
 
-    err = maxDome.Sync_Dome(dAz);
-    if (err)
+    nErr = maxDome.Sync_Dome(dAz);
+    if (nErr)
         return ERR_CMDFAILED;
 	return SB_OK;
 }

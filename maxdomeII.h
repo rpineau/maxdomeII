@@ -47,7 +47,7 @@
 #include "../../licensedinterfaces/sberrorx.h"
 #include "../../licensedinterfaces/serxinterface.h"
 
-#define PLUGIN_VERSION      1.37
+#define PLUGIN_VERSION      1.39
 
 #define MAXDOME_DEBUG 3
 
@@ -85,6 +85,8 @@
 // Direction fo azimuth movement
 #define MAXDOMEII_EW_DIR 0x01
 #define MAXDOMEII_WE_DIR 0x02
+
+#define MAX_RETRY   3
 
 // Azimuth motor status. When motor is idle, sometimes returns 0, sometimes 4. After connect, it returns 5
 // 5 might not be an error at all !!!
@@ -170,6 +172,8 @@ protected:
     
     signed char     checksum_MaxDomeII(unsigned char *cMessage, int nLen);
     int             ReadResponse_MaxDomeII(unsigned char *cMessage);
+    int            reConnect();
+    
     bool            bIsConnected;
 
     char            m_szFirmwareVersion[LOG_BUFFER_SIZE];
@@ -196,6 +200,7 @@ protected:
     
     int             mGotoTicks;
     SerXInterface   *pSerx;
+    std::string     m_sPort;
 
     void            hexdump(unsigned char* pszInputBuffer, unsigned char *pszOutputBuffer, int nInputBufferSize, int nOutpuBufferSize);
     

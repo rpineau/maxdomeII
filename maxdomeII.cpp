@@ -104,6 +104,7 @@ int CMaxDome::Connect(const char *pszPort)
 
     if(!pSerx)
         return ERR_COMMNOLINK;
+    m_sPort.clear();
 
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
     ltime = time(NULL);
@@ -117,9 +118,10 @@ int CMaxDome::Connect(const char *pszPort)
     nErr = pSerx->open(pszPort, 19200, SerXInterface::B_NOPARITY);
     if(nErr) {
         bIsConnected = false;
-        return nErr;
+        return ERR_COMMNOLINK;
     }
     bIsConnected = true;
+    m_sPort.assign(pszPort);
 
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
     ltime = time(NULL);
@@ -137,7 +139,7 @@ int CMaxDome::Connect(const char *pszPort)
     {
         pSerx->close();
         bIsConnected = false;
-        return bIsConnected;
+        return ERR_NORESPONSE;
     }
 
     if(mNbTicksPerRev) {
@@ -160,7 +162,7 @@ int CMaxDome::Connect(const char *pszPort)
         nErr = setParkAz(mParkBeforeCloseShutter, mParkAz);
         if(nErr) {
             bIsConnected = false;
-            return false;
+            return ERR_NORESPONSE;
         }
     }
 
@@ -172,11 +174,53 @@ int CMaxDome::Connect(const char *pszPort)
     {
         bIsConnected = false;
         pSerx->close();
+        return ERR_NORESPONSE;
     }
 
     return nErr;
 }
 
+int CMaxDome::reConnect()
+{
+    int nErr = MD2_OK;
+
+#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
+    ltime = time(NULL);
+    timestamp = asctime(localtime(&ltime));
+    timestamp[strlen(timestamp) - 1] = 0;
+    fprintf(Logfile, "[%s] [reConnect] SetTicksPerCount_MaxDomeII] Closing serial port connectionn\n", timestamp);
+    fflush(Logfile);
+#endif
+
+    pSerx->purgeTxRx();
+    pSerx->close();
+
+#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
+    ltime = time(NULL);
+    timestamp = asctime(localtime(&ltime));
+    timestamp[strlen(timestamp) - 1] = 0;
+    fprintf(Logfile, "[%s] [reConnect] SetTicksPerCount_MaxDomeII] Opening serial port connectionn\n", timestamp);
+    fflush(Logfile);
+#endif
+
+    // 19200 8N1
+    nErr = pSerx->open(m_sPort.c_str(), 19200, SerXInterface::B_NOPARITY);
+    if(nErr) {
+        bIsConnected = false;
+        return MD2_CANT_CONNECT;
+    }
+    pSerx->purgeTxRx();
+
+    // init the comms
+    nErr = Init_Communication();
+    if(nErr)
+    {
+        pSerx->close();
+        bIsConnected = false;
+        nErr = MD2_CANT_CONNECT;
+    }
+    return nErr;
+}
 
 void CMaxDome::Disconnect(void)
 {
@@ -536,6 +580,7 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     int nErrorType;
     unsigned long  nBytesWrite;;
     int nReturn;
+    int nbRetry = 0;
     
     cMessage[0] = 0x01;
     cMessage[1] = 0x02;		// Will follow 2 bytes more
@@ -551,17 +596,36 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
     fprintf(Logfile, "[%s] [Status_MaxDomeII] sending :\n%s\n", timestamp, cHexMessage);
     fflush(Logfile);
 #endif
+    while(nbRetry < MAX_RETRY) {
+        nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
+        pSerx->flushTx();
 
-    nErrorType = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
-    pSerx->flushTx();
+        if (nErrorType != MD2_OK) {
+            nbRetry++;
+            nErrorType = reConnect();
+            if (nErrorType == MD2_CANT_CONNECT) {
+                bIsConnected = false;
+                return nErrorType;
+            }
+            continue;
+        }
+        nReturn = ReadResponse_MaxDomeII(cMessage);
+        if (nReturn != MD2_OK) {
+            nbRetry++;
+            nErrorType = reConnect();
+            if (nErrorType == MD2_CANT_CONNECT) {
+                bIsConnected = false;
+                return nErrorType;
+            }
+            continue;
+        }
+    }
 
-    if (nErrorType != MD2_OK)
+    if(nbRetry== MAX_RETRY) {
+        bIsConnected = false;
         return MD2_CANT_CONNECT;
-    
-    nReturn = ReadResponse_MaxDomeII(cMessage);
-    if (nReturn != MD2_OK)
-        return nReturn;
-    
+    }
+
     if (cMessage[2] == (unsigned char)(STATUS_CMD | TO_COMPUTER))
     {
         nShutterStatus = (enum SH_Status)cMessage[3];
