@@ -49,7 +49,7 @@
 
 #define PLUGIN_VERSION      1.40
 
-#define MAXDOME_DEBUG 3
+// #define MAXDOME_DEBUG 3
 
 #define LOG_BUFFER_SIZE 256
 
