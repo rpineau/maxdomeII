@@ -232,15 +232,15 @@ int CMaxDome::reConnect()
         bIsConnected = false;
         nErr = ERR_CMDFAILED;
     }
-
+    else {
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
-    ltime = time(NULL);
-    timestamp = asctime(localtime(&ltime));
-    timestamp[strlen(timestamp) - 1] = 0;
-    fprintf(Logfile, "[%s] [reConnect] Done and successful.\n", timestamp);
-    fflush(Logfile);
+        ltime = time(NULL);
+        timestamp = asctime(localtime(&ltime));
+        timestamp[strlen(timestamp) - 1] = 0;
+        fprintf(Logfile, "[%s] [reConnect] Done and successful.\n", timestamp);
+        fflush(Logfile);
 #endif
-
+    }
     return nErr;
 }
 
