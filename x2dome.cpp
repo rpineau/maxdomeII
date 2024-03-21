@@ -84,7 +84,7 @@ int X2Dome::establishLink(void)
     portNameOnToCharPtr(szPort,DRIVER_MAX_STRING);
     nErr = maxDome.Connect(szPort);
     if(nErr)
-        return ERR_CMDFAILED;
+        return nErr;
 
     m_bLinked = true;
 	return SB_OK;
