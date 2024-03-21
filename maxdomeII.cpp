@@ -232,6 +232,15 @@ int CMaxDome::reConnect()
         bIsConnected = false;
         nErr = ERR_CMDFAILED;
     }
+
+#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
+    ltime = time(NULL);
+    timestamp = asctime(localtime(&ltime));
+    timestamp[strlen(timestamp) - 1] = 0;
+    fprintf(Logfile, "[%s] [reConnect] Done and successful.\n", timestamp);
+    fflush(Logfile);
+#endif
+
     return nErr;
 }
 
@@ -279,7 +288,6 @@ int CMaxDome::Init_Communication(void)
 
     if (nErr != MD2_OK) {
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
-        unsigned char cHexMessage[LOG_BUFFER_SIZE];
         ltime = time(NULL);
         timestamp = asctime(localtime(&ltime));
         timestamp[strlen(timestamp) - 1] = 0;
@@ -292,7 +300,6 @@ int CMaxDome::Init_Communication(void)
     
     if (nBytesWrite != 4) {
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -306,7 +313,6 @@ int CMaxDome::Init_Communication(void)
 
     if (nErr != MD2_OK) {
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
-    unsigned char cHexMessage[LOG_BUFFER_SIZE];
     ltime = time(NULL);
     timestamp = asctime(localtime(&ltime));
     timestamp[strlen(timestamp) - 1] = 0;
@@ -320,10 +326,29 @@ int CMaxDome::Init_Communication(void)
     if (cMessage[2] == (unsigned char)(ACK_CMD | TO_COMPUTER)) {
         m_nFirmwareVersion = (int)cMessage[3];
         snprintf(m_szFirmwareVersion, LOG_BUFFER_SIZE, "2.%1d", m_nFirmwareVersion);
-        return MD2_OK;
+    }
+    else {
+#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
+        ltime = time(NULL);
+        timestamp = asctime(localtime(&ltime));
+        timestamp[strlen(timestamp) - 1] = 0;
+        hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
+        fprintf(Logfile, "[%s] [Init_Communication] response is incorrect :\n%02x\n", timestamp, cMessage[2]);
+        fflush(Logfile);
+#endif
+        return ERR_CMDFAILED;
     }
 
-    return ERR_CMDFAILED;
+#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 2
+    ltime = time(NULL);
+    timestamp = asctime(localtime(&ltime));
+    timestamp[strlen(timestamp) - 1] = 0;
+    hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
+    fprintf(Logfile, "[%s] [Init_Communication] Done and successful.\n", timestamp);
+    fflush(Logfile);
+#endif
+
+    return MD2_OK;
 }
 
 
@@ -350,9 +375,9 @@ signed char CMaxDome::checksum_MaxDomeII(unsigned char *cMessage, int nLen)
 }
 
 /*
-	Reads a response from MAX DOME II
-	It verifies message sintax and checksum
- 
+	Reads a response from maxdome II
+	It verifies message syntax and checksum
+
 	@param cMessage Pointer to a buffer to receive the message
 	@return 0 if message is Ok. -1 if no response or no start caracter found. -2 invalid declared message length. -3 message too short. -4 checksum error
  */
@@ -653,16 +678,16 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
             nErr = reConnect();
             if (nErr) {
 #if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
-            unsigned char cHexMessage[LOG_BUFFER_SIZE];
-            ltime = time(NULL);
-            timestamp = asctime(localtime(&ltime));
-            timestamp[strlen(timestamp) - 1] = 0;
-            hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
-            fprintf(Logfile, "[%s] [Status_MaxDomeII] writeFile reConnect error :%d\n", timestamp, nErr);
-            fflush(Logfile);
+                unsigned char cHexMessage[LOG_BUFFER_SIZE];
+                ltime = time(NULL);
+                timestamp = asctime(localtime(&ltime));
+                timestamp[strlen(timestamp) - 1] = 0;
+                hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
+                fprintf(Logfile, "[%s] [Status_MaxDomeII] writeFile reConnect error :%d\n", timestamp, nErr);
+                fflush(Logfile);
 #endif
                 bIsConnected = false;
-                return ERR_CMDFAILED;
+                continue;
             }
             continue;
         }
@@ -690,7 +715,7 @@ int CMaxDome::Status_MaxDomeII(enum SH_Status &nShutterStatus, enum AZ_Status &n
                 fflush(Logfile);
 #endif
                 bIsConnected = false;
-                return ERR_CMDFAILED;
+                continue;
             }
             continue;
         }
