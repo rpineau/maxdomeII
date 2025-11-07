@@ -4,6 +4,8 @@
 #include "../../licensedinterfaces/modalsettingsdialoginterface.h"
 #include "../../licensedinterfaces/x2guiinterface.h"
 
+#include <iostream>
+
 
 class SerXInterface;		
 class TheSkyXFacadeForDriversInterface;

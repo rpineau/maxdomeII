@@ -56,7 +56,8 @@ CMaxDome::CMaxDome()
     mCalibrating = false;
 
     m_nDebounceTime = 120;
-    
+	m_ParkedChargingEnabled = false;
+	
     memset(m_szFirmwareVersion,0,LOG_BUFFER_SIZE);
 
 
@@ -249,6 +250,8 @@ int CMaxDome::reConnect()
 #endif
     }
 
+	setParkedCharging(m_ParkedChargingEnabled);
+	
     return nErr;
 }
 
@@ -1592,8 +1595,9 @@ int CMaxDome::setParkedCharging(bool bEnable)
 	unsigned char cMessage[MD_BUFFER_SIZE];
 	unsigned long  nBytesWrite;;
 
+	m_ParkedChargingEnabled = bEnable;
+
 	if(!bIsConnected) {
-		bEnable = m_ParkedChargingEnabled;
 		return nErr;
 	}
 
