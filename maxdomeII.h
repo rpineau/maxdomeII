@@ -47,7 +47,7 @@
 #include "../../licensedinterfaces/sberrorx.h"
 #include "../../licensedinterfaces/serxinterface.h"
 
-#define PLUGIN_VERSION      1.40
+#define PLUGIN_VERSION      1.45
 
 // #define MAXDOME_DEBUG 3
 
@@ -68,12 +68,12 @@
 #define GOTO_CMD    0x05		// Go to azimuth position
 #define SHUTTER_CMD 0x06		// Send a command to Shutter
 #define STATUS_CMD  0x07		// Retrieve status
-#define SYMC_CMD    0x08        // swicth patk to sync mode
+#define SYMC_CMD    0x08        // switch park to sync mode
 #define TICKS_CMD   0x09		// Set the number of tick per revolution of the dome
 #define ACK_CMD     0x0A		// ACK (?)
 #define SETPARK_CMD 0x0B		// Set park coordinates and if need to park before to operating shutter
-
-#define SETDEBOUNCE_CMD 0x0C		// Set park coordinates and if need to park before to operating shutter
+#define SETDEBOUNCE_CMD 0x0C		// Set optical encoder debounce time
+#define SETPARK_CHARGE_CMD	0x0D	// Parked Charging enable/disable
 
 // Shutter commands
 #define OPEN_SHUTTER            0x01
@@ -168,6 +168,9 @@ public:
     int setDebounceTime(int nDebounceTime);
     int getDebounceTime();
 
+	int setParkedCharging(bool bEnable);
+	bool getParkedCharging();
+
 protected:
     
     signed char     checksum_MaxDomeII(unsigned char *cMessage, int nLen);
@@ -202,6 +205,7 @@ protected:
     SerXInterface   *pSerx;
     std::string     m_sPort;
 
+	bool			m_ParkedChargingEnabled;
     void            hexdump(unsigned char* pszInputBuffer, unsigned char *pszOutputBuffer, int nInputBufferSize, int nOutpuBufferSize);
     
 #ifdef MAXDOME_DEBUG

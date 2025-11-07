@@ -48,7 +48,7 @@ X2Dome::X2Dome(const char* pszSelection,
         mIsRollOffRoof = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, false);
         maxDome.setParkBeforeCloseShutter( ! m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, false)); // if we can operate at any Az then CloseShutterBeforePark is false
         maxDome.setDebounceTime(m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_DEBOUNCE_TIME, 120));
-
+		maxDome.setParkedCharging(m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_PARK_CHARGE, false)); // new feature is off by default
     }
 }
 
@@ -129,12 +129,13 @@ int X2Dome::execModalSettingsDialog()
     X2GUIInterface*					ui = uiutil.X2UI();
     X2GUIExchangeInterface*			dx = NULL;//Comes after ui is loaded
     bool bPressedOK = false;
-    int nDebouceIndex;
+    int nDebouceIndex = 0;
 
-    double dHomeAz;
-    double dParkAz;
-    bool operateAnyAz;
-    int nTicksPerRev;
+    double dHomeAz = 0;
+    double dParkAz = 0;
+    bool operateAnyAz = false;
+    int nTicksPerRev = 0;
+	bool bParkedCharging = false;
 
     if (NULL == ui)
         return ERR_POINTER;
@@ -155,23 +156,13 @@ int X2Dome::execModalSettingsDialog()
         dx->setEnabled("isRoolOffRoof", true);
         dx->setEnabled("radioButtonShutterAnyAz", true);
         dx->setEnabled("groupBoxShutter", true);
+		dx->setChecked("openUpperShutterOnly", mOpenUpperShutterOnly);
+		dx->setChecked("radioButtonShutterPark", maxDome.getCloseShutterBeforePark());
+		dx->setChecked("isRoolOffRoof",mIsRollOffRoof);
+		dx->setEnabled("ParkedCharging", true);
+		dx->setChecked("ParkedCharging",maxDome.getParkedCharging());
 
-
-        if(mOpenUpperShutterOnly)
-            dx->setChecked("openUpperShutterOnly", true);
-        else
-            dx->setChecked("openUpperShutterOnly", false);
-
-        if(maxDome.getCloseShutterBeforePark())
-            dx->setChecked("radioButtonShutterPark", true);
-        else
-            dx->setChecked("radioButtonShutterAnyAz", true);
-
-        if (mIsRollOffRoof)
-            dx->setChecked("isRoolOffRoof",true);
-        else
-            dx->setChecked("isRoolOffRoof",false);
-    }
+	}
     else
     {
         dx->setChecked("hasShutterCtrl",false);
@@ -183,7 +174,8 @@ int X2Dome::execModalSettingsDialog()
         dx->setEnabled("isRoolOffRoof", false);
         dx->setEnabled("groupBoxShutter", false);
         dx->setEnabled("radioButtonShutterAnyAz", false);
-        
+
+		dx->setEnabled("ParkedCharging", false);
     }
 
     if(m_bLinked) {
@@ -225,6 +217,8 @@ int X2Dome::execModalSettingsDialog()
         {
             mOpenUpperShutterOnly = dx->isChecked("openUpperShutterOnly");
             mIsRollOffRoof = dx->isChecked("isRoolOffRoof");
+			bParkedCharging = dx->isChecked("ParkedCharging");
+			maxDome.setParkedCharging(bParkedCharging);
         }
         else
         {
@@ -244,6 +238,7 @@ int X2Dome::execModalSettingsDialog()
         nErr |= m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPEN_UPPER_ONLY, mOpenUpperShutterOnly);
         nErr |= m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_ROOL_OFF_ROOF, mIsRollOffRoof);
         nErr |= m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, operateAnyAz);
+		nErr |= m_pIniUtil->writeInt(PARENT_KEY, CHILD_KEY_PARK_CHARGE, bParkedCharging);
     }
     return nErr;
 

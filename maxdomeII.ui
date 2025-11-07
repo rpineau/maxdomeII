@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>356</width>
-    <height>504</height>
+    <height>540</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>356</width>
-    <height>504</height>
+    <height>540</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>356</width>
-    <height>504</height>
+    <height>540</height>
    </size>
   </property>
   <property name="sizeIncrement">
@@ -49,7 +49,7 @@
         <x>8</x>
         <y>0</y>
         <width>312</width>
-        <height>432</height>
+        <height>456</height>
        </rect>
       </property>
       <property name="maximumSize">
@@ -91,7 +91,7 @@
        <property name="geometry">
         <rect>
          <x>16</x>
-         <y>320</y>
+         <y>344</y>
          <width>280</width>
          <height>96</height>
         </rect>
@@ -408,6 +408,19 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
+      <widget class="QCheckBox" name="ParkedCharging">
+       <property name="geometry">
+        <rect>
+         <x>16</x>
+         <y>312</y>
+         <width>216</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Enable Parked Charging</string>
+       </property>
+      </widget>
       <zorder>groupBoxShutter</zorder>
       <zorder>hasShutterCtrl</zorder>
       <zorder>pushButton</zorder>
@@ -420,12 +433,13 @@
       <zorder>label_3</zorder>
       <zorder>homePosition</zorder>
       <zorder>label_2</zorder>
+      <zorder>ParkedCharging</zorder>
      </widget>
      <widget class="QPushButton" name="pushButtonOK">
       <property name="geometry">
        <rect>
         <x>240</x>
-        <y>440</y>
+        <y>472</y>
         <width>81</width>
         <height>24</height>
        </rect>
@@ -441,7 +455,7 @@
       <property name="geometry">
        <rect>
         <x>152</x>
-        <y>440</y>
+        <y>472</y>
         <width>81</width>
         <height>24</height>
        </rect>

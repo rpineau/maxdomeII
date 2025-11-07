@@ -1586,4 +1586,62 @@ int CMaxDome::getDebounceTime()
     return m_nDebounceTime;
 }
 
+int CMaxDome::setParkedCharging(bool bEnable)
+{
+	int nErr = MD2_OK;
+	unsigned char cMessage[MD_BUFFER_SIZE];
+	unsigned long  nBytesWrite;;
+
+	if(!bIsConnected) {
+		bEnable = m_ParkedChargingEnabled;
+		return nErr;
+	}
+
+	if(m_nFirmwareVersion<4) {
+		return FIRMWARE_NOT_SUPPORTED;
+	}
+
+
+	cMessage[0] = 0x01;
+	cMessage[1] = 0x05;
+	cMessage[2] = SETPARK_CHARGE_CMD;
+	// Note: we do not use mParkAzInTicks >> 8 in order to remain compatible with both little-endian and big-endian procesors
+	cMessage[3] = bEnable?1:0;
+	cMessage[4] = (char)(mParkAzInTicks / 256);
+	cMessage[5] = (char)(mParkAzInTicks % 256);
+	cMessage[6] = checksum_MaxDomeII(cMessage, 6);
+
+#if defined MAXDOME_DEBUG && MAXDOME_DEBUG >= 3
+	unsigned char cHexMessage[LOG_BUFFER_SIZE];
+	ltime = time(NULL);
+	timestamp = asctime(localtime(&ltime));
+	timestamp[strlen(timestamp) - 1] = 0;
+	hexdump(cMessage, cHexMessage, cMessage[1]+2, LOG_BUFFER_SIZE);
+	fprintf(Logfile, "[%s] [setDebounceTime] sending : %s\n", timestamp, cHexMessage);
+	fflush(Logfile);
+#endif
+	nErr = pSerx->writeFile(cMessage, cMessage[1]+2, nBytesWrite);
+	pSerx->flushTx();
+
+	if (nErr != MD2_OK)
+		return ERR_CMDFAILED;
+
+	nErr = ReadResponse_MaxDomeII(cMessage);
+	if (nErr != MD2_OK)
+		return nErr;
+
+	if (cMessage[2] == (unsigned char)(SETDEBOUNCE_CMD | TO_COMPUTER))
+	{
+		m_ParkedChargingEnabled = bEnable;
+		return MD2_OK;
+	}
+
+	return BAD_CMD_RESPONSE;	// Response don't match command
+
+}
+
+bool CMaxDome::getParkedCharging()
+{
+	return m_ParkedChargingEnabled;
+}
 

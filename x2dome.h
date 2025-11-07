@@ -26,6 +26,7 @@ class TickCountInterface;
 #define CHILD_KEY_ROOL_OFF_ROOF "RollOffRoof"
 #define CHILD_KEY_SHUTTER_OPER_ANY_Az "ShutterOperAnyAz"
 #define CHILD_KEY_DEBOUNCE_TIME "DebounceTime"
+#define CHILD_KEY_PARK_CHARGE	"ParkedCharging"
 
 #if defined(SB_WIN_BUILD)
 #define DEF_PORT_NAME					"COM1"
