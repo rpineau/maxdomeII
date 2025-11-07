@@ -50,8 +50,6 @@ X2Dome::X2Dome(const char* pszSelection,
         maxDome.setParkBeforeCloseShutter( ! m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_SHUTTER_OPER_ANY_Az, false)); // if we can operate at any Az then CloseShutterBeforePark is false
         maxDome.setDebounceTime(m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_DEBOUNCE_TIME, 120));
 		bParkedCharging = m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_PARK_CHARGE, false);
-		std::cout << "bParkedCharging = " << (bParkedCharging?"yes":"no") << std::endl;
-
 		maxDome.setParkedCharging(bParkedCharging); // new feature is off by default
     }
 }
@@ -152,8 +150,6 @@ int X2Dome::execModalSettingsDialog()
 
     nDebouceIndex = (maxDome.getDebounceTime() - 20)/10;
 	bParkedCharging = maxDome.getParkedCharging();
-	std::cout << "bParkedCharging : " << (bParkedCharging?"yes":"no") << std::endl;
-	std::cout << "mHasShutterControl : " << (mHasShutterControl?"yes":"no") << std::endl;
 
     // set controls state depending on the connection state
     if(mHasShutterControl)
@@ -220,14 +216,12 @@ int X2Dome::execModalSettingsDialog()
         operateAnyAz = dx->isChecked("radioButtonShutterAnyAz");
         dx->propertyInt("ticksPerRev", "value", nTicksPerRev);
         mHasShutterControl = dx->isChecked("hasShutterCtrl");
-		std::cout << "[bPressedOK] mHasShutterControl : " << (mHasShutterControl?"yes":"no") << std::endl;
 
 		if(mHasShutterControl)
         {
             mOpenUpperShutterOnly = dx->isChecked("openUpperShutterOnly");
             mIsRollOffRoof = dx->isChecked("isRoolOffRoof");
 			bParkedCharging = dx->isChecked("ParkedCharging");
-			std::cout << "[bPressedOK] bParkedCharging : " << (bParkedCharging?"yes":"no") << std::endl;
 			maxDome.setParkedCharging(bParkedCharging);
         }
         else
